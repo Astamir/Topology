@@ -1,0 +1,18 @@
+*.class
+
+/.gradle
+/build-gradle
+buildSrc/.gradle
+buildSrc/build-gradle
+/deliver-gradle
+
+## IntelliJ IDEA
+*.iml
+/out/
+## Directory-based project format:
+.idea/
+## File-based project format:
+*.ipr
+*.iws
+# JIRA plugin
+atlassian-ide-plugin.xml
