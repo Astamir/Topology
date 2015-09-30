@@ -47,11 +47,12 @@ public class VirtualGridPanel extends JPanel {
         //this.topology = topology;
 
         model = new VirtualElementModel(topology);
-        handler.install(this, true);
+        coordinates = new JLabel();
+        handler.install(this, coordinates, true);
 
         setBackground(Color.WHITE);
-        coordinates = new JLabel();
-        addMouseMotionListener(new CoordinateTracker(coordinates));
+
+        //addMouseMotionListener(new CoordinateTracker(coordinates));
         add(coordinates);
     }
 
@@ -66,7 +67,7 @@ public class VirtualGridPanel extends JPanel {
      * @param coordinate
      * @return
      */
-    private Point toGridCoordinates(Point coordinate) {
+    Point toGridCoordinates(Point coordinate) {
         return mode == TopologyMode.VIRTUAL ? Point.of(coordinate.x() * step, -coordinate.y() * step) : Point.of(coordinate.x(), -coordinate.y());
     }
 
@@ -161,18 +162,18 @@ public class VirtualGridPanel extends JPanel {
 
         drawGrid(graphics2D);
         drawElements(graphics2D);
-//        for (Border border : borders_to_paint) {
-//            BorderPainter painter = new BorderPainter();
-//            painter.paint(border, graphics2D, new Function<Point, Point>() {
-//                @Override
-//                public Point apply(Point input) {
-//                    return Point.of(input.x() * step, -input.y() * step);
-//                }
-//            });
-//        }
+        for (Border border : borders_to_paint) {
+            BorderPainter painter = new BorderPainter();
+            painter.paint(border, graphics2D, new Function<Point, Point>() {
+                @Override
+                public Point apply(Point input) {
+                    return Point.of(input.x() * step, -input.y() * step);
+                }
+            });
+        }
     }
 
-    private static class ZoomAndDragHandler implements MouseMotionListener, MouseWheelListener, MouseListener {
+    private class ZoomAndDragHandler implements MouseMotionListener, MouseWheelListener, MouseListener {
         double currentMouseX;
         double currentMouseY;
 
@@ -200,13 +201,16 @@ public class VirtualGridPanel extends JPanel {
 
         Insets constraints;
 
+        JLabel label;
+
         public ZoomAndDragHandler(Insets constraints) {
             this.constraints = constraints;
         }
 
-        public void install(JPanel panel, boolean allowZooming) {
+        public void install(JPanel panel, JLabel coordinate_label, boolean allowZooming) {
             this.panel = panel;
             this.allowZooming = allowZooming;
+            this.label = coordinate_label;
             panel.addMouseListener(this);
             panel.addMouseMotionListener(this);
             if (allowZooming) {
@@ -281,6 +285,7 @@ public class VirtualGridPanel extends JPanel {
         public void mouseMoved(MouseEvent e) {
             currentMouseX = e.getX();
             currentMouseY = e.getY();
+            label.setText((Point.fromPoint2D(getTranslatedPoint(e.getPoint().x, e.getPoint().y))).toString());
         }
 
         @Override

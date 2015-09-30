@@ -69,7 +69,7 @@ public class Contact extends TopologyElement implements ConnectionPoint, Seriali
     }
 
     @Override
-    public void setCoordinates(Collection<Point> coordinates) {
+    public boolean setCoordinates(Collection<Point> coordinates) {
         throw new NotImplementedException();
     }
 

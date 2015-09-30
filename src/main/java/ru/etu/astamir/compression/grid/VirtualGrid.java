@@ -229,6 +229,15 @@ public class VirtualGrid implements Grid, Serializable {
         return symbols;
     }
 
+    public <V extends TopologyElement> Collection<V> getElementsOfType(final Class<V> type) {
+        return CollectionUtils.cast(Collections2.filter(elements, new Predicate<TopologyElement>() {
+            @Override
+            public boolean apply(TopologyElement input) {
+                return type.isAssignableFrom(input.getClass());
+            }
+        }), type);
+    }
+
     public Optional<Contour> getElementsContainer(String name) {
         if (elements.contains(name)) {
             TopologyElement element = elements.get(name);

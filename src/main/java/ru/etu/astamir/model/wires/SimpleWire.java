@@ -2,6 +2,8 @@ package ru.etu.astamir.model.wires;
 
 import com.google.common.primitives.Ints;
 import ru.etu.astamir.geom.common.*;
+import ru.etu.astamir.model.Movable;
+import ru.etu.astamir.model.Stretchable;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.serialization.LookIntoAttribute;
 
@@ -18,7 +20,7 @@ import java.util.Collections;
  * @author astamir
  * @version 1.0
  */
-public class SimpleWire extends TopologyElement implements Serializable, Comparable<SimpleWire> {
+public class SimpleWire extends TopologyElement implements Movable, Stretchable, Serializable, Comparable<SimpleWire> {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -174,25 +176,29 @@ public class SimpleWire extends TopologyElement implements Serializable, Compara
 	}
 
     @Override
-    public void setCoordinates(Collection<Point> coordinates) {
+    public boolean setCoordinates(Collection<Point> coordinates) {
         if (coordinates.size() < 2) {
-            return;
+            return false;
         }
 
         Point[] points = coordinates.toArray(new Point[coordinates.size()]);
         axis.setEdge(points[0], points[1]);
 
         rebuildBounds();
+
+		return false;
     }
 
     /**
      * Перемещение куска шины независимо от шины. Использование этого метода
      * влечет за собой некооректное состояние шины, если такая есть.
      */
-    void moveDirectly(double dx, double dy) {
-        axis.move(dx, dy);
+    boolean moveDirectly(double dx, double dy) {
+        boolean success = axis.move(dx, dy);
+		if (success)
+        	rebuildBounds();
 
-        rebuildBounds();
+		return success;
     }
 
     /**
@@ -207,15 +213,31 @@ public class SimpleWire extends TopologyElement implements Serializable, Compara
         }
     }
 
-    void stretchDirectly(Direction direction, double d) {
+	@Override
+	public boolean move(double dx, double dy) {
+		return moveDirectly(dx, dy);
+	}
+
+	/**
+	 * use #stretchDirectly(Point, Direction, double)
+	 */
+	@Deprecated
+    boolean stretchDirectly(Direction direction, double d) {
         axis.stretch(direction, d);
         rebuildBounds();
+		return true;
     }
 
-    void stretchDirectly(Point base, Direction direction, double d) {
+    boolean stretchDirectly(Point base, Direction direction, double d) {
         axis.stretch(base, direction, d);
         rebuildBounds();
+		return true;
     }
+
+	@Override
+	public boolean stretch(Direction direction, double length, Point stretchPoint) {
+		return stretchDirectly(stretchPoint, direction, length);
+	}
 
     public double length() {
         return axis.length();
@@ -270,7 +292,7 @@ public class SimpleWire extends TopologyElement implements Serializable, Compara
         return Ints.compare(getIndex(), o.getIndex());
     }
 
-    public static class Builder {
+	public static class Builder {
 		private final SimpleWire WIRE = new SimpleWire();
 
 		public Builder() {

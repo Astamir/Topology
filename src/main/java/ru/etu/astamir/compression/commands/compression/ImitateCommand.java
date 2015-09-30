@@ -1,6 +1,7 @@
-package ru.etu.astamir.compression.commands;
+package ru.etu.astamir.compression.commands.compression;
 
 import ru.etu.astamir.compression.Border;
+import ru.etu.astamir.compression.commands.Command;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.model.Flap;

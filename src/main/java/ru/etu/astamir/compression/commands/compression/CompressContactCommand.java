@@ -3,8 +3,10 @@ package ru.etu.astamir.compression.commands.compression;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.common.collections.CollectionUtils;
+import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.BorderPart;
 import ru.etu.astamir.compression.CompressionUtils;
@@ -33,9 +35,14 @@ import java.util.Map;
  * Created by Astamir on 11.01.2015.
  */
 public class CompressContactCommand extends CompressCommand {
-
-    MoveCommand move;
-    UpdateBorderCommand update_border;
+    private static final Predicate<Contact> DIAGONAL_CONTACTS_ANALYSIS = new Predicate<Contact>() {
+        @Override
+        public boolean apply(Contact input) {
+            return true; // todo
+        }
+    };
+    private MoveCommand move;
+    private UpdateBorderCommand update_border;
 
     public CompressContactCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, Direction direction, String element_name) {
         super(grid, borders, element_name, direction);
@@ -53,10 +60,10 @@ public class CompressContactCommand extends CompressCommand {
         Collection<Border> affectedBorders = getAffectedBorders();
 
         // first we have to figure out our moving distance
-        double length = getContactMoveDistance(contact, affectedBorders, direction, Collections.<Contact>emptyList());
+        double length = getContactMoveDistance(contact, affectedBorders, direction);
 
         // find out if some other contacts or contours are in the way
-        length = diagonalAnalysis(length, contact, Collections.<Contact>emptyList());
+        //length = diagonalAnalysis(length, contact, grid.getElementsOfType(Contact.class));
 
         // find and move connected wires;
         moveConnected(contact, length);
@@ -101,10 +108,31 @@ public class CompressContactCommand extends CompressCommand {
     }
 
     private double diagonalAnalysis(double moveLength, Contact contact, Collection<Contact> otherContacts) {
-        return moveLength; // todo implement
+        EntitySet<Contact> contactSet = EntitySet.clone(Iterables.filter(otherContacts, DIAGONAL_CONTACTS_ANALYSIS));
+        if (contactSet.contains(contact)) {
+            contactSet.remove(contact);
+        }
+
+        double length = -1D;
+        for (Contact c : contactSet) {
+            double diagonal = diagonalDistance(contact.getCoordinates(), c.getCoordinates());
+            length = Utils.assignIfSmaller(length, diagonal, -1D);
+        }
+
+        return Utils.assignIfSmaller(moveLength, length, -1D);
     }
 
-    private double getContactMoveDistance(Contact contact, Collection<Border> borders, Direction direction, Collection<Contact> otherContacts) {
+    private double diagonalDistance(Collection<Point> one, Collection<Point> another) {
+        double diagonal = -1D;
+        for (Point onePoint : one) {
+            for (Point anotherPoint : another) {
+                diagonal = Utils.assignIfSmaller(diagonal, Point.distance(onePoint, anotherPoint));
+            }
+        }
+        return Utils.round(diagonal);
+    }
+
+    private double getContactMoveDistance(Contact contact, Collection<Border> borders, Direction direction) {
         double length = 0.0;
 
         for (Border border : borders) {
@@ -124,13 +152,13 @@ public class CompressContactCommand extends CompressCommand {
             if (contact_windows.isEmpty()) {
                 throw new UnexpectedException("There are no contact windows in contact " + contact);
             }
-            for (Map.Entry<Material, ContactWindow> window : contact_windows.entrySet()) {
-                if (border.getLayer() != null && !border.getLayer().getMaterial().equals(window.getKey())) {
-                    continue;
-                }
-
-                length = Utils.assignIfSmaller(length, CompressionUtils.getMovingLength(window.getValue(), direction, working_border));
-            }
+//            for (Map.Entry<Material, ContactWindow> window : contact_windows.entrySet()) {
+//                if (border.getLayer() != null && !border.getLayer().getMaterial().equals(window.getKey())) {
+//                    continue;
+//                }
+//
+//                length = Utils.assignIfSmaller(length, CompressionUtils.getMovingLength(window.getValue(), direction, working_border));
+//            }
         }
 
         return length;

@@ -77,6 +77,6 @@ public class MoveCommand implements Command {
 
     @Override
     public String toString() {
-        return "Moving " + source.getClass().getSimpleName() + " with symbol " + source.getSymbol() + ": dx = " + dx + ", dy = " + dy;
+        return "Moving " + source.getClass().getSimpleName() + "[" + source.getSymbol() + "-" +source.getName() + "]: dx = " + dx + ", dy = " + dy;
     }
 }

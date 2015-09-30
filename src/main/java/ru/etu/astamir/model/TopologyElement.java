@@ -67,7 +67,7 @@ public abstract class TopologyElement extends Entity implements Serializable, Cl
 
 	public abstract Collection<Point> getCoordinates();
 
-    public abstract void setCoordinates(Collection<Point> coordinates);
+    public abstract boolean setCoordinates(Collection<Point> coordinates);
 
     public abstract Polygon getBounds();
 

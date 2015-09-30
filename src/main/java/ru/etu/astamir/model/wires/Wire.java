@@ -289,7 +289,7 @@ public class Wire extends TopologyElement implements Movable, Serializable {
     }
 
     @Override
-    public void setCoordinates(Collection<Point> coordinates) {
+    public boolean setCoordinates(Collection<Point> coordinates) {
         throw new UnsupportedOperationException();
     }
 

@@ -124,8 +124,9 @@ public abstract class Contour extends TopologyElement implements Movable {
     }
 
     @Override
-    public void setCoordinates(Collection<Point> coordinates) {
+    public boolean setCoordinates(Collection<Point> coordinates) {
         area.setVertices(coordinates);
+        return true;
     }
 
     @Override

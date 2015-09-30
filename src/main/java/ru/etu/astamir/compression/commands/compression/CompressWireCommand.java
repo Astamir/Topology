@@ -1,13 +1,10 @@
 package ru.etu.astamir.compression.commands.compression;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.commands.Command;
-import ru.etu.astamir.compression.commands.ImitateCommand;
 import ru.etu.astamir.compression.commands.UpdateBorderCommand;
 import ru.etu.astamir.compression.grid.VirtualGrid;
 import ru.etu.astamir.geom.common.Direction;

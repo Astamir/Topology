@@ -1,10 +1,8 @@
 package ru.etu.astamir.compression.commands.compression;
 
 import ru.etu.astamir.compression.Border;
-import ru.etu.astamir.compression.commands.ImitateCommand;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.model.wires.Gate;
-import ru.etu.astamir.model.wires.Wire;
 
 /**
  * @author Artem Mon'ko
