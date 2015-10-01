@@ -10,6 +10,7 @@ import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.geom.common.Polygon;
 import ru.etu.astamir.gui.painters.*;
 import ru.etu.astamir.gui.painters.Painter;
+import ru.etu.astamir.gui.widgets.PlayerPanel;
 import ru.etu.astamir.launcher.Topology;
 import ru.etu.astamir.launcher.VirtualTopology;
 import ru.etu.astamir.model.TopologyElement;
@@ -54,6 +55,7 @@ public class VirtualGridPanel extends JPanel {
 
         //addMouseMotionListener(new CoordinateTracker(coordinates));
         add(coordinates);
+        add(new PlayerPanel());
     }
 
     public void setModel(ElementModel model) {

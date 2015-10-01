@@ -13,6 +13,7 @@ import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.BorderPart;
+import ru.etu.astamir.compression.commands.Command;
 import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.math.MathUtils;
@@ -266,6 +267,10 @@ public class WireUtils {
         }
 
         return -1;
+    }
+
+    private static List<Command> imitate(Wire wire, Border overlay, Direction direction) {
+        return Collections.emptyList();
     }
 
     public static void main(String... args) {
