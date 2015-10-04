@@ -17,7 +17,7 @@ import java.util.Collections;
  * Time: 15:39
  * To change this template use File | Settings | File Templates.
  */
-public class MoveCommand implements Command {
+public class MoveCommand implements DescribableCommand {
     /**
      * Это элемент, который мы двигаем.
      */
@@ -78,5 +78,10 @@ public class MoveCommand implements Command {
     @Override
     public String toString() {
         return "Moving " + source.getClass().getSimpleName() + "[" + source.getSymbol() + "-" +source.getName() + "]: dx = " + dx + ", dy = " + dy;
+    }
+
+    @Override
+    public String getDescription() {
+        return null;
     }
 }
