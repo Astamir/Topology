@@ -4,14 +4,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.sun.xml.internal.ws.util.StringUtils;
-import ru.etu.astamir.compression.Border;
+import ru.etu.astamir.common.io.StringUtils;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,6 +1,7 @@
 package ru.etu.astamir.compression.commands;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 import java.util.*;
 
@@ -12,6 +13,7 @@ public class CommandManager<T extends Command> {
     Deque<T> commands = new LinkedList<>();
     Deque<T> history = new LinkedList<>();
     Deque<T> failed_commands = new LinkedList<>();
+    Deque<T> executed_commands = new LinkedList<>();
 
     private int fail_policy = CONTINUE_ON_FAIL;
 
@@ -26,15 +28,21 @@ public class CommandManager<T extends Command> {
         commands.add(Preconditions.checkNotNull(command));
     }
 
-    public void executeNext() {
+    public boolean executeNext() {
+        boolean success = false;
         T next_command = commands.poll();
         if (next_command != null) {
-            boolean success = next_command.execute();
+            success = next_command.execute();
             log(next_command); // todo
             if (!success) {
                 next_command.unexecute();
+                failed_commands.add(next_command);
             }
+
+            executed_commands.add(next_command);
         }
+
+        return success;
     }
 
     // todo remove later, debug for now
@@ -52,6 +60,10 @@ public class CommandManager<T extends Command> {
         failed_commands.clear();
     }
 
+    public ImmutableList<T> getCommands() {
+        return ImmutableList.copyOf(commands);
+    }
+
     private void log(T command) {
         StringBuilder log = new StringBuilder();
         log.append(command.getClass().getSimpleName()).append(" was executed - ");
@@ -60,11 +72,21 @@ public class CommandManager<T extends Command> {
     }
 
     public void executeAll() {
-
+        while (hasNext()) {
+            Command currentCommand = peek();
+            boolean success = executeNext();
+            if (!success) {
+                System.out.println("Unable to execute command: " + currentCommand.toString() + ", rolling back now");
+                rollback();
+            }
+        }
     }
 
     public void rollback() {
-
+        while (!executed_commands.isEmpty()) {
+            T command_to_unexecute = executed_commands.pop();
+            command_to_unexecute.unexecute();
+        }
     }
 
 

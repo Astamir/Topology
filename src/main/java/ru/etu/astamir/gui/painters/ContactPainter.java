@@ -2,7 +2,6 @@ package ru.etu.astamir.gui.painters;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.sun.istack.internal.Nullable;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.geom.common.Point;
@@ -17,7 +16,7 @@ import java.awt.*;
  */
 public class ContactPainter implements Painter<Contact> {
     @Override
-    public void paint(Contact entity, Graphics graphics, @Nullable Function<Point, Point> coordinateTranslator) {
+    public void paint(Contact entity, Graphics graphics, Function<Point, Point> coordinateTranslator) {
         Color color = ProjectObjectManager.getColorCentral().getColor(entity);
         graphics.setColor(color);
 

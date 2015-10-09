@@ -1,7 +1,6 @@
 package ru.etu.astamir.gui.painters;
 
 import com.google.common.base.Function;
-import com.sun.istack.internal.Nullable;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.geom.common.Point;
@@ -15,7 +14,7 @@ import java.awt.*;
  */
 public class GatePainter implements Painter<Gate> {
     @Override
-    public void paint(Gate entity, Graphics graphics, @Nullable Function<Point, Point> coordinateTranslator) {
+    public void paint(Gate entity, Graphics graphics, Function<Point, Point> coordinateTranslator) {
         Color color = ProjectObjectManager.getColorCentral().getColor(entity);
         graphics.setColor(color);
 

@@ -4,7 +4,9 @@ import com.google.common.base.Optional;
 import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.model.TopologyElement;
+import ru.etu.astamir.model.wires.Wire;
 
+import java.security.PublicKey;
 import java.util.*;
 
 /**
@@ -21,6 +23,15 @@ public class ConnectionUtils {
         }
 
         return result;
+    }
+
+    public static <V extends TopologyElement> EntitySet<V> getConnectedElements(Wire wire, Grid grid) {
+        EntitySet<V> connected_elements = new EntitySet<>();
+        for (ConnectionPoint connection_point : wire.getConnections()) {
+            connected_elements.addAll(ConnectionUtils.<V>resolveConnectedElements(connection_point, grid));
+        }
+
+        return connected_elements;
     }
 
     public static Collection<String> getConnectedNames(ConnectionPoint... connections) {

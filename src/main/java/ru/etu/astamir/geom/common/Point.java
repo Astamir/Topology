@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  *  @author astamir
  */
 @XmlRootElement
-public class Point implements Serializable, Cloneable, Drawable, Movable, Comparable<Point> {
+public class Point implements Serializable, Cloneable, Drawable, Movable, Roundable, Comparable<Point> {
     private static final long serialVersionUID = 1L;
 
     @XmlAttribute

@@ -1,7 +1,6 @@
 package ru.etu.astamir.common.collections;
 
 import com.google.common.base.Preconditions;
-import com.sun.istack.internal.NotNull;
 import ru.etu.astamir.common.reflect.ReflectUtils;
 import ru.etu.astamir.model.Entity;
 
@@ -20,7 +19,6 @@ public abstract class AbstractEntitySet<V extends Entity> implements Set<V>, Ser
 
     }
 
-    @NotNull
     protected abstract Map<String, V> getMap();
 
     @Override

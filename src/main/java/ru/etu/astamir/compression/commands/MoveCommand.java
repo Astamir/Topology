@@ -1,5 +1,6 @@
 package ru.etu.astamir.compression.commands;
 
+import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.GeomUtils;
 import ru.etu.astamir.geom.common.Point;
@@ -7,6 +8,7 @@ import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.Movable;
 import ru.etu.astamir.common.Pair;
 
+import javax.rmi.CORBA.Util;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -30,8 +32,8 @@ public class MoveCommand implements DescribableCommand {
     
     private MoveCommand(TopologyElement element, double dx, double dy) {
         this.source = element;
-        this.dx = dx;
-        this.dy = dy;
+        this.dx = Utils.round(dx);
+        this.dy = Utils.round(dy);
     }
 
     private MoveCommand(TopologyElement element, Pair<Double, Double> dPair) {

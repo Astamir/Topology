@@ -3,7 +3,6 @@ package ru.etu.astamir.gui.painters;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.sun.istack.internal.Nullable;
 import ru.etu.astamir.common.reflect.ReflectUtils;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.*;
@@ -32,7 +31,7 @@ public class TopologyElementPainter implements Painter<TopologyElement> {
     }
 
     @Override
-    public void paint(TopologyElement elem, Graphics graphics, @Nullable Function<Point, Point> coordinateTranslator) {
+    public void paint(TopologyElement elem, Graphics graphics, Function<Point, Point> coordinateTranslator) {
         checkForMoreSuitablePainter(elem.getClass()); // maybe we have more suitable painter
 
         List<Point> points = Lists.newArrayList(elem.getCoordinates());

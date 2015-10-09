@@ -81,7 +81,7 @@ public class Rectangle extends Polygon {
 
     public static Rectangle of(final Edge axis, double width, double widthAtBorder) {
         Orientation axisOrientation = axis.getOrientation();
-        Preconditions.checkArgument(axisOrientation != Orientation.BOTH);
+        Preconditions.checkArgument(axisOrientation != Orientation.BOTH, axis);
         Edge goodAxis = (Edge) axis.clone();
         if (goodAxis.getStart().compareTo(goodAxis.getEnd()) > 0) {
             goodAxis.reverse();

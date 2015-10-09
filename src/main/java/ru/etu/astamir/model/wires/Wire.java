@@ -517,68 +517,6 @@ public class Wire extends TopologyElement implements Movable, Serializable {
         return false;
     }
 
-
-    @Deprecated
-            // todo
-    boolean movePartWithLengthRestriction(int partIndex, Direction direction, double width) {
-        if (width == 0) {
-            return true;
-        }
-
-        if (partIndex < 0 || partIndex > parts.size() - 1) {
-            return false;
-        }
-
-        SimpleWire part = parts.get(partIndex);
-        if (!part.movable) {
-            return false; // we can't even move this part.
-        }
-
-        Direction partDirection = part.getAxis().getDirection();
-        List<SimpleWire> connectedParts = getConnectedParts(part);
-        if (direction.isOrthogonal(partDirection)) {
-            // firstly, we have to be sure that all connected parts can be stretched
-            boolean canStretch = Iterables.all(connectedParts, new Predicate<SimpleWire>() {
-                @Override
-                public boolean apply(SimpleWire input) {
-                    return input.stretchable;
-                }
-            });
-
-            if (canStretch) { // if we actually can stretch connected parts
-                // we have to find out real moving length.
-                double correctedWidth = direction.getDirectionSign() * width;
-                for (SimpleWire connectedPart : connectedParts) {
-                    double length = connectedPart.length();
-                    final double maxLength = connectedPart.maxLength;
-                    //TODO
-                }
-
-                if (correctedWidth != 0) {
-                    part.moveDirectly(direction, correctedWidth); // if direction is orthogonal we just moving the part
-                    rebuildBounds();
-                    return true;
-                }
-
-                part.moveDirectly(direction, width); // if direction is orthogonal we just moving the part
-                rebuildBounds();
-                return true;
-            }
-
-            return false;
-        }
-
-        // in this case we have to move some connected parts too.
-        List<SimpleWire> partsToMove = Lists.newArrayList(connectedParts);
-        partsToMove.add(part);
-        moveParts(partsToMove, direction, width);
-
-        rebuildBounds();
-
-        // TODO проверки на максимальную длину
-        return true;
-    }
-
     public void round() {
         for (SimpleWire part : parts) {
             part.getAxis().getStart().round();
@@ -1114,16 +1052,11 @@ public class Wire extends TopologyElement implements Movable, Serializable {
                 axisComparator(direction.getEdgeComparator()));
     }
 
-    public Optional<SimpleWire> closest(final SimpleWire part) {
+    public Optional<SimpleWire> closestWithSameOrientation(final SimpleWire part) {
         final Edge axis = part.getAxis();
         List<SimpleWire> orientationParts = orientationParts(axis.getOrientation());
         orientationParts.remove(part);
-        return axis.closestEdge(orientationParts, new Function<SimpleWire, Edge>() {
-            @Override
-            public Edge apply(SimpleWire input) {
-                return input.getAxis();
-            }
-        });
+        return axis.closestEdge(orientationParts, Utils.Functions.WIRE_AXIS_FUNCTION);
     }
 
     static Comparator<SimpleWire> axisComparator(final Comparator<Edge> cmp) {

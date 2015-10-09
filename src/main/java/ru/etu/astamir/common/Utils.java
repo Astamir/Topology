@@ -9,6 +9,7 @@ import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Orientation;
 import ru.etu.astamir.geom.common.Point;
+import ru.etu.astamir.math.MathUtils;
 import ru.etu.astamir.model.Entity;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.legacy.Edged;
@@ -115,7 +116,7 @@ public class Utils {
     }
 
     public static double round(double value) {
-        return new BigDecimal(value).setScale(5, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return new BigDecimal(value).setScale(MathUtils.MAX_PRECISION, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     public static double assignIfSmaller(double current, double new_one, double nan) {

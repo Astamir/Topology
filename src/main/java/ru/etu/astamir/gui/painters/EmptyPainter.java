@@ -1,7 +1,6 @@
 package ru.etu.astamir.gui.painters;
 
 import com.google.common.base.Function;
-import com.sun.istack.internal.Nullable;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.model.Entity;
 
@@ -12,7 +11,7 @@ import java.awt.*;
  */
 public class EmptyPainter implements Painter<Entity> {
     @Override
-    public void paint(Entity entity, Graphics graphics, @Nullable Function<Point, Point> coordinateTranslator) {
+    public void paint(Entity entity, Graphics graphics, Function<Point, Point> coordinateTranslator) {
         // nothing to do here
     }
 }

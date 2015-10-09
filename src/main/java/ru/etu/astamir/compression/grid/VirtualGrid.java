@@ -16,7 +16,7 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * @author Astamir
+ *
  */
 public class VirtualGrid implements Grid, Serializable {
     private EntitySet<TopologyElement> elements = EntitySet.create();
@@ -183,7 +183,9 @@ public class VirtualGrid implements Grid, Serializable {
     }
 
     public List<List<TopologyElement>> getReversedColumns() {
-        return null;
+        List<List<TopologyElement>> reversedColumns = getColumns();
+        Collections.reverse(reversedColumns);
+        return reversedColumns;
     }
 
     public Map<Double, Map<Double, Collection<TopologyElement>>> columnMap() {

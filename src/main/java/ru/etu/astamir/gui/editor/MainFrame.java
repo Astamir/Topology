@@ -2,6 +2,7 @@ package ru.etu.astamir.gui.editor;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import net.miginfocom.swing.MigLayout;
 import org.jdom2.JDOMException;
 import org.omg.PortableServer.POAManager;
 import org.xml.sax.InputSource;
@@ -76,11 +77,13 @@ public class MainFrame extends JFrame {
     }
 
     private void initComponents() {
+        setLayout(new MigLayout("ins 0"));
         setJMenuBar(createMainMenu());
         toolBar = createToolBar();
-        add(toolBar, BorderLayout.PAGE_START);
+        add(toolBar, "growx, wrap");
         paintPanel = new VirtualGridPanel(defaultTopology, 20);
-        add(paintPanel);
+        add(paintPanel, "push, grow");
+       // add(new CommandTrackerPanel(paintPanel.model, ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology).commands), "growy, pushy, wrap");
     }
 
     private JToolBar createToolBar() {

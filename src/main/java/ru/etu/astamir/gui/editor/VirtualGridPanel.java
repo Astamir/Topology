@@ -55,7 +55,6 @@ public class VirtualGridPanel extends JPanel {
 
         //addMouseMotionListener(new CoordinateTracker(coordinates));
         add(coordinates);
-        add(new PlayerPanel());
     }
 
     public void setModel(ElementModel model) {

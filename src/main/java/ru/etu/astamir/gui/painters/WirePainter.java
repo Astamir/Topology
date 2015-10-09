@@ -2,7 +2,6 @@ package ru.etu.astamir.gui.painters;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.sun.istack.internal.Nullable;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.geom.common.Point;
@@ -21,7 +20,7 @@ import java.util.List;
 public class WirePainter implements Painter<Wire> {
 
     @Override
-    public void paint(Wire entity, Graphics graphics, @Nullable Function<Point, Point> coordinateTranslator) {
+    public void paint(Wire entity, Graphics graphics, Function<Point, Point> coordinateTranslator) {
         //List<Edge> edges = WireUtils.fromPoints(Lists.transform(Lists.newArrayList(entity.getCoordinates()), coordinateTranslator));
 
         Color color = ProjectObjectManager.getColorCentral().getColor(entity);

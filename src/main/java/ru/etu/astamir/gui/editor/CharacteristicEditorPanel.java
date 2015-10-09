@@ -1,12 +1,7 @@
 package ru.etu.astamir.gui.editor;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.sun.java.swing.plaf.windows.WindowsGraphicsUtils;
-import javafx.scene.control.Tab;
-import net.miginfocom.swing.MigLayout;
-import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.gui.common.WindowUtils;
 import ru.etu.astamir.gui.widgets.DropDownPanel;
 import ru.etu.astamir.model.technology.Technology;
@@ -17,7 +12,6 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Map;
 
 /**
  * Панель просмотра и редактирвоания технологических норм.

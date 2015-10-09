@@ -194,9 +194,10 @@ public class SimpleWire extends TopologyElement implements Movable, Stretchable,
      * влечет за собой некооректное состояние шины, если такая есть.
      */
     boolean moveDirectly(double dx, double dy) {
+
         boolean success = axis.move(dx, dy);
-		if (success)
-        	rebuildBounds();
+		//if (success)
+        	//rebuildBounds();
 
 		return success;
     }

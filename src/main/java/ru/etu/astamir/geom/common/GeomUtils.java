@@ -13,6 +13,10 @@ import java.util.List;
  * Различные вспомогательные геометрические функции.
  */
 public class GeomUtils {
+    private GeomUtils() {
+
+    }
+
     public static final Function<Pair<Direction, Double>, Pair<Double, Double>> TO_DXDY = new Function<Pair<Direction, Double>, Pair<Double, Double>>() {
         @Override
         public Pair<Double, Double> apply(Pair<Direction, Double> input) {
@@ -122,12 +126,30 @@ public class GeomUtils {
         return result;
     }
 
+    public static double getSignedLength(Direction direction, double l) {
+        return l * direction.getDirectionSign();
+    }
+
     public static Collection<Point> prepareToMove(Collection<Point> points, Direction direction, double d) {
-        double signedD = d * direction.getDirectionSign();
+        double signedD = getSignedLength(direction, d);
         if (direction.isLeftOrRight()) {
             return prepareToMove(points, signedD, 0);
         } else {
             return prepareToMove(points, 0, signedD);
         }
+    }
+
+    public static Point[] toPoints(double... coordinates) {
+        if (coordinates.length < 2) {
+            return new Point[0];
+        }
+
+        int length = coordinates.length / 2;
+        Point[] points = new Point[length];
+        for (int i = 0, k = 0; i < length; i++, k+=2) {
+            points[i] = Point.of(coordinates[k], coordinates[k + 1]);
+        }
+
+        return points;
     }
 }

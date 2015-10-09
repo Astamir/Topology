@@ -3,6 +3,7 @@ package ru.etu.astamir.gui.widgets;
 import com.google.common.collect.Sets;
 import net.miginfocom.swing.MigLayout;
 import ru.etu.astamir.gui.IconFactory;
+import ru.etu.astamir.gui.common.ComponentHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,6 +13,8 @@ import java.util.*;
 import java.util.List;
 
 /**
+ * Some player like behaviour. To use it, simply add it to layout and register listener
+ * to get player actions.
  * @author Artem Mon'ko
  */
 public class PlayerPanel extends JPanel implements ActionListener{
@@ -80,36 +83,43 @@ public class PlayerPanel extends JPanel implements ActionListener{
 
     private void initComponents() {
         firstButton = new JButton(IconFactory.makeImageIcon(PlayerPanel.class, "player_panel_first_item.png"));
+        ComponentHelper.setFixedComponentSize(firstButton, 32, 32);
         firstButton.addActionListener(this);
         firstButton.setActionCommand(FIRST_COMMAND);
         add(firstButton);
 
         previousButton = new JButton(IconFactory.makeImageIcon(PlayerPanel.class, "player_panel_previous_item.png"));
+        ComponentHelper.setFixedComponentSize(previousButton, 32, 32);
         previousButton.addActionListener(this);
         previousButton.setActionCommand(PREVIOUS_COMMAND);
         add(previousButton, "gapleft 1");
 
         playButton = new JButton(IconFactory.makeImageIcon(PlayerPanel.class, "player_panel_play_item.png"));
+        ComponentHelper.setFixedComponentSize(playButton, 32, 32);
         playButton.addActionListener(this);
         playButton.setActionCommand(PLAY_COMMAND);
         add(playButton, "gapleft 1");
 
         pauseButton = new JButton(IconFactory.makeImageIcon(PlayerPanel.class, "player_panel_pause_item.png"));
+        ComponentHelper.setFixedComponentSize(pauseButton, 32, 32);
         pauseButton.addActionListener(this);
         pauseButton.setActionCommand(PAUSE_COMMAND);
         add(pauseButton, "gapleft 1");
 
         stopButton = new JButton(IconFactory.makeImageIcon(PlayerPanel.class, "player_panel_stop_item.png"));
+        ComponentHelper.setFixedComponentSize(stopButton, 32, 32);
         stopButton.addActionListener(this);
         stopButton.setActionCommand(STOP_COMMAND);
         add(stopButton, "gapleft 1");
 
         nextButton = new JButton(IconFactory.makeImageIcon(PlayerPanel.class, "player_panel_next_item.png"));
+        ComponentHelper.setFixedComponentSize(nextButton, 32, 32);
         nextButton.addActionListener(this);
         nextButton.setActionCommand(NEXT_COMMAND);
         add(nextButton, "gapleft 1");
 
         lastButton = new JButton(IconFactory.makeImageIcon(PlayerPanel.class, "player_panel_last_item.png"));
+        ComponentHelper.setFixedComponentSize(lastButton, 32, 32);
         lastButton.addActionListener(this);
         lastButton.setActionCommand(LAST_COMMAND);
         add(lastButton, "gapleft 1");

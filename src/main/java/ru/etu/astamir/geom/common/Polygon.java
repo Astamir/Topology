@@ -28,7 +28,7 @@ import java.util.*;
  * @author astamir
  */
 @XmlRootElement
-public class Polygon implements Cloneable, Serializable, Drawable, Movable {
+public class Polygon implements Cloneable, Serializable, Drawable, Movable, Roundable {
     /**
      * Список вершин полигона.
      */
@@ -48,7 +48,7 @@ public class Polygon implements Cloneable, Serializable, Drawable, Movable {
     /**
      * Положение ребра относительно точки.
      */
-    static enum EdgeToPointRelation {TOUCHING, CROSSING, INESSENTIAL}
+    enum EdgeToPointRelation {TOUCHING, CROSSING, INESSENTIAL}
 
     /**
      * Подсчет кол-ва измененияй списка точек.
@@ -109,6 +109,13 @@ public class Polygon implements Cloneable, Serializable, Drawable, Movable {
         }
         
         return false;
+    }
+
+    @Override
+    public void round() {
+        for (Point vertex : vertices) {
+            vertex.round();
+        }
     }
 
     public boolean intersects(Edge edge) {

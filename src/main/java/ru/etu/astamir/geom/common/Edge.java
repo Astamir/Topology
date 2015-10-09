@@ -26,7 +26,7 @@ import java.util.List;
  * Класс ребро.
  */
 @XmlRootElement
-public class Edge implements Serializable, Cloneable, Drawable, Movable {
+public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundable {
 
 	@XmlElement
     private Point start = new Point();
