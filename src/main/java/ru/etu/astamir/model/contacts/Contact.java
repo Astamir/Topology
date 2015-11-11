@@ -4,10 +4,7 @@ import com.google.common.collect.Lists;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.geom.common.Polygon;
-import ru.etu.astamir.model.ComplexElement;
-import ru.etu.astamir.model.Material;
-import ru.etu.astamir.model.Movable;
-import ru.etu.astamir.model.TopologyElement;
+import ru.etu.astamir.model.*;
 import ru.etu.astamir.model.connectors.ConnectionPoint;
 import ru.etu.astamir.model.regions.ContactWindow;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -15,7 +12,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.io.Serializable;
 import java.util.*;
 
-public class Contact extends TopologyElement implements ConnectionPoint, Serializable, ComplexElement, Movable {
+public class Contact extends TopologyElement implements ConnectionPoint, Serializable, ComplexElement, Movable, Edged {
     private static final long serialVersionUID = 1L;
 
     protected Edge center;
@@ -129,5 +126,10 @@ public class Contact extends TopologyElement implements ConnectionPoint, Seriali
             success &= contactWindow.move(dx, dy);
         }
         return success;
+    }
+
+    @Override
+    public Edge getAxis() {
+        return center;
     }
 }

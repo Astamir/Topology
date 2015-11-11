@@ -2,6 +2,7 @@ package ru.etu.astamir.model.wires;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -12,6 +13,9 @@ import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.BorderPart;
 import ru.etu.astamir.compression.commands.Command;
+import ru.etu.astamir.compression.commands.CompositeCommand;
+import ru.etu.astamir.compression.commands.MoveCommand;
+import ru.etu.astamir.compression.commands.compression.SimpleCompressCommand;
 import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.math.MathUtils;
@@ -256,8 +260,60 @@ public class WireUtils {
         return -1;
     }
 
-    private static List<Command> imitate(Wire wire, Border overlay, Direction direction) {
+    public static List<SimpleCompressCommand> moveSimpleWire(SimpleWire wire, Direction direction, double length, BorderPart part) {
+        List<SimpleCompressCommand> commands = new ArrayList<>();
+        if (wire.getWire() != null) { // part of a complex wire
+        } else {
+            commands.add(new SimpleCompressCommand(new MoveCommand(wire, direction, length), part));
+        }
+        return commands;
+    }
+
+    private static List<Command> imitate(Wire wire, Border overlay, boolean deformation_allowed, Direction direction) {
+        //bus.correctBus();
+        if (!wire.isChained()) {
+            wire.ensureChained();
+        }
+        wire.round();
+        if (deformation_allowed)
+            createEmptyLinks(wire, overlay, direction);
+
+        for (SimpleWire part : wire.getParts()) {
+            if (!part.getAxis().getOrientation().isOrthogonal(direction.toOrientation()) || part.getAxis().isPoint()) {
+                continue;
+            }
+            Optional<BorderPart> closestPart = overlay.getClosestPartWithConstraints(part.getAxis(), wire.getSymbol(), direction);
+            if (closestPart.isPresent()) {
+                double distToMove = overlay.getMoveDistance(closestPart.get(), wire.getSymbol(),
+                        direction, part.getAxis().getStart());
+
+                wire.movePart(part, direction, distToMove);
+            }
+        }
+
+        wire.removeEmptyParts();
         return Collections.emptyList();
+    }
+
+    private static void createEmptyLinks(Wire bus, Border border, Direction direction) {
+        List<BorderPart> nonOrientParts =
+                Lists.newArrayList(Iterables.filter(border.getParts(), Predicates.not(border.orientationPredicate())));
+        //boolean wasEmptyPartsOnEdges = bus.hasEmptyPartsOnEdges();
+        for (BorderPart part : nonOrientParts) {
+            double min = border.getMinDistance(part, bus.getSymbol());
+            Point one = part.getAxis().getStart().clone();
+            GeomUtils.move(one, direction.clockwise(), min);
+            Point another = part.getAxis().getStart().clone();
+            GeomUtils.move(another, direction.counterClockwise(), min);
+
+            bus.createAnEmptyLink(one, direction.getOppositeDirection());
+            bus.createAnEmptyLink(another, direction.getOppositeDirection());
+        }
+
+
+        //bus.removeEmptyPartsOnEdges(); // handle more carefully
+        //bus.removeEmptyParts(!wasEmptyPartsOnEdges);
+        // todo remove empty links on 5the edges ?
     }
 
     public static void main(String... args) {

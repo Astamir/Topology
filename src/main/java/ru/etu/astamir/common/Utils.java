@@ -3,22 +3,17 @@ package ru.etu.astamir.common;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Lists;
 import ru.etu.astamir.compression.BorderPart;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Orientation;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.math.MathUtils;
-import ru.etu.astamir.model.Entity;
 import ru.etu.astamir.model.TopologyElement;
-import ru.etu.astamir.model.legacy.Edged;
 import ru.etu.astamir.model.wires.SimpleWire;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Created by IntelliJ IDEA.

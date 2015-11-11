@@ -1,4 +1,4 @@
-package ru.etu.astamir.model.legacy;
+package ru.etu.astamir.model;
 
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.model.TopologyElement;
@@ -15,11 +15,4 @@ public interface Edged {
      * @return Осевая линия элемента.
      */
     Edge getAxis();
-
-    /**
-     * Получить ссылку на себя.
-     *
-     * @return
-     */
-    TopologyElement getElement();
 }

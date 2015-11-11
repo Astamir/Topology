@@ -49,8 +49,8 @@ public class TopologyCompressor {
 
         prepareBorders();
         compress(Direction.LEFT);
-        compress(Direction.RIGHT);
-        straightenWires(Direction.LEFT);
+        ///compress(Direction.RIGHT);
+        //straightenWires(Direction.LEFT);
         stage = CompressionStage.COMPRESSED;
     }
 

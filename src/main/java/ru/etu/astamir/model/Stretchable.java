@@ -4,10 +4,10 @@ import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Point;
 
 /**
- * Элемент, который может растягиваться.
+ * Элемент, который может растягиваться. Только двухточечные элементы могут растягиваться.
  * @author Artem Mon'ko
  */
-public interface Stretchable {
+public interface Stretchable extends Edged{
 
     /**
      * Stretch the element directly by the given length in the given direction.

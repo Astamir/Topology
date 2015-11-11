@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Команда сжатия. Содержив все частоколы и сетку, а так же направления сжатия.
+ * Команда сжатия. Содержит все частоколы и сетку, а так же направления сжатия.
  */
 public abstract class CompressCommand implements Command {
     /**

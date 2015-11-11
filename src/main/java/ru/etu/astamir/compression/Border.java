@@ -1,14 +1,10 @@
 package ru.etu.astamir.compression;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Collections2;
+import com.google.common.base.*;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.common.collections.CollectionUtils;
 import ru.etu.astamir.common.collections.UniqueIterator;
@@ -16,18 +12,12 @@ import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.model.TopologicalCell;
 import ru.etu.astamir.model.TopologyElement;
-import ru.etu.astamir.model.connectors.ConnectionUtils;
-import ru.etu.astamir.model.contacts.Contact;
-import ru.etu.astamir.model.exceptions.UnexpectedException;
 import ru.etu.astamir.model.TopologyLayer;
-import ru.etu.astamir.common.Pair;
-import ru.etu.astamir.model.regions.Contour;
-import ru.etu.astamir.model.technology.ElementFactory;
+import ru.etu.astamir.model.exceptions.UnexpectedException;
 import ru.etu.astamir.model.technology.Technology;
 import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
 
-import javax.swing.text.TabExpander;
 import java.util.*;
 
 /**

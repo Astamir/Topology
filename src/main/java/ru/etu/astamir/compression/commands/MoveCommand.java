@@ -79,11 +79,15 @@ public class MoveCommand implements DescribableCommand {
 
     @Override
     public String toString() {
-        return "Moving " + source.getClass().getSimpleName() + "[" + source.getSymbol() + "-" +source.getName() + "]: dx = " + dx + ", dy = " + dy;
+        return getDescription();
     }
 
     @Override
     public String getDescription() {
-        return null;
+        StringBuilder description = new StringBuilder();
+        description.append("Moving ").append(source.getClass().getSimpleName());
+        description.append("[").append(source.getSymbol()).append("-").append(source.getName()).append("]:");
+        description.append(" dx = ").append(dx).append(", dy = ").append(dy);
+        return description.toString();
     }
 }

@@ -1,34 +1,19 @@
 package ru.etu.astamir.compression;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Edge;
-import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.geom.common.Polygon;
 import ru.etu.astamir.geom.common.Rectangle;
-import ru.etu.astamir.model.Entity;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.contacts.Contact;
-import ru.etu.astamir.model.legacy.LegacyTopologyElement;
-import ru.etu.astamir.model.legacy.LegacyContact;
-import ru.etu.astamir.model.legacy.Bus;
-import ru.etu.astamir.model.legacy.Deformable;
-import ru.etu.astamir.model.legacy.LegacyDistanceCharacteristics;
-import ru.etu.astamir.model.legacy.Edged;
-import ru.etu.astamir.model.legacy.Transistor;
-import ru.etu.astamir.model.exceptions.UnexpectedException;
 import ru.etu.astamir.model.regions.ContactWindow;
 import ru.etu.astamir.model.regions.Contour;
-import ru.etu.astamir.model.technology.Technology;
 import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.nio.file.Watchable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -101,15 +86,6 @@ public class BorderPart {
         return new BorderPart(wire.getAxis(), wire, wire.getSymbol() != null ? wire.getSymbol() : symbol);
     }
 
-    public static List<BorderPart> of(Deformable deformable) {
-        List<BorderPart> result = Lists.newArrayList();
-        for (Edged edged : deformable.parts()) {
-            final TopologyElement elem = edged.getElement();
-            result.add(new BorderPart(edged.getAxis(), elem, elem != null ? elem.getSymbol() : ""));
-        }
-        return result;
-    }
-
     public Edge getAxis() {
         return axis;
     }
@@ -175,9 +151,6 @@ public class BorderPart {
 
     @Override
     public String toString() {
-        return "BorderPart{" +
-                "axis=" + axis +
-                ", symbol='" + symbol + '\'' +
-                '}';
+        return "{" + axis + "}[" + symbol + "]";
     }
 }
