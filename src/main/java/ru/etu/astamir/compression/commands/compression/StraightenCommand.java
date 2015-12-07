@@ -11,14 +11,12 @@ import ru.etu.astamir.model.wires.WireUtils;
  * @author Artem Mon'ko
  */
 public class StraightenCommand extends ImitateCommand {
-    Grid grid;
     public StraightenCommand(Wire source, Border border, Direction direction, Grid grid) {
-        super(source, border, direction);
-        this.grid = grid;
+        super(source, border, direction, grid);
     }
 
     @Override
     protected boolean imitate(boolean allow_deformation) {
-        return WireUtils.straighten(source, CompressionUtils.borderWithoutConnectedElements(source, border), direction, grid);
+        return WireUtils.straighten(source, CompressionUtils.borderWithoutConnectedElements(source, border, grid), direction, grid);
     }
 }

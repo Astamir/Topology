@@ -23,7 +23,7 @@ import java.util.*;
 public class TopologyCompressor {
     Topology topology;
     public CommandManager commands = new CommandManager(); // public for debug
-    VirtualGrid working_grid;
+    //VirtualGrid working_grid;
     int mode;
     public Map<TopologyLayer, Map<Direction, Border>> borders = new HashMap<>(); // public for debug
     private Map<Entity, Integer> processed_elements = new HashMap<>();
@@ -37,7 +37,7 @@ public class TopologyCompressor {
 
     public TopologyCompressor(Topology topology) {
         this.topology = Preconditions.checkNotNull(topology);
-        this.working_grid = Preconditions.checkNotNull(topology.getGrid());
+      //  this.working_grid = Preconditions.checkNotNull(topology.getGrid());
     }
 
     /**
@@ -49,8 +49,8 @@ public class TopologyCompressor {
 
         prepareBorders();
         compress(Direction.LEFT);
-        ///compress(Direction.RIGHT);
-        //straightenWires(Direction.LEFT);
+        compress(Direction.RIGHT);
+        straightenWires(Direction.LEFT);
         stage = CompressionStage.COMPRESSED;
     }
 
@@ -60,7 +60,7 @@ public class TopologyCompressor {
             commands.executeNext();
             step_counter++;
         }
-        return working_grid;
+        return topology.getGrid();
     }
 
     void prepareBorders() {
@@ -88,7 +88,7 @@ public class TopologyCompressor {
         processed_contours.clear();
 
 
-        for (List<TopologyElement> column : working_grid.walk(direction)) {
+        for (List<TopologyElement> column : topology.getGrid().walk(direction)) {
                 clearProcessedContours();
                 for (TopologyElement element : column) {
                     if (element instanceof TopologicalCell) {
@@ -104,12 +104,12 @@ public class TopologyCompressor {
 
     void straightenWires(Direction direction) {
         processed_elements.clear();
-        for (List<TopologyElement> column : working_grid.walk(direction)) {
+        for (List<TopologyElement> column : topology.getGrid().walk(direction.getOppositeDirection())) {
             clearProcessedContours();
             for (TopologyElement element : column) {
                 if (element instanceof Wire) {
                     if (!isElementProcessed(element)) {
-                        commands.addCommand(new StraightenWireCommand(working_grid, borders, element.getName(), direction));
+                        commands.addCommand(new StraightenWireCommand(topology.getGrid(), borders, element.getName(), direction));
                         updateProcessedStatus(element, direction);
                     }
                 }
@@ -145,7 +145,7 @@ public class TopologyCompressor {
             } else if (element instanceof Wire) {
                 //Border border = affectedBorders.iterator().next();
                 //processWire((Wire) element, border, compressionDirection);
-                final CompressWireCommand command = new CompressWireCommand(working_grid, borders, element.getName(), compressionDirection);
+                final CompressWireCommand command = new CompressWireCommand(topology.getGrid(), borders, element.getName(), compressionDirection);
                 if (compressionDirection == Direction.RIGHT) {
                     command.setGateDeformationAllowed(false);
                 }
@@ -214,7 +214,7 @@ public class TopologyCompressor {
 //        length = diagonalAnalysis(length, contact, otherContacts);
 //
 //        move(contact, direction, length, affectedBorders);
-        commands.addCommand(new CompressContactCommand(working_grid, borders, direction, contact.getName()));
+        commands.addCommand(new CompressContactCommand(topology.getGrid(), borders, direction, contact.getName()));
     }
 
     private double diagonalAnalysis(double moveLength, Contact contact, Collection<Contact> otherContacts) {
@@ -222,7 +222,7 @@ public class TopologyCompressor {
     }
 
     void processWire(Wire wire, Border border, Direction direction) {
-        commands.addCommand(new CompositeCommand(new ImitateCommand(wire, border, direction)/*, new UpdateBorderCommand(Collections.singletonList(border), wire, direction)*/));
+        commands.addCommand(new CompositeCommand(new ImitateCommand(wire, border, direction, topology.getGrid())/*, new UpdateBorderCommand(Collections.singletonList(border), wire, direction)*/));
         new UpdateBorderCommand(Collections.singletonList(border), wire, direction).execute();
 
     }
@@ -244,7 +244,7 @@ public class TopologyCompressor {
 //        double move = getMoveDistanceForEdge(new Rectangle(contour.getBounds()).getEdge(direction), contour.getSymbol(), borders, direction);
 //        commands.addCommand(new CompositeCommand(new MoveContourCommand(contour, move, direction, side)/*, new UpdateBorderCommand(borders, contour, direction)*/));
 //        new UpdateBorderCommand(borders, contour, direction).execute();
-        commands.addCommand(new CompressContourCommand(working_grid, borders, contour.getName(), direction, side));
+        commands.addCommand(new CompressContourCommand(topology.getGrid(), borders, contour.getName(), direction, side));
         processed_contours.put(contour.getName(), side);
     }
 
@@ -255,11 +255,11 @@ public class TopologyCompressor {
         }
 
         TopologicalCell cell = first.get();
-        commands.addCommand(new CompressTopologicalCellCommand(working_grid, borders, cell.getName(), direction));
+        commands.addCommand(new CompressTopologicalCellCommand(topology.getGrid(), borders, cell.getName(), direction));
     }
 
     private <V extends TopologyElement> Optional<V> findFirst(final Class<V> clazz) {
-        for (TopologyElement element : working_grid.getAllElements()) {
+        for (TopologyElement element : topology.getGrid().getAllElements()) {
             if (clazz.isInstance(element)) {
                 return Optional.of((V) element);
             }

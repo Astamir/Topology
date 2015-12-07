@@ -1,6 +1,7 @@
 package ru.etu.astamir.compression.commands.compression;
 
 import ru.etu.astamir.compression.Border;
+import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.model.wires.Gate;
 
@@ -8,8 +9,8 @@ import ru.etu.astamir.model.wires.Gate;
  * @author Artem Mon'ko
  */
 public class ImitateGateCommand extends ImitateCommand {
-    public ImitateGateCommand(Gate source, Border border, Direction direction, boolean allow_deformation) {
-        super(source, border, direction, allow_deformation);
+    public ImitateGateCommand(Gate source, Border border, Direction direction, boolean allow_deformation, Grid grid) {
+        super(source, border, direction, allow_deformation, grid);
     }
 
     @Override

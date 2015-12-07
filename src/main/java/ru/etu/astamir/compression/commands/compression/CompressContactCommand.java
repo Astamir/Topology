@@ -152,13 +152,14 @@ public class CompressContactCommand extends CompressCommand {
             if (contact_windows.isEmpty()) {
                 throw new UnexpectedException("There are no contact windows in contact " + contact);
             }
-//            for (Map.Entry<Material, ContactWindow> window : contact_windows.entrySet()) {
-//                if (border.getLayer() != null && !border.getLayer().getMaterial().equals(window.getKey())) {
-//                    continue;
-//                }
-//
-//                length = Utils.assignIfSmaller(length, CompressionUtils.getMovingLength(window.getValue(), direction, working_border));
-//            }
+            // todo look through
+            for (Map.Entry<Material, ContactWindow> window : contact_windows.entrySet()) {
+                if (border.getLayer() != null && !border.getLayer().getMaterial().equals(window.getKey())) {
+                    continue;
+                }
+
+                length = Utils.assignIfSmaller(length, CompressionUtils.getMovingLength(window.getValue(), direction, working_border));
+            }
         }
 
         return length;

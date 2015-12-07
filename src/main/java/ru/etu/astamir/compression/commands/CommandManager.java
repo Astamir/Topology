@@ -15,10 +15,13 @@ public class CommandManager<T extends Command> {
     Deque<T> failed_commands = new LinkedList<>();
     Deque<T> executed_commands = new LinkedList<>();
 
+    List<Listener> listeners = new ArrayList<>();
+
     private int fail_policy = CONTINUE_ON_FAIL;
 
-    public CommandManager(Collection<T> commands) {
+    public CommandManager(List<T> commands) {
         this.commands.addAll(commands);
+        fireCommandAdded(commands);
     }
 
     public CommandManager() {
@@ -26,6 +29,7 @@ public class CommandManager<T extends Command> {
 
     public void addCommand(T command) {
         commands.add(Preconditions.checkNotNull(command));
+        fireCommandAdded(Collections.singletonList(command));
     }
 
     public boolean executeNext() {
@@ -40,6 +44,7 @@ public class CommandManager<T extends Command> {
             }
 
             executed_commands.add(next_command);
+            fireCommandExecuted(next_command);
         }
 
         return success;
@@ -89,5 +94,30 @@ public class CommandManager<T extends Command> {
         }
     }
 
+    private void fireCommandAdded(List<? extends Command> commands) {
+        for (Listener listener : listeners) {
+            listener.commandAdded(commands);
+        }
+    }
 
+    private void fireCommandExecuted(T command) {
+        for (Listener listener : listeners) {
+            listener.commandExecuted(command);
+        }
+    }
+
+    public void addListener(Listener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(Listener listener) {
+        listeners.remove(listener);
+    }
+
+    public static interface Listener {
+        void commandAdded(List<? extends Command> commands);
+        void commandRemoved(Command command);
+        void commandExecuted(Command command);
+        void commandUnexecuted(Command command);
+    }
 }

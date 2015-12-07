@@ -8,6 +8,7 @@ import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.common.collections.CollectionUtils;
 import ru.etu.astamir.common.collections.UniqueIterator;
+import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.model.TopologicalCell;
@@ -596,12 +597,12 @@ public class Border {
         bus.removeEmptyParts();
     }
 
-    public void imitate(Wire bus, Direction direction) {
-        imitate(bus, direction, true);
+    public void imitate(Wire bus, Direction direction, Grid grid) {
+        imitate(bus, direction, true, grid);
     }
 
-    public void imitate(Wire bus, Direction direction, boolean deformation_allowed) {
-        Border copy = CompressionUtils.borderWithoutConnectedElements(bus, this);
+    public void imitate(Wire bus, Direction direction, boolean deformation_allowed, Grid grid) {
+        Border copy = CompressionUtils.borderWithoutConnectedElements(bus, this, grid);
         imitate(bus, copy.getOverlay(direction), direction, deformation_allowed);
         if (!bus.isConnected()) {
             throw new UnexpectedException("not connected");

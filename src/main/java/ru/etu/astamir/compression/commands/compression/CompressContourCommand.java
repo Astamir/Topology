@@ -117,6 +117,9 @@ public class CompressContourCommand extends CompressCommand {
 
     @Override
     public String toString() {
+        if (move == null) {
+            return "Compress contour command with null move command for" + element_name;
+        }
         return move.toString();
     }
 }

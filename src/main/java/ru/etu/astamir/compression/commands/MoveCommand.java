@@ -23,12 +23,12 @@ public class MoveCommand implements DescribableCommand {
     /**
      * Это элемент, который мы двигаем.
      */
-    private TopologyElement source;
+    protected TopologyElement source;
 
-    private double dx = 0.0;
-    private double dy = 0.0;
+    protected double dx = 0.0;
+    protected double dy = 0.0;
 
-    private Collection<Point> old_coordinates = Collections.emptyList();
+    protected Collection<Point> old_coordinates = Collections.emptyList();
     
     private MoveCommand(TopologyElement element, double dx, double dy) {
         this.source = element;

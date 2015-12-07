@@ -65,7 +65,7 @@ public class CompressWireCommand extends CompressCommand {
     }
 
     protected Command createImitateCommand(Wire wire, Border overlay) {
-        return wire instanceof Gate ? new ImitateGateCommand((Gate) wire, overlay, direction, gate_deformation_allowed) : new ImitateCommand(wire, overlay, direction);
+        return wire instanceof Gate ? new ImitateGateCommand((Gate) wire, overlay, direction, gate_deformation_allowed, grid) : new ImitateCommand(wire, overlay, direction, grid);
     }
 
     protected void moveConnected() {
@@ -154,6 +154,9 @@ public class CompressWireCommand extends CompressCommand {
 
     @Override
     public String toString() {
+        if (wire == null) {
+            return "CompressWireCommand with null element" + element_name;
+        }
         return "Moving " + wire.getClass().getSimpleName() +"[" + wire.getSymbol()+"], deformation = " + gate_deformation_allowed;
     }
 }

@@ -15,6 +15,7 @@ import ru.etu.astamir.compression.BorderPart;
 import ru.etu.astamir.compression.commands.Command;
 import ru.etu.astamir.compression.commands.CompositeCommand;
 import ru.etu.astamir.compression.commands.MoveCommand;
+import ru.etu.astamir.compression.commands.MoveSimpleWireCommand;
 import ru.etu.astamir.compression.commands.compression.SimpleCompressCommand;
 import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.geom.common.*;
@@ -263,17 +264,19 @@ public class WireUtils {
     public static List<SimpleCompressCommand> moveSimpleWire(SimpleWire wire, Direction direction, double length, BorderPart part) {
         List<SimpleCompressCommand> commands = new ArrayList<>();
         if (wire.getWire() != null) { // part of a complex wire
+            commands.add(new SimpleCompressCommand(new MoveSimpleWireCommand(wire, direction, length), part));
         } else {
             commands.add(new SimpleCompressCommand(new MoveCommand(wire, direction, length), part));
         }
         return commands;
     }
 
-    private static List<Command> imitate(Wire wire, Border overlay, boolean deformation_allowed, Direction direction) {
+    public static List<Command> imitate(Wire wire, Border overlay, boolean deformation_allowed, Direction direction) {
         //bus.correctBus();
-        if (!wire.isChained()) {
-            wire.ensureChained();
-        }
+        List<Command> commands = new LinkedList<>();
+//        if (!wire.isChained()) {
+//            wire.ensureChained();
+//        }
         wire.round();
         if (deformation_allowed)
             createEmptyLinks(wire, overlay, direction);
@@ -287,12 +290,12 @@ public class WireUtils {
                 double distToMove = overlay.getMoveDistance(closestPart.get(), wire.getSymbol(),
                         direction, part.getAxis().getStart());
 
-                wire.movePart(part, direction, distToMove);
+                commands.addAll(moveSimpleWire(part, direction, distToMove, closestPart.get()));
             }
         }
 
         wire.removeEmptyParts();
-        return Collections.emptyList();
+        return commands;
     }
 
     private static void createEmptyLinks(Wire bus, Border border, Direction direction) {

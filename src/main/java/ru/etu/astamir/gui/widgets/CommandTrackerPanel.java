@@ -1,9 +1,10 @@
-package ru.etu.astamir.gui.editor;
+package ru.etu.astamir.gui.widgets;
 
 import net.miginfocom.swing.MigLayout;
 import ru.etu.astamir.compression.commands.Command;
 import ru.etu.astamir.compression.commands.CommandManager;
 import ru.etu.astamir.compression.commands.DescribableCommand;
+import ru.etu.astamir.gui.editor.ElementModel;
 import ru.etu.astamir.gui.widgets.PlayerPanel;
 
 import javax.swing.*;
@@ -27,22 +28,44 @@ public class CommandTrackerPanel extends JPanel{
         super(new MigLayout("ins 0"));
         this.elementModel = elementModel;
         this.commands = commands;
+        commands.addListener(new CommandManager.Listener() {
+            @Override
+            public void commandAdded(List<? extends Command> commands) {
+                commandList.setModel(new CommandListModel<>(CommandTrackerPanel.this.commands.getCommands()));
+                commandList.repaint();
+            }
+
+            @Override
+            public void commandRemoved(Command command) {
+
+            }
+
+            @Override
+            public void commandExecuted(Command command) {
+
+            }
+
+            @Override
+            public void commandUnexecuted(Command command) {
+
+            }
+        });
         initComponents();
     }
 
     private void initComponents() {
         commandPlayerPanel = new PlayerPanel();
-        add(commandPlayerPanel, "growx, wrap");
+        add(commandPlayerPanel, "wrap");
 
         commandList = new JList(new CommandListModel<>((List<DescribableCommand>) commands.getCommands()));
-        add(commandList, "grow");
+        add(new JScrollPane(commandList), "grow, push");
     }
 
     private JPanel createDescriptionPanel(Command command) {
         return null;
     }
 
-    private static class CommandListModel<V extends DescribableCommand> implements ListModel<V> {
+    private static class CommandListModel<V extends Command> implements ListModel<V> {
         private List<V> commands = new ArrayList<>();
         private List<ListDataListener> listeners = new ArrayList<>();
 

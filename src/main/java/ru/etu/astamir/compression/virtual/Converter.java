@@ -400,7 +400,9 @@ public class Converter {
                 symbols.addAll(extractElementSymbols(elem));
             }
         } else {
-            symbols.add(element.getSymbol());
+            if (element.getSymbol() != null) {
+                symbols.add(element.getSymbol());
+            }
         }
 
         return symbols;

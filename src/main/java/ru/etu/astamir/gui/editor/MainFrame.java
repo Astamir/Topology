@@ -4,9 +4,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import net.miginfocom.swing.MigLayout;
 import org.jdom2.JDOMException;
-import org.omg.PortableServer.POAManager;
 import org.xml.sax.InputSource;
 import ru.etu.astamir.compression.Border;
+import ru.etu.astamir.compression.CompressionUtils;
 import ru.etu.astamir.compression.TopologyCompressor;
 import ru.etu.astamir.compression.TopologyParser;
 import ru.etu.astamir.compression.commands.Command;
@@ -18,12 +18,16 @@ import ru.etu.astamir.compression.virtual.ConvertException;
 import ru.etu.astamir.compression.virtual.Converter;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.Direction;
+import ru.etu.astamir.gui.editor.creation.ContactCreationDialog;
+import ru.etu.astamir.gui.editor.creation.ElementCreationDialog;
+import ru.etu.astamir.gui.widgets.CommandTrackerPanel;
 import ru.etu.astamir.launcher.Project;
 import ru.etu.astamir.launcher.Topology;
 import ru.etu.astamir.launcher.VirtualTopology;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
 import ru.etu.astamir.model.technology.Technology;
+import ru.etu.astamir.model.wires.Wire;
 import ru.etu.astamir.serialization.Attribute;
 import ru.etu.astamir.serialization.AttributeAdapter;
 import ru.etu.astamir.serialization.AttributeContainer;
@@ -31,7 +35,6 @@ import ru.etu.astamir.serialization.AttributeFactory;
 import ru.etu.astamir.serialization.xml.XMLAttributeParser;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.Collection;
@@ -83,7 +86,7 @@ public class MainFrame extends JFrame {
         add(toolBar, "growx, wrap");
         paintPanel = new VirtualGridPanel(defaultTopology, 20);
         add(paintPanel, "push, grow");
-       // add(new CommandTrackerPanel(paintPanel.model, ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology).commands), "growy, pushy, wrap");
+      //  add(new CommandTrackerPanel(paintPanel.model, ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology).commands), "growy, pushy, wrap");
     }
 
     private JToolBar createToolBar() {
@@ -162,6 +165,7 @@ public class MainFrame extends JFrame {
                 Collection<Border> affectedBorders = ((CompressCommand) peek).getAffectedBorders();
                 if (peek instanceof CompressWireCommand) {
                     Border border = affectedBorders.iterator().next();
+                    border = CompressionUtils.borderWithoutConnectedElements((Wire)((CompressWireCommand) peek).getElement(), border, defaultTopology.getGrid());
                     border = border.getOverlay(Direction.LEFT);
                     paintPanel.setBorders(Collections.singletonList(border));
                 } else {

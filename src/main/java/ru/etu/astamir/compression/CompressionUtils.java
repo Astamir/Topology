@@ -7,6 +7,8 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import ru.etu.astamir.common.collections.EntitySet;
+import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Point;
@@ -18,6 +20,7 @@ import ru.etu.astamir.model.connectors.ConnectionUtils;
 import ru.etu.astamir.model.regions.ActiveRegion;
 import ru.etu.astamir.model.regions.Bulk;
 import ru.etu.astamir.model.regions.Contour;
+import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
 
 import java.util.*;
@@ -75,8 +78,26 @@ public class CompressionUtils {
         return length;
     }
 
-    public static Border borderWithoutConnectedElements(Wire wire, Border border) {
-        final List<String> connected_names = new ArrayList<>(ConnectionUtils.getConnectedNames(wire.getConnections()));
+    public static Border borderWithoutConnectedElements(Wire wire, Border border, Grid grid) {
+        EntitySet<TopologyElement> connected_elements = ConnectionUtils.getConnectedElements(wire, grid);
+        // todo make it good
+        final Collection<String> connected_names = Lists.newArrayList(Iterables.concat(Iterables.transform(connected_elements, new Function<TopologyElement, Iterable<String>>() {
+            @Override
+            public Iterable<String> apply(TopologyElement topologyElement) {
+                List<String> connected = new ArrayList<>();
+                connected.add(topologyElement.getName());
+                if (topologyElement instanceof ComplexElement) {
+                    connected.addAll(Collections2.transform(((ComplexElement) topologyElement).getElements(), new Function<TopologyElement, String>() {
+                        @Override
+                        public String apply(TopologyElement topologyElement1) {
+                            return topologyElement1.getName();
+                        }
+                    }));
+                }
+                return connected;
+            }
+        })));
+
         Border result = new Border(border.getOrientation(), border.getTechnology());
         Collection<BorderPart> parts = Collections2.filter(border.getParts(), new Predicate<BorderPart>() {
             @Override

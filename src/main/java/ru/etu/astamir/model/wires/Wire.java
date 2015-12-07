@@ -1,10 +1,7 @@
 package ru.etu.astamir.model.wires;
 
 import com.google.common.base.*;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.google.common.primitives.Doubles;
 import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.common.Utils;
@@ -13,6 +10,7 @@ import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.BorderPart;
 import ru.etu.astamir.geom.common.*;
+import ru.etu.astamir.model.ComplexElement;
 import ru.etu.astamir.model.Movable;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.connectors.ConnectionPoint;
@@ -23,7 +21,7 @@ import ru.etu.astamir.serialization.LookIntoAttribute;
 import java.io.Serializable;
 import java.util.*;
 
-public class Wire extends TopologyElement implements Movable, Serializable {
+public class Wire extends TopologyElement implements ComplexElement, Movable, Serializable {
 
     @LookIntoAttribute
     private List<SimpleWire> parts = new ArrayList<>();
@@ -920,7 +918,7 @@ public class Wire extends TopologyElement implements Movable, Serializable {
     protected List<SimpleWire> createAnEmptyLink(Point p, SimpleWire closestPart, double maxBendLength) {
         p.round();
         Preconditions.checkArgument(closestPart.getAxis().isPointInOrOnEdges(p),
-                "Given bus part does not contain link point: part=" + closestPart.getAxis() + ", point=" + p);
+                "Given wire part does not contain link point: part=" + closestPart.getAxis() + ", point=" + p);
         if (!hasEmptyLink(p)) {
             Edge partAxis = closestPart.getAxis();
 
@@ -1087,6 +1085,11 @@ public class Wire extends TopologyElement implements Movable, Serializable {
     @Override
     public boolean move(double dx, double dy) {
         return moveParts(parts, dx, dy);
+    }
+
+    @Override
+    public Collection<? extends TopologyElement> getElements() {
+        return ImmutableList.copyOf(parts);
     }
 
     public static class Builder {

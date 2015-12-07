@@ -30,6 +30,7 @@ import java.util.List;
  *
  * @param <E>
  */
+// todo implement for maps
 @SuppressWarnings("unchecked")
 public class BasicAdapter<E extends Entity> implements AttributeAdapter<E> {
     Class<? extends Entity> clazz;

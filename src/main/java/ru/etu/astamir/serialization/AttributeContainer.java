@@ -6,10 +6,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.compression.grid.VirtualGrid;
-import ru.etu.astamir.geom.common.Edge;
-import ru.etu.astamir.geom.common.Orientation;
-import ru.etu.astamir.geom.common.Point;
-import ru.etu.astamir.geom.common.Polygon;
+import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.model.*;
 import ru.etu.astamir.model.contacts.Contact;
 import ru.etu.astamir.model.contacts.ContactType;
@@ -45,6 +42,8 @@ public class AttributeContainer {
         cache.put(ContactType.class, new EnumAdapter<>(ContactType.class));
         cache.put(SimpleWire.class, new BasicAdapter<>(SimpleWire.class));
         cache.put(Polygon.class, new PolygonAdapter());
+
+        substitutes.put(Rectangle.class, new PolygonAdapter());
 
         //---------
 
