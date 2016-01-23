@@ -51,6 +51,12 @@ public class TopologyCompressor {
         compress(Direction.LEFT);
         compress(Direction.RIGHT);
         straightenWires(Direction.LEFT);
+//        compress(Direction.UP);
+//        compress(Direction.DOWN);
+//        straightenWires(Direction.UP);
+        // todo compressing wires for another direction
+        // compressing active regions
+        // correcting wires
         stage = CompressionStage.COMPRESSED;
     }
 

@@ -34,6 +34,8 @@ public interface Grid {
 
     Optional<TopologyElement> findElementByName(String name);
 
+    <V extends TopologyElement> Collection<V> findAllOfType(Class<? extends V> type);
+
     void putElement(double x, double y, TopologyElement element);
 
     void addElement(TopologyElement element);

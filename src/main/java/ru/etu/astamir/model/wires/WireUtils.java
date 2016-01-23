@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Doubles;
+import org.reflections.vfs.CommonsVfs2UrlType;
 import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.compression.Border;
@@ -34,37 +35,6 @@ import java.util.*;
  * @author Artem Mon'ko
  */
 public class WireUtils {
-    public static List<Edge> fromPoints(List<Point> points) {
-        int length = points.size();
-        if (length < 2) {
-            return Collections.emptyList();
-        }
-
-        ImmutableList<Edge> edges = Polygon.of(points).edges();
-        return Lists.newArrayList(edges.subList(0, edges.size() - 1));
-    }
-
-    public static Orientation getOrientation(Iterable<Edge> edges) {
-        double vertical = 0.0;
-        double horizontal = 0.0;
-        for (Edge edge : edges) {
-            double length = edge.length();
-            if (edge.isHorizontal()) {
-                horizontal += length;
-            } else if (edge.isVertical()) {
-                vertical += length;
-            } else {
-                return Orientation.BOTH;
-            }
-        }
-
-        return vertical > horizontal ? Orientation.VERTICAL : Orientation.HORIZONTAL;
-    }
-
-    public static Point getCommonPoint(SimpleWire one, SimpleWire another) {
-        return one.axis.findCommonPoint(another.axis);
-    }
-
     public static Collection<SimpleWire> connect(Wire wire, Contact contact) {
         // first lets check if they are connected formally
         if (!contact.getConnectedNames().contains(wire.getName())) {
@@ -120,6 +90,10 @@ public class WireUtils {
         return Collections.emptyList();
     }
 
+    public static Point getCommonPoint(SimpleWire one, SimpleWire another) {
+        return one.axis.findCommonPoint(another.axis);
+    }
+
     public static Optional<Point> getConnectionPoint(Wire one, Wire another) {
         for (SimpleWire ones_part : one.getParts()) {
             for (SimpleWire anothers_part : another.getParts()) {
@@ -156,6 +130,7 @@ public class WireUtils {
     }
 
     public static boolean straighten(Wire wire, Border border, Direction direction, Grid grid) {
+        wire.removeEmptyParts(false);
         boolean hadBeenChanged;
         do {
             hadBeenChanged = false;
@@ -214,7 +189,7 @@ public class WireUtils {
         }
 
         Optional<SimpleWire> closest_part = wire.closestWithSameOrientation(part);
-        double to_closest_part = closest_part.isPresent() ? part.axis.distanceToEdge(closest_part.get().axis) : 0.0;
+        double to_closest_part = isMin(wire, part, direction) ? 0.0 : closest_part.isPresent() ? part.axis.distanceToEdge(closest_part.get().axis) : 0.0;
 
         if (preferable.isPresent()) {
             to_closest_part = Utils.round(GeomUtils.distance(part.axis.getConstantComponent(), preferable.get()));
@@ -317,6 +292,27 @@ public class WireUtils {
         //bus.removeEmptyPartsOnEdges(); // handle more carefully
         //bus.removeEmptyParts(!wasEmptyPartsOnEdges);
         // todo remove empty links on 5the edges ?
+    }
+
+    public static boolean isMin(Wire wire, SimpleWire part, Direction dir) {
+        boolean min = true;
+        double constant = part.getAxis().getConstantComponent();
+        for (SimpleWire p : wire.getParts()) {
+            Edge axis = p.getAxis();
+            double start = dir.getDirectionalComponent(axis.getStart());
+            double end = dir.getDirectionalComponent(axis.getEnd());
+            if (dir.isUpOrRight()) {
+                if (start > constant || end > constant) {
+                    min = false;
+                }
+            } else {
+                if (start < constant || end < constant) {
+                    min = false;
+                }
+            }
+        }
+
+        return min;
     }
 
     public static void main(String... args) {

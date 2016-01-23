@@ -1,6 +1,7 @@
 package ru.etu.astamir.model.wires;
 
 import com.google.common.base.*;
+import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import com.google.common.primitives.Doubles;
 import ru.etu.astamir.common.Pair;
@@ -1014,12 +1015,12 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
      */
     // TODO вообще-то, нужно еще смотреть, что нам ничего не мешает, однако, если на что-то мешает, это странная ситуация
     // TODO так как коррекция должна вызываться сразу! после деформации.
-    private void correct(Direction direction) {
+    public void correct(Direction direction) {
         while (!checkLength(direction.toOrientation())) { // we need this, because we can make long parts while correcting the other ones
             for (SimpleWire part : orientationParts(orientationPredicate(direction.toOrientation()))) {
                 double length = part.length();
                 if (length > part.maxLength) {
-                    part.stretchDirectly(direction.getOppositeDirection(), -(length - part.maxLength));
+                    stretch(part, direction.getOppositeDirection(), -(length - part.maxLength));
                 }
             }
         }

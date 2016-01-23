@@ -2,11 +2,14 @@ package ru.etu.astamir.geom.common;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.model.Movable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -137,6 +140,33 @@ public class GeomUtils {
         } else {
             return prepareToMove(points, 0, signedD);
         }
+    }
+
+    public static List<Edge> fromPoints(List<Point> points) {
+        int length = points.size();
+        if (length < 2) {
+            return Collections.emptyList();
+        }
+
+        ImmutableList<Edge> edges = Polygon.of(points).edges();
+        return Lists.newArrayList(edges.subList(0, edges.size() - 1));
+    }
+
+    public static Orientation getOrientation(Iterable<Edge> edges) {
+        double vertical = 0.0;
+        double horizontal = 0.0;
+        for (Edge edge : edges) {
+            double length = edge.length();
+            if (edge.isHorizontal()) {
+                horizontal += length;
+            } else if (edge.isVertical()) {
+                vertical += length;
+            } else {
+                return Orientation.BOTH;
+            }
+        }
+
+        return vertical > horizontal ? Orientation.VERTICAL : Orientation.HORIZONTAL;
     }
 
     public static Point[] toPoints(double... coordinates) {

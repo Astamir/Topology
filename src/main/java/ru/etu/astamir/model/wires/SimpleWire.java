@@ -2,9 +2,7 @@ package ru.etu.astamir.model.wires;
 
 import com.google.common.primitives.Ints;
 import ru.etu.astamir.geom.common.*;
-import ru.etu.astamir.model.Movable;
-import ru.etu.astamir.model.Stretchable;
-import ru.etu.astamir.model.TopologyElement;
+import ru.etu.astamir.model.*;
 import ru.etu.astamir.serialization.LookIntoAttribute;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -175,7 +173,17 @@ public class SimpleWire extends TopologyElement implements Movable, Stretchable,
 		return axis.getPoints();
 	}
 
-    @Override
+	@Override
+	public TopologyLayer getLayer() {
+		return wire != null ? wire.getLayer() : super.getLayer();
+	}
+
+	@Override
+	public Material getMaterial() {
+		return wire != null ? wire.getMaterial() : super.getMaterial();
+	}
+
+	@Override
     public boolean setCoordinates(Collection<Point> coordinates) {
         if (coordinates.size() < 2) {
             return false;
@@ -301,6 +309,8 @@ public class SimpleWire extends TopologyElement implements Movable, Stretchable,
 
 		public Builder(Wire wire) {
 			WIRE.wire = wire;
+			WIRE.setLayer(wire.getLayer());
+			WIRE.setMaterial(wire.getMaterial());
             WIRE.width = wire.width;
             WIRE.widthAtBorder = wire.widthAtBorder;
 		}
@@ -316,6 +326,8 @@ public class SimpleWire extends TopologyElement implements Movable, Stretchable,
             WIRE.movable = other.movable;
             WIRE.deformable = other.deformable;
             WIRE.bounds = other.bounds;
+			WIRE.setMaterial(other.getMaterial());
+			WIRE.setLayer(other.getLayer());
         }
 
 		public SimpleWire build() {

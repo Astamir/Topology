@@ -23,6 +23,7 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class Utils {
+    public static final double LENGTH_NAN = -1D;
 
     public static class Functions {
         public static final Function<TopologyElement, String> NAME_FUNCTION = new Function<TopologyElement, String>() {
@@ -119,6 +120,6 @@ public class Utils {
     }
 
     public static double assignIfSmaller(double current, double new_one) {
-        return assignIfSmaller(current, new_one, 0.0);
+        return assignIfSmaller(current, new_one, LENGTH_NAN);
     }
 }

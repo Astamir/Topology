@@ -2,10 +2,7 @@ package ru.etu.astamir.model.technology;
 
 import com.google.common.collect.Lists;
 import ru.etu.astamir.dao.ProjectObjectManager;
-import ru.etu.astamir.geom.common.Edge;
-import ru.etu.astamir.geom.common.Point;
-import ru.etu.astamir.geom.common.Polygon;
-import ru.etu.astamir.geom.common.Rectangle;
+import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.model.*;
 import ru.etu.astamir.model.contacts.Contact;
 import ru.etu.astamir.model.contacts.ContactType;
@@ -113,18 +110,20 @@ public class DefaultElementFactory implements ElementFactory {
         cache.put("SN", new ElementCreator() { // n - затвор
             @Override
             public Entity create(Point... coordinates) {
-                List<Edge> edges = WireUtils.fromPoints(Lists.newArrayList(coordinates));
+                List<Edge> edges = GeomUtils.fromPoints(Lists.newArrayList(coordinates));
                 List<SimpleWire> parts = Lists.newArrayList();
                 for (Edge edge : edges) {
                     SimpleWire wire = new SimpleWire(edge);
+                    wire.setMaxLength(2.5);
                     parts.add(wire);
                 }
 
-                Gate gate = new Gate(WireUtils.getOrientation(edges));
+                Gate gate = new Gate(GeomUtils.getOrientation(edges));
                 gate.setSymbol("SN");
                 gate.setLayer(ProjectObjectManager.getLayerFactory().forName("SI"));
                 gate.setConductionType(ConductionType.N);
                 gate.setParts(parts);
+                gate.setMaxBendLength(2.5);
 
                 return gate;
             }
@@ -132,18 +131,20 @@ public class DefaultElementFactory implements ElementFactory {
         cache.put("SP", new ElementCreator() {// p - затвор
             @Override
             public Entity create(Point... coordinates) {
-                List<Edge> edges = WireUtils.fromPoints(Lists.newArrayList(coordinates));
+                List<Edge> edges = GeomUtils.fromPoints(Lists.newArrayList(coordinates));
                 List<SimpleWire> parts = Lists.newArrayList();
                 for (Edge edge : edges) {
                     SimpleWire wire = new SimpleWire(edge);
+                    wire.setMaxLength(2.5);
                     parts.add(wire);
                 }
 
-                Gate gate = new Gate(WireUtils.getOrientation(edges));
+                Gate gate = new Gate(GeomUtils.getOrientation(edges));
                 gate.setSymbol("SP");
                 gate.setLayer(ProjectObjectManager.getLayerFactory().forName("SI"));
                 gate.setConductionType(ConductionType.P);
                 gate.setParts(parts);
+                gate.setMaxBendLength(2.5);
 
                 return gate;
             }
@@ -152,14 +153,14 @@ public class DefaultElementFactory implements ElementFactory {
         cache.put("M2", new ElementCreator() {
             @Override
             public Entity create(Point... coordinates) {
-                List<Edge> edges = WireUtils.fromPoints(Lists.newArrayList(coordinates));
+                List<Edge> edges = GeomUtils.fromPoints(Lists.newArrayList(coordinates));
                 List<SimpleWire> parts = Lists.newArrayList();
                 for (Edge edge : edges) {
                     SimpleWire wire = new SimpleWire(edge);
                     parts.add(wire);
                 }
 
-                Wire wire = new Wire(WireUtils.getOrientation(edges));
+                Wire wire = new Wire(GeomUtils.getOrientation(edges));
                 wire.setSymbol("M2");
                 wire.setLayer(ProjectObjectManager.getLayerFactory().forName("M2"));
                 wire.setMaterial(Material.METAL);
@@ -172,14 +173,14 @@ public class DefaultElementFactory implements ElementFactory {
         cache.put("M1", new ElementCreator() {
             @Override
             public Entity create(Point... coordinates) {
-                List<Edge> edges = WireUtils.fromPoints(Lists.newArrayList(coordinates));
+                List<Edge> edges = GeomUtils.fromPoints(Lists.newArrayList(coordinates));
                 List<SimpleWire> parts = Lists.newArrayList();
                 for (Edge edge : edges) {
                     SimpleWire wire = new SimpleWire(edge);
                     parts.add(wire);
                 }
 
-                Wire wire = new Wire(WireUtils.getOrientation(edges));
+                Wire wire = new Wire(GeomUtils.getOrientation(edges));
                 wire.setSymbol("M1");
                 wire.setMaterial(Material.METAL);
                 wire.setLayer(ProjectObjectManager.getLayerFactory().forName("M1"));
@@ -279,14 +280,14 @@ public class DefaultElementFactory implements ElementFactory {
         cache.put("SI", new ElementCreator() {//Поликремниевая шина
             @Override
             public Entity create(Point... coordinates) {
-                List<Edge> edges = WireUtils.fromPoints(Lists.newArrayList(coordinates));
+                List<Edge> edges = GeomUtils.fromPoints(Lists.newArrayList(coordinates));
                 List<SimpleWire> parts = Lists.newArrayList();
                 for (Edge edge : edges) {
                     SimpleWire wire = new SimpleWire(edge);
                     parts.add(wire);
                 }
 
-                Wire wire = new Wire(WireUtils.getOrientation(edges));
+                Wire wire = new Wire(GeomUtils.getOrientation(edges));
                 wire.setSymbol("SI");
                 wire.setMaterial(Material.POLYSILICON);
                 wire.setLayer(ProjectObjectManager.getLayerFactory().forName("SI"));

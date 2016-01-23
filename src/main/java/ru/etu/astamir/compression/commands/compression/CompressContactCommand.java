@@ -20,8 +20,10 @@ import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.model.Material;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.TopologyLayer;
+import ru.etu.astamir.model.connectors.ConnectionUtils;
 import ru.etu.astamir.model.contacts.Contact;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
+import ru.etu.astamir.model.regions.ActiveRegion;
 import ru.etu.astamir.model.regions.ContactWindow;
 import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
@@ -133,8 +135,8 @@ public class CompressContactCommand extends CompressCommand {
     }
 
     private double getContactMoveDistance(Contact contact, Collection<Border> borders, Direction direction) {
-        double length = 0.0;
-
+        double length = Utils.LENGTH_NAN;
+        boolean insideActiveRegion = !ConnectionUtils.isContainedIn(grid, contact, ActiveRegion.class).isEmpty(); // todo different distances might be
         for (Border border : borders) {
             final Collection<String> connected_names = contact.getConnectedNames();
             Border working_border = new Border(border.getOrientation(), border.getTechnology(), Collections2.filter(border.getParts(), new Predicate<BorderPart>() {
@@ -144,21 +146,25 @@ public class CompressContactCommand extends CompressCommand {
                     return name == null || !connected_names.contains(name);
                 }
             })); // this filtration is needed to skip border parts based on connected elements.
-            working_border.setLayer(border.getLayer());
+            TopologyLayer borderLayer = border.getLayer();
+            working_border.setLayer(borderLayer);
 
-            length = Utils.assignIfSmaller(length, CompressionUtils.getMovingLength(contact, direction, working_border));
+            length = Utils.assignIfSmaller(length, CompressionUtils.getMovingLength(contact, direction, working_border)); // moving length from the center of contact
 
             Map<Material, ContactWindow> contact_windows = contact.getContactWindows();
             if (contact_windows.isEmpty()) {
                 throw new UnexpectedException("There are no contact windows in contact " + contact);
             }
             // todo look through
-            for (Map.Entry<Material, ContactWindow> window : contact_windows.entrySet()) {
-                if (border.getLayer() != null && !border.getLayer().getMaterial().equals(window.getKey())) {
+            for (Map.Entry<Material, ContactWindow> windowEntry : contact_windows.entrySet()) {
+                ContactWindow window = windowEntry.getValue();
+                if (borderLayer != null && !borderLayer.equals(window.getLayer())) { // if border has different layer from contact window we skip it
                     continue;
                 }
 
-                length = Utils.assignIfSmaller(length, CompressionUtils.getMovingLength(window.getValue(), direction, working_border));
+                // todo check for sertain elements in the border who might be ignored inspite of being in the same layer.
+
+                length = Utils.assignIfSmaller(length, CompressionUtils.getMovingLength(windowEntry.getValue(), direction, working_border));
             }
         }
 

@@ -1,9 +1,13 @@
 package ru.etu.astamir.model.connectors;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.model.TopologyElement;
+import ru.etu.astamir.model.regions.Contour;
 import ru.etu.astamir.model.wires.Wire;
 
 import java.security.PublicKey;
@@ -48,5 +52,14 @@ public class ConnectionUtils {
 
     public static Collection<String> getConnectedNames(Collection<ConnectionPoint> connections) {
         return getConnectedNames(connections.toArray(new ConnectionPoint[connections.size()]));
+    }
+
+    public static Collection<Contour> isContainedIn(Grid grid, final TopologyElement element, Class<? extends Contour> contourType) {
+        return Lists.newArrayList(Collections2.filter(grid.findAllOfType(contourType), new Predicate<Contour>() {
+            @Override
+            public boolean apply(Contour contour) {
+                return contour.contains(element);
+            }
+        }));
     }
 }

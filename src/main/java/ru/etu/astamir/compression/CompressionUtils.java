@@ -20,6 +20,7 @@ import ru.etu.astamir.model.connectors.ConnectionUtils;
 import ru.etu.astamir.model.regions.ActiveRegion;
 import ru.etu.astamir.model.regions.Bulk;
 import ru.etu.astamir.model.regions.Contour;
+import ru.etu.astamir.model.wires.Gate;
 import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
 
@@ -78,8 +79,16 @@ public class CompressionUtils {
         return length;
     }
 
-    public static Border borderWithoutConnectedElements(Wire wire, Border border, Grid grid) {
+    public static Border borderWithoutConnectedElements(final Wire wire, Border border, Grid grid) {
         EntitySet<TopologyElement> connected_elements = ConnectionUtils.getConnectedElements(wire, grid);
+        if (wire instanceof Gate) {
+            Collections2.filter(connected_elements, new Predicate<TopologyElement>() {
+                @Override
+                public boolean apply(TopologyElement topologyElement) {
+                    return !(topologyElement instanceof ActiveRegion);
+                }
+            });
+        }
         // todo make it good
         final Collection<String> connected_names = Lists.newArrayList(Iterables.concat(Iterables.transform(connected_elements, new Function<TopologyElement, Iterable<String>>() {
             @Override

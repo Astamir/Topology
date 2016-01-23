@@ -1,6 +1,7 @@
 package ru.etu.astamir.compression;
 
 import com.google.common.base.*;
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -595,6 +596,7 @@ public class Border {
         }
 
         bus.removeEmptyParts();
+        bus.correct(direction.getOppositeDirection());
     }
 
     public void imitate(Wire bus, Direction direction, Grid grid) {

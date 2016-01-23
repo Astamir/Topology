@@ -5,6 +5,8 @@ import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Orientation;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.model.Flap;
+import ru.etu.astamir.model.Material;
+import ru.etu.astamir.model.TopologyLayer;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
 
 import java.util.Collections;
@@ -33,7 +35,27 @@ public class Gate extends Wire {
 
     public void setFlaps(Map<Flap.Position, Flap> flaps) {
         this.flaps = flaps;
+        for (Flap flap : flaps.values()) {
+            flap.setLayer(getLayer());
+            flap.setMaterial(getMaterial());
+        }
         ensureFlapsCoordinates();
+    }
+
+    @Override
+    public void setLayer(TopologyLayer layer) {
+        super.setLayer(layer);
+        for (Flap flap : flaps.values()) {
+            flap.setLayer(layer);
+        }
+    }
+
+    @Override
+    public void setMaterial(Material material) {
+        super.setMaterial(material);
+        for (Flap flap : flaps.values()) {
+            flap.setMaterial(material);
+        }
     }
 
     private void createFlaps() {

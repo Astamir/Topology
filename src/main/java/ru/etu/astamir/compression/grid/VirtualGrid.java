@@ -211,6 +211,11 @@ public class VirtualGrid implements Grid, Serializable {
         return Optional.fromNullable(elements.get(name));
     }
 
+    @Override
+    public <V extends TopologyElement> Collection<V> findAllOfType(Class<? extends V> type) {
+        return (Collection<V>) toElements(getSymbolsOfClass(type));
+    }
+
     public Collection<String> getSymbolsOfClass(Collection<Class<? extends TopologyElement>> types) {
         Set<String> symbols = new HashSet<>();
         for (TopologyElement element : elements) {

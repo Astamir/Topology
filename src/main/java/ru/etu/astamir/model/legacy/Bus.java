@@ -1,6 +1,7 @@
 package ru.etu.astamir.model.legacy;
 
 import com.google.common.base.*;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
