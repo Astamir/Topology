@@ -93,7 +93,7 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
     }
 
     public static Edge of(Point point) {
-        return Edge.of((Point) point.clone(), (Point) point.clone());
+        return Edge.of(point.clone(), point.clone());
     }
 
     public Point getStart() {
@@ -520,14 +520,12 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
         if (equals(e)) {
             return start; // this scenario is undefined, but we will return start.
         }
-        Point.Position startPosition = start.classify(e);
-        Point.Position endPosition = end.classify(e);
-        if (startPosition == Point.Position.ORIGIN || startPosition == Point.Position.DESTINATION) {
-            return start;
+        if (start.equals(e.getStart()) || start.equals(e.getEnd())) {
+            return start.clone();
         }
 
-        if (endPosition == Point.Position.ORIGIN || endPosition == Point.Position.DESTINATION) {
-            return end;
+        if (end.equals(e.getStart()) || end.equals(e.getEnd())) {
+            return end.clone();
         }
 
         return null;

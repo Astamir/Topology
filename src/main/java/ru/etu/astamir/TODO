@@ -15,3 +15,14 @@
     6. Ввод/вывод. чтение и запись в существующих форматах.
 
     7. Прикрутить мементо ко всем элементам и замутить команды и менеджер команд.
+
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+// Grid - make it complete: walks, finds, inserts, interface.
+// Commands - think about improving
+// imitate and straighten
+// compression of contours(work with polygons, work as if with wires)
+// full compression

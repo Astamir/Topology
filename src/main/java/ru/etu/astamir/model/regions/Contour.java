@@ -2,7 +2,6 @@ package ru.etu.astamir.model.regions;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.geom.common.Direction;
@@ -11,12 +10,9 @@ import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.geom.common.Polygon;
 import ru.etu.astamir.model.Movable;
 import ru.etu.astamir.model.TopologyElement;
-import ru.etu.astamir.model.exceptions.UnexpectedException;
-import ru.etu.astamir.model.wires.Wire;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**

@@ -1,21 +1,14 @@
 package ru.etu.astamir.common.collections;
 
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
-import ru.etu.astamir.geom.common.Edge;
-import ru.etu.astamir.geom.common.Orientation;
 import ru.etu.astamir.model.Entity;
-import ru.etu.astamir.model.TopologyElement;
-import ru.etu.astamir.model.contacts.Contact;
-import ru.etu.astamir.model.wires.Wire;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author Artem Mon'ko
@@ -37,7 +30,7 @@ public class EntitySet<V extends Entity> extends AbstractEntitySet<V> implements
     }
 
     public static <V extends Entity> EntitySet<V> create(V... entities) {
-        return new EntitySet<V>(Arrays.asList(entities));
+        return new EntitySet<>(Arrays.asList(entities));
     }
 
     public static <V extends Entity> EntitySet<V> clone(Iterable<V> entities) {

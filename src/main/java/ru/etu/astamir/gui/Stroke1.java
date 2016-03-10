@@ -2,10 +2,6 @@ package ru.etu.astamir.gui;
 
 
 import ru.etu.astamir.common.Utils;
-import ru.etu.astamir.compression.Border;
-import ru.etu.astamir.compression.legacy.LegacyTopologyScheme;
-import ru.etu.astamir.compression.grid.legacy.LegacyVirtualGrid;
-import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Orientation;
@@ -13,12 +9,6 @@ import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.geom.common.Rectangle;
 import ru.etu.astamir.gui.painters.DrawingUtils;
 import ru.etu.astamir.gui.painters.WirePainter;
-import ru.etu.astamir.model.*;
-import ru.etu.astamir.model.legacy.LegacyContact;
-import ru.etu.astamir.model.legacy.Bus;
-import ru.etu.astamir.model.legacy.DirectedBounds;
-import ru.etu.astamir.model.legacy.LegacyGate;
-import ru.etu.astamir.model.legacy.LegacyTransistorActiveRegion;
 import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
 
@@ -76,6 +66,8 @@ public class Stroke1 extends JFrame {
 
                 if (e.getKeyChar() == KeyEvent.VK_SPACE) {
                     wire.movePart(selected_part, direction, 5);
+                    repaint();
+                    return;
                 }
 
                 if (e.getKeyChar() == '0') {
@@ -163,7 +155,10 @@ public class Stroke1 extends JFrame {
         WirePainter painter = new WirePainter();
         painter.paint(wire, g, Utils.Functions.SELF_FUNCTION);
         if (selected_part != null) {
-            g.drawString(String.valueOf(selected_part.getIndex()), 10, 10);
+            Color color = g2d.getColor();
+            g2d.setColor(Color.RED);
+            g2d.draw(selected_part.getAxis().toLine2D());
+            g2d.setColor(color);
         }
 
         g.drawString(direction.toString(), 25, 10);

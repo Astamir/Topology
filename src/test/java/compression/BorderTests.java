@@ -8,7 +8,6 @@ import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.BorderPart;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Edge;
-import ru.etu.astamir.model.legacy.Bus;
 
 import java.util.List;
 

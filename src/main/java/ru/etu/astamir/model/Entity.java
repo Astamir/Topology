@@ -45,7 +45,7 @@ public abstract class Entity implements Serializable, Cloneable {
         try {
             return super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new InternalError("cant happen, since we're clonable");
+            throw new InternalError("cant happen, since we're cloneable");
         }
     }
 

@@ -386,14 +386,7 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
                 }
                 if (!current.getEnd().equals(next.getStart())) {
                     // we have to chain them somehow
-                    if (current.getEnd().equals(next.getEnd())) {
-                        next.reverse();
-                    } else if (current.getStart().equals(next.getEnd()) && i == 0) {
-                        current.reverse();
-                        next.reverse();
-                    } else if (current.getStart().equals(next.getStart()) && i == 0) {
-                        current.reverse();
-                    }
+                    next.reverse();
                 }
             }
         }
@@ -465,6 +458,10 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
         SimpleWire part = parts.get(partIndex);
         if (!part.movable) {
             return false; // we can't even move this part.
+        }
+
+        if (part.isLink()) {
+            return false; // cant move empty link
         }
 
         Direction partDirection = part.getAxis().getDirection();

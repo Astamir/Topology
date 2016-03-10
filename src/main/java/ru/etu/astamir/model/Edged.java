@@ -1,8 +1,6 @@
 package ru.etu.astamir.model;
 
 import ru.etu.astamir.geom.common.Edge;
-import ru.etu.astamir.model.TopologyElement;
-import ru.etu.astamir.model.legacy.LegacyTopologyElement;
 
 /**
  * Вспомгательный интефейс. Говорит от том, что элемент имеет осевую линию, т.е.

@@ -16,6 +16,7 @@ import ru.etu.astamir.model.TopologicalCell;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.TopologyLayer;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
+import ru.etu.astamir.model.regions.Contour;
 import ru.etu.astamir.model.technology.Technology;
 import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
@@ -583,7 +584,7 @@ public class Border {
             border.createEmptyLinks(bus, direction);
 
         for (SimpleWire part : bus.getParts()) {
-            if (!part.getAxis().getOrientation().isOrthogonal(direction.toOrientation()) || part.getAxis().isPoint()) {
+            if (!part.getAxis().getOrientation().isOrthogonal(direction.toOrientation()) || part.isLink()) {
                 continue;
             }
             Optional<BorderPart> closestPart = border.getClosestPartWithConstraints(part.getAxis(), bus.getSymbol(), direction);
@@ -609,6 +610,10 @@ public class Border {
         if (!bus.isConnected()) {
             throw new UnexpectedException("not connected");
         }
+    }
+
+    public void imitate(Contour contour, Direction direction, Grid grid) {
+
     }
 
     // TODO
