@@ -26,12 +26,12 @@ import java.util.*;
  */
 public class CollectionUtils {
     public static <V extends Cloneable> Collection<V> clone(Collection<V> collection, Class<V> type) {
-        List<V> clone_list = new ArrayList<>();
+        List<V> cloneList = new ArrayList<>();
         try {
-            Method clone_method = type.getMethod("clone");
-            clone_method.setAccessible(true);
+            Method cloneMethod = type.getMethod("clone");
+            cloneMethod.setAccessible(true);
             for (V element : collection) {
-                clone_list.add((V) clone_method.invoke(element));
+                cloneList.add((V) cloneMethod.invoke(element));
             }
         } catch (NoSuchMethodException e) {
             throw new UnexpectedException("We have no method clone in " + type.getSimpleName(), e);
@@ -41,7 +41,7 @@ public class CollectionUtils {
             throw new UnexpectedException("this is weird since we made that method accessible", e);
         }
 
-        return clone_list;
+        return cloneList;
     }
 
     public static <V> Collection<V> cast(Collection collection, Class<V> clazz) {

@@ -11,7 +11,7 @@ import java.util.Map;
  * Закрылок затвора.
  */
 public class Flap extends Contact {
-    public static enum Position{START, END}
+    public enum Position{START, END}
 
     private Position position;
 

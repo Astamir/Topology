@@ -54,12 +54,7 @@ public class Converter {
         if (cells.isEmpty()) {
             // we have to create one
             // but first we have to figure out its boundary
-            Polygon coordinates = Polygon.of(Iterables.concat(Lists.transform(allElements, new Function<TopologyElement, Collection<Point>>() {
-                @Override
-                public Collection<Point> apply(TopologyElement input) {
-                    return input.getCoordinates();
-                }
-            })));
+            Polygon coordinates = Polygon.of(Iterables.concat(Lists.transform(allElements, TopologyElement::getCoordinates)));
             Polygon bounds = coordinates.getBounds();
             if (bounds.isRectangle()) {
                 Rectangle rectangle = Rectangle.of(bounds.vertices());

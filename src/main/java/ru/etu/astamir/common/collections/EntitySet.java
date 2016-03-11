@@ -14,7 +14,7 @@ import java.util.Map;
  * @author Artem Mon'ko
  */
 public class EntitySet<V extends Entity> extends AbstractEntitySet<V> implements Serializable, Cloneable {
-    private Map<String, V> backing_map = new LinkedHashMap<>();
+    private Map<String, V> backingMap = new LinkedHashMap<>();
 
     public EntitySet(Iterable<V> entities) {
         super();
@@ -26,7 +26,7 @@ public class EntitySet<V extends Entity> extends AbstractEntitySet<V> implements
 
     @Override
     protected Map<String, V> getMap() {
-        return backing_map;
+        return backingMap;
     }
 
     public static <V extends Entity> EntitySet<V> create(V... entities) {

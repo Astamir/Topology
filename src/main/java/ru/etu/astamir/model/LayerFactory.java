@@ -35,13 +35,6 @@ public class LayerFactory {
         return forName("LL");
     }
 
-    @Deprecated
-    public TopologyLayer createLayerForMaterialType(Material material) {
-        TopologyLayer layer = new TopologyLayer(material, material != null ? material.name() : "unknown " + " LAYER", 0, "");
-        return layer;
-    }
-
-
     public TopologyLayer createLayerForMaterialType(Material material, String shortName) {
         if (map.containsKey(shortName)) {
             return map.get(shortName);

@@ -1,6 +1,5 @@
 package ru.etu.astamir.model.contacts;
 
-import com.google.common.collect.Lists;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.geom.common.Polygon;

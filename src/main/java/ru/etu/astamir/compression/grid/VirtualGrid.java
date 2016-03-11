@@ -212,6 +212,17 @@ public class VirtualGrid implements Grid, Serializable {
     }
 
     @Override
+    public Collection<TopologyElement> findElements(Point point) {
+        List<TopologyElement> result = new ArrayList<>();
+        for (TopologyElement element : elements) {
+            if (element.getBounds().contains(Collections.singleton(point))) {
+                result.add(element);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public <V extends TopologyElement> Collection<V> findAllOfType(Class<? extends V> type) {
         return (Collection<V>) toElements(getSymbolsOfClass(type));
     }

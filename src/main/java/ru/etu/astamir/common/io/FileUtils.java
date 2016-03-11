@@ -13,7 +13,7 @@ import java.util.zip.ZipFile;
  * A collection of utility methods for files.
  */
 public class FileUtils {
-    public static final int BUFFER__SIZE = 4096;
+    public static final int BUFFER_SIZE = 4096;
 
     /**
      * Finds a file with given id pattern in all subdirectories from the give base path
@@ -102,7 +102,7 @@ public class FileUtils {
      * Write the contents of the given input stream to the output stream.
      */
     public static void pipe(InputStream in, OutputStream out) throws IOException {
-        pipe(in, out, BUFFER__SIZE);
+        pipe(in, out, BUFFER_SIZE);
     }
 
     public static void pipe(InputStream in, OutputStream out, int buffer_size) throws IOException {
@@ -173,19 +173,19 @@ public class FileUtils {
     }
 
     public static BufferedInputStream buffered(InputStream is) {
-        return is instanceof BufferedInputStream ? (BufferedInputStream) is : new BufferedInputStream(is, BUFFER__SIZE);
+        return is instanceof BufferedInputStream ? (BufferedInputStream) is : new BufferedInputStream(is, BUFFER_SIZE);
     }
 
     public static BufferedOutputStream buffered(OutputStream os) {
-        return os instanceof BufferedOutputStream ? (BufferedOutputStream) os : new BufferedOutputStream(os, BUFFER__SIZE);
+        return os instanceof BufferedOutputStream ? (BufferedOutputStream) os : new BufferedOutputStream(os, BUFFER_SIZE);
     }
 
     public static BufferedReader buffered(Reader r) {
-        return r instanceof BufferedReader ? (BufferedReader) r : new BufferedReader(r, BUFFER__SIZE);
+        return r instanceof BufferedReader ? (BufferedReader) r : new BufferedReader(r, BUFFER_SIZE);
     }
 
     public static BufferedWriter buffered(Writer w) {
-        return w instanceof BufferedWriter ? (BufferedWriter) w : new BufferedWriter(w, BUFFER__SIZE);
+        return w instanceof BufferedWriter ? (BufferedWriter) w : new BufferedWriter(w, BUFFER_SIZE);
     }
 
 

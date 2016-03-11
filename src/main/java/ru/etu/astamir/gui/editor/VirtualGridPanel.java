@@ -30,18 +30,20 @@ public class VirtualGridPanel extends JPanel {
     private static final Insets COORDINATE_WINDOW = new Insets(500, 500, 500, 500);
 
     ElementModel model;
-    int step = 10;
+    double step = 10;
+    private TopologyElement selectedElement;
 
     private ZoomAndDragHandler handler = new ZoomAndDragHandler(COORDINATE_WINDOW);
     JLabel coordinates;
 
-    public static enum TopologyMode {
+    public enum TopologyMode {
         VIRTUAL, REAL
     }
 
     private TopologyMode mode = TopologyMode.VIRTUAL;
 
     private Collection<Border> borders_to_paint = Lists.newArrayList();
+    private Point point;
 
     public VirtualGridPanel(VirtualTopology topology, int step) {
         this.step = step;
@@ -50,6 +52,18 @@ public class VirtualGridPanel extends JPanel {
         model = new VirtualElementModel(topology);
         coordinates = new JLabel();
         handler.install(this, coordinates, true);
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Point point = goBack(Point.fromPoint2D(e.getPoint()));
+                VirtualGridPanel.this.point = point;
+                Collection<TopologyElement> elements = model.grid().findElements(point);
+                if (!elements.isEmpty()) {
+                    selectedElement = elements.iterator().next();
+                }
+                repaint();
+            }
+        });
 
         setBackground(Color.WHITE);
 
@@ -70,6 +84,10 @@ public class VirtualGridPanel extends JPanel {
      */
     Point toGridCoordinates(Point coordinate) {
         return mode == TopologyMode.VIRTUAL ? Point.of(coordinate.x() * step, -coordinate.y() * step) : Point.of(coordinate.x(), -coordinate.y());
+    }
+
+    Point goBack(Point coordinate) {
+        return Point.of(coordinate.x() / step, -coordinate.y() / step);
     }
 
     private Point toRealCoordinates(Point coordinate) {
@@ -159,10 +177,15 @@ public class VirtualGridPanel extends JPanel {
         super.paint(g);
         Graphics2D graphics2D = (Graphics2D) g;
         graphics2D.setTransform(handler.getAffineTransform());
-        graphics2D.translate(-OFFSET, -4 * OFFSET);
 
         drawGrid(graphics2D);
         drawElements(graphics2D);
+        if (selectedElement != null) {
+            graphics2D.drawString(selectedElement.getSymbol(), 0, 0);
+        }
+        if (point != null) {
+            DrawingUtils.drawPoint(toGridCoordinates(point), 8, false, graphics2D);
+        }
         for (Border border : borders_to_paint) {
             BorderPainter painter = new BorderPainter();
             painter.paint(border, graphics2D, new Function<Point, Point>() {
@@ -286,7 +309,9 @@ public class VirtualGridPanel extends JPanel {
         public void mouseMoved(MouseEvent e) {
             currentMouseX = e.getX();
             currentMouseY = e.getY();
-            label.setText((Point.fromPoint2D(getTranslatedPoint(e.getPoint().x, e.getPoint().y))).toString());
+            Point point = goBack(Point.fromPoint2D(getTranslatedPoint(e.getPoint().x, e.getPoint().y)));
+
+            label.setText(point.toString());
         }
 
         @Override

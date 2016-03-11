@@ -612,10 +612,6 @@ public class Border {
         }
     }
 
-    public void imitate(Contour contour, Direction direction, Grid grid) {
-
-    }
-
     // TODO
     private void createEmptyLinks(Wire bus, Direction direction) {
         List<BorderPart> nonOrientParts =

@@ -19,5 +19,4 @@ public interface Project {
     String getName();
 
 
-    // some common daos
 }

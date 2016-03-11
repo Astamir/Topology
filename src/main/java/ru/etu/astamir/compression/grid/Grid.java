@@ -3,6 +3,7 @@ package ru.etu.astamir.compression.grid;
 
 import com.google.common.base.Optional;
 import ru.etu.astamir.geom.common.Direction;
+import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.model.TopologyElement;
 
 import java.util.Collection;
@@ -33,6 +34,8 @@ public interface Grid {
     Collection<TopologyElement> getAllElements();
 
     Optional<TopologyElement> findElementByName(String name);
+
+    Collection<TopologyElement> findElements(Point point);
 
     <V extends TopologyElement> Collection<V> findAllOfType(Class<? extends V> type);
 

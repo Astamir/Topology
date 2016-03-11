@@ -25,7 +25,7 @@ public class TopologyLayerMarshallTest extends JAXBTest<TopologyLayer> {
         List<TopologyLayer> layers = new ArrayList<TopologyLayer>();
         layers.add(ProjectObjectManager.getLayerFactory().createDefaultTopologyLayer());
         for(Material material : Material.values()) {
-            layers.add(ProjectObjectManager.getLayerFactory().createLayerForMaterialType(material));
+            layers.addAll(ProjectObjectManager.getLayerFactory().forMaterial(material));
         }
 
         return layers;
