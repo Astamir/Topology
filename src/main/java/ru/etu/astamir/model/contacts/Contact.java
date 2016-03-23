@@ -1,5 +1,6 @@
 package ru.etu.astamir.model.contacts;
 
+import com.google.common.primitives.Doubles;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.geom.common.Polygon;
@@ -88,7 +89,8 @@ public class Contact extends TopologyElement implements ConnectionPoint, Seriali
 
     @Override
     public Polygon getBounds() {
-        return new Polygon(); // it's heavily dependent on the technology
+        //return new Polygon(); // it's heavily dependent on the technology
+        return !contactWindows.isEmpty() ? contactWindows.values().stream().max((o1, o2) -> Doubles.compare(o1.getBounds().area(), o2.getBounds().area())).get().getBounds() : Polygon.emptyPolygon();
     }
 
     @Override

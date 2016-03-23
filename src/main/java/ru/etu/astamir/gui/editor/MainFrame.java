@@ -86,7 +86,9 @@ public class MainFrame extends JFrame {
         add(toolBar, "growx, wrap");
         paintPanel = new VirtualGridPanel(defaultTopology, 20);
         add(paintPanel, "push, grow");
-      //  add(new CommandTrackerPanel(paintPanel.model, ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology).commands), "growy, pushy, wrap");
+        ElementDescriptionPanel description = new ElementDescriptionPanel();
+        paintPanel.setDetailsPanel(description);
+        //add(description, "growy, pushy, wrap");
     }
 
     private JToolBar createToolBar() {

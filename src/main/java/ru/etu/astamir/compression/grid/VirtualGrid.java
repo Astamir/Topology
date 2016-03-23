@@ -9,6 +9,7 @@ import ru.etu.astamir.common.collections.CollectionUtils;
 import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Point;
+import ru.etu.astamir.geom.common.Polygon;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.regions.Contour;
 
@@ -212,14 +213,35 @@ public class VirtualGrid implements Grid, Serializable {
     }
 
     @Override
-    public Collection<TopologyElement> findElements(Point point) {
+    public Collection<TopologyElement> findAllElements(Point point) {
         List<TopologyElement> result = new ArrayList<>();
         for (TopologyElement element : elements) {
-            if (element.getBounds().contains(Collections.singleton(point))) {
+            Polygon bounds = element.getBounds();
+            if (bounds.isPointIn(point)) {
                 result.add(element);
             }
         }
         return result;
+    }
+
+    @Override
+    public Optional<TopologyElement> findElement(Point point) {
+        Collection<TopologyElement> allElements = findAllElements(point);
+        if (allElements.isEmpty()) {
+            return Optional.absent();
+        }
+
+        TopologyElement result = null;
+        for (TopologyElement element : allElements) {
+            if (result == null) {
+                result = element;
+            } else if (result instanceof Contour) {
+                if (((Contour) result).contains(element)) {
+                    result = element;
+                }
+            }
+        }
+        return Optional.fromNullable(result);
     }
 
     @Override

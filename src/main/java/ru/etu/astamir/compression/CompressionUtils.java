@@ -2,12 +2,11 @@ package ru.etu.astamir.compression;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import ru.etu.astamir.common.collections.EntitySet;
+import ru.etu.astamir.common.Utils;
+import ru.etu.astamir.compression.commands.compression.ActiveBorder;
 import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.Direction;
@@ -15,16 +14,13 @@ import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.model.ComplexElement;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.TopologyLayer;
-import ru.etu.astamir.model.connectors.ConnectionPoint;
 import ru.etu.astamir.model.connectors.ConnectionUtils;
 import ru.etu.astamir.model.regions.ActiveRegion;
-import ru.etu.astamir.model.regions.Bulk;
 import ru.etu.astamir.model.regions.Contour;
 import ru.etu.astamir.model.wires.Gate;
-import ru.etu.astamir.model.wires.SimpleWire;
-import ru.etu.astamir.model.wires.Wire;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Artem Mon'ko
@@ -66,57 +62,58 @@ public class CompressionUtils {
         return result;
     }
 
-    public static double getMovingLength(TopologyElement element, Direction direction, Border border) {
-        double length = 0.0;
+    public static ActiveBorder getMovingLength(TopologyElement element, Direction direction, Border border) {
+        ActiveBorder result = ActiveBorder.NAN;
         for (Point coordinate : element.getCoordinates()) {
             final Optional<BorderPart> closest = border.getClosestPartWithConstraints(coordinate, element.getSymbol(), direction);
             if (closest.isPresent()) {
                 double l = border.getMoveDistance(closest.get(), element.getSymbol(), direction, coordinate);
-                length = l < length || length == 0 ? l : length;
+                result = Utils.assignIfSmaller(result, ActiveBorder.of(closest.get(), l));
             }
         }
 
-        return length;
+        return result;
     }
 
-    public static Border borderWithoutConnectedElements(final Wire wire, Border border, Grid grid) {
-        EntitySet<TopologyElement> connected_elements = ConnectionUtils.getConnectedElements(wire, grid);
-        if (wire instanceof Gate) {
-            Collections2.filter(connected_elements, new Predicate<TopologyElement>() {
-                @Override
-                public boolean apply(TopologyElement topologyElement) {
-                    return !(topologyElement instanceof ActiveRegion);
-                }
-            });
+    public static ActiveBorder getMovingLength(TopologyElement element, Point coordinate, Direction direction, Border border) {
+        ActiveBorder result = ActiveBorder.NAN;
+        BorderPart part = null;
+        final Optional<BorderPart> closest = border.getClosestPartWithConstraints(coordinate, element.getSymbol(), direction);
+        if (closest.isPresent()) {
+            double l = border.getMoveDistance(closest.get(), element.getSymbol(), direction, coordinate);
+            result = ActiveBorder.of(closest.get(), l);
         }
-        // todo make it good
-        final Collection<String> connected_names = Lists.newArrayList(Iterables.concat(Iterables.transform(connected_elements, new Function<TopologyElement, Iterable<String>>() {
-            @Override
-            public Iterable<String> apply(TopologyElement topologyElement) {
-                List<String> connected = new ArrayList<>();
-                connected.add(topologyElement.getName());
-                if (topologyElement instanceof ComplexElement) {
-                    connected.addAll(Collections2.transform(((ComplexElement) topologyElement).getElements(), new Function<TopologyElement, String>() {
-                        @Override
-                        public String apply(TopologyElement topologyElement1) {
-                            return topologyElement1.getName();
-                        }
-                    }));
+
+        return result;
+    }
+
+    /**
+     * Constructs a border without connected elements of some particular element.
+     *
+     * @param border base border to remove connected elements from
+     * @param grid all the elements in the grid
+     * @return border without connected elements
+     */
+    public static Border borderWithoutConnectedElements(final TopologyElement element, Border border, Grid grid) {
+        boolean isGate = element instanceof Gate;
+
+        final Collection<String> connected_names = ConnectionUtils.getElementsNames(element);
+
+        List<BorderPart> parts = border.getParts().stream().filter(part-> { // filter out active regions if element is gate
+            if (isGate) {
+                TopologyElement e = part.getElement();
+                if (e instanceof ActiveRegion) {
+                    return ((ActiveRegion)e).contains(e);
                 }
-                return connected;
             }
-        })));
+            return true;
+        }).filter(part -> {
+            TopologyElement e = part.getElement();
+            return e == null || !connected_names.contains(e.getName());
+        }).collect(Collectors.toList());
 
         Border result = new Border(border.getOrientation(), border.getTechnology());
-        Collection<BorderPart> parts = Collections2.filter(border.getParts(), new Predicate<BorderPart>() {
-            @Override
-            public boolean apply(BorderPart input) {
-                TopologyElement element = input.getElement();
-                return element == null || !connected_names.contains(element.getName());
-            }
-        });
-
-        result.setParts(Lists.newArrayList(parts));
+        result.setParts(parts);
         return result;
     }
 }

@@ -1,15 +1,11 @@
 package ru.etu.astamir.compression.commands.compression;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.BorderPart;
-import ru.etu.astamir.compression.CompressionUtils;
 import ru.etu.astamir.compression.commands.MoveContourCommand;
-import ru.etu.astamir.compression.commands.MoveContourSideCommand;
 import ru.etu.astamir.compression.commands.UpdateBorderCommand;
 import ru.etu.astamir.compression.grid.VirtualGrid;
-import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Point;
@@ -17,11 +13,9 @@ import ru.etu.astamir.geom.common.Rectangle;
 import ru.etu.astamir.model.TopologicalCell;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.TopologyLayer;
-import ru.etu.astamir.model.contacts.Contact;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
-import ru.etu.astamir.model.regions.Bulk;
+import ru.etu.astamir.model.regions.Well;
 import ru.etu.astamir.model.regions.Contour;
-import ru.etu.astamir.model.technology.ElementFactory;
 import ru.etu.astamir.model.technology.Technology;
 
 import java.util.Collection;
@@ -96,7 +90,7 @@ public class CompressContourCommand extends CompressCommand {
         }
 
         if (closest_border != null && technology != null) { // check for bulks and topological cell
-            if (closest_border.getSymbol().equals(TopologicalCell.DEFAULT_CELL_SYMBOL) && contour instanceof Bulk) {
+            if (closest_border.getSymbol().equals(TopologicalCell.DEFAULT_CELL_SYMBOL) && contour instanceof Well) {
                 if (Direction.RIGHT.getEdgeComparator().compare(closest_border.getAxis(), edge) < 0) {
                     double min = technology.getMinDistance(contour.getSymbol(), contour.getSymbol());
                     length += 2 * min;

@@ -6,12 +6,16 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.compression.grid.Grid;
+import ru.etu.astamir.model.ComplexElement;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.regions.Contour;
 import ru.etu.astamir.model.wires.Wire;
 
 import java.security.PublicKey;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Artem Mon'ko
@@ -36,6 +40,16 @@ public class ConnectionUtils {
         }
 
         return connected_elements;
+    }
+
+    public static Collection<String> getElementsNames(TopologyElement element) {
+        if (element instanceof ComplexElement) {
+            List<String> children = ((ComplexElement) element).getElements().stream().map(TopologyElement::getName).collect(Collectors.toList());
+            children.add(element.getName());
+            return children;
+        }
+
+        return Collections.singleton(element.getName());
     }
 
     public static Collection<String> getConnectedNames(ConnectionPoint... connections) {

@@ -4,18 +4,19 @@ import ru.etu.astamir.geom.common.Polygon;
 import ru.etu.astamir.model.TopologyElement;
 
 /**
+ * карман
  * @author Artem Mon'ko
  */
-public class Bulk extends Contour implements ConductionRegion {
-    public Bulk(String symbol, Polygon area) {
+public class Well extends Contour implements ConductionRegion {
+    public Well(String symbol, Polygon area) {
         super(symbol, area);
     }
 
-    public Bulk(String name, String symbol) {
+    public Well(String name, String symbol) {
         super(name, symbol);
     }
 
-    public Bulk(String name, String symbol, Polygon area) {
+    public Well(String name, String symbol, Polygon area) {
         super(name, symbol, area);
     }
 

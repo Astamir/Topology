@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import ru.etu.astamir.compression.BorderPart;
+import ru.etu.astamir.compression.commands.compression.ActiveBorder;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Orientation;
@@ -121,5 +122,13 @@ public class Utils {
 
     public static double assignIfSmaller(double current, double new_one) {
         return assignIfSmaller(current, new_one, LENGTH_NAN);
+    }
+
+    public static <V extends Comparable<V>> V assignIfSmaller(V current, V new_one, V nan) {
+        return current.compareTo(new_one) <= 0 && current.compareTo(nan) != 0 ? current : new_one;
+    }
+
+    public static ActiveBorder assignIfSmaller(ActiveBorder current, ActiveBorder new_one) {
+        return assignIfSmaller(current, new_one, ActiveBorder.NAN);
     }
 }

@@ -469,7 +469,7 @@ public class Polygon implements Cloneable, Serializable, Drawable, Movable, Roun
             }
         }
         
-        return true;
+        return positionDefined;
     }
 
     /**

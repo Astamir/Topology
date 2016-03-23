@@ -1,17 +1,18 @@
 package ru.etu.astamir.gui.editor;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.compression.Border;
-import ru.etu.astamir.compression.grid.VirtualGrid;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.Edge;
+import ru.etu.astamir.geom.common.MarshallTest;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.geom.common.Polygon;
+import ru.etu.astamir.gui.common.ElementContainer;
 import ru.etu.astamir.gui.painters.*;
 import ru.etu.astamir.gui.painters.Painter;
-import ru.etu.astamir.gui.widgets.PlayerPanel;
-import ru.etu.astamir.launcher.Topology;
 import ru.etu.astamir.launcher.VirtualTopology;
 import ru.etu.astamir.model.TopologyElement;
 
@@ -35,6 +36,9 @@ public class VirtualGridPanel extends JPanel {
 
     private ZoomAndDragHandler handler = new ZoomAndDragHandler(COORDINATE_WINDOW);
     JLabel coordinates;
+    ElementContainer details;
+
+    Point one, another;
 
     public enum TopologyMode {
         VIRTUAL, REAL
@@ -43,7 +47,6 @@ public class VirtualGridPanel extends JPanel {
     private TopologyMode mode = TopologyMode.VIRTUAL;
 
     private Collection<Border> borders_to_paint = Lists.newArrayList();
-    private Point point;
 
     public VirtualGridPanel(VirtualTopology topology, int step) {
         this.step = step;
@@ -55,11 +58,23 @@ public class VirtualGridPanel extends JPanel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Point point = goBack(Point.fromPoint2D(e.getPoint()));
-                VirtualGridPanel.this.point = point;
-                Collection<TopologyElement> elements = model.grid().findElements(point);
-                if (!elements.isEmpty()) {
-                    selectedElement = elements.iterator().next();
+                Point point = fromGridCoordinates(Point.fromPoint2D(e.getPoint()));
+                if (one != null && another != null) {
+                    one = point;
+                    another = null;
+                } else if (one == null) {
+                    one = point;
+                    another = null;
+                } else {
+                    another = point;
+                }
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    one = null;
+                    another = null;
+                }
+                Optional<TopologyElement> element = model.grid().findElement(point);
+                if (element.isPresent()) {
+                    setSelectedElement(element.get());
                 }
                 repaint();
             }
@@ -71,9 +86,20 @@ public class VirtualGridPanel extends JPanel {
         add(coordinates);
     }
 
+    public void setDetailsPanel(ElementContainer container) {
+        this.details = container;
+    }
+
     public void setModel(ElementModel model) {
         this.model = model;
         repaint();
+    }
+
+    public void setSelectedElement(TopologyElement element) {
+        selectedElement = element;
+        if (details != null) {
+            details.addElement(selectedElement);
+        }
     }
 
     /**
@@ -86,8 +112,9 @@ public class VirtualGridPanel extends JPanel {
         return mode == TopologyMode.VIRTUAL ? Point.of(coordinate.x() * step, -coordinate.y() * step) : Point.of(coordinate.x(), -coordinate.y());
     }
 
-    Point goBack(Point coordinate) {
-        return Point.of(coordinate.x() / step, -coordinate.y() / step);
+    Point fromGridCoordinates(Point coordinate) {
+        Point translated = Point.fromPoint2D(handler.getTranslatedPoint(coordinate.x(), coordinate.y()));
+        return Point.of(translated.x() / step, -translated.y() / step);
     }
 
     private Point toRealCoordinates(Point coordinate) {
@@ -180,12 +207,14 @@ public class VirtualGridPanel extends JPanel {
 
         drawGrid(graphics2D);
         drawElements(graphics2D);
-        if (selectedElement != null) {
-            graphics2D.drawString(selectedElement.getSymbol(), 0, 0);
+
+        if (one != null) {
+            DrawingUtils.drawPoint(toGridCoordinates(one), 4, false, graphics2D);
         }
-        if (point != null) {
-            DrawingUtils.drawPoint(toGridCoordinates(point), 8, false, graphics2D);
+        if (another != null) {
+            DrawingUtils.drawEdge(Edge.of(toGridCoordinates(one), toGridCoordinates(another)), 4, true, graphics2D);
         }
+
         for (Border border : borders_to_paint) {
             BorderPainter painter = new BorderPainter();
             painter.paint(border, graphics2D, new Function<Point, Point>() {
@@ -309,9 +338,15 @@ public class VirtualGridPanel extends JPanel {
         public void mouseMoved(MouseEvent e) {
             currentMouseX = e.getX();
             currentMouseY = e.getY();
-            Point point = goBack(Point.fromPoint2D(getTranslatedPoint(e.getPoint().x, e.getPoint().y)));
+            Point point = fromGridCoordinates(Point.fromPoint2D(e.getPoint()));
 
-            label.setText(point.toString());
+            double l = -1;
+            if (one != null && another != null) {
+                double x = Math.abs(one.x() - another.x());
+                double y = Math.abs(one.y() - another.y());
+                l = x > y ? x : y;
+            }
+            label.setText(point.toString() + (l >= 0 ? ("l=" + Utils.round(l)) : ""));
         }
 
         @Override
@@ -357,24 +392,6 @@ public class VirtualGridPanel extends JPanel {
 
         public double getDy() {
             return dy;
-        }
-    }
-
-    private class CoordinateTracker implements MouseMotionListener {
-        private JLabel label;
-
-        public CoordinateTracker(JLabel label) {
-            this.label = label;
-        }
-
-        @Override
-        public void mouseDragged(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mouseMoved(MouseEvent e) {
-            label.setText((Point.fromPoint2D(e.getPoint())).toString());
         }
     }
 }

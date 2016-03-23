@@ -5,7 +5,7 @@ import ru.etu.astamir.geom.common.Polygon;
 /**
  * @author Artem Mon'ko
  */
-public class AlloyRegion extends Bulk {
+public class AlloyRegion extends Well {
     public AlloyRegion(String name, String symbol) {
         super(name, symbol);
     }

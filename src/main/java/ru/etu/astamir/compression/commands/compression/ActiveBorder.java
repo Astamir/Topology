@@ -1,17 +1,16 @@
 package ru.etu.astamir.compression.commands.compression;
 
-import ru.etu.astamir.common.collections.EntitySet;
+import com.google.common.primitives.Doubles;
+import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.compression.BorderPart;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by astamir on 10/24/15.
  */
-public class ActiveBorder {
+public class ActiveBorder implements Comparable<ActiveBorder> {
+    public static ActiveBorder NAN = new ActiveBorder(null, Utils.LENGTH_NAN);
     private BorderPart part;
-    double length;
+    private double length;
 
     public ActiveBorder(BorderPart part, double length) {
         this.part = part;
@@ -28,5 +27,37 @@ public class ActiveBorder {
 
     public double getLength() {
         return length;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ActiveBorder that = (ActiveBorder) o;
+
+        if (Double.compare(that.length, length) != 0) return false;
+        return !(part != null ? !part.equals(that.part) : that.part != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = part != null ? part.hashCode() : 0;
+        temp = Double.doubleToLongBits(length);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    @Override
+    public int compareTo(ActiveBorder o) {
+        return Doubles.compare(length, o.length);
+    }
+
+    @Override
+    public String toString() {
+        return part.getSymbol() + ": " + length;
     }
 }

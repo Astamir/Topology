@@ -20,6 +20,8 @@ import ru.etu.astamir.model.wires.SimpleWire;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * @author Artem Mon'ko
@@ -179,7 +181,7 @@ public class CollectionUtils {
     }
 
     public static <V> Collection<V> filterNullElements(Iterable<V> iterable) {
-        return Lists.newArrayList(Iterables.filter(iterable, Predicates.notNull()));
+        return StreamSupport.stream(iterable.spliterator(), false).filter(e -> e != null).collect(Collectors.toList());
     }
 
     public static <V> List<List<V>> divideEdgedElements(List<V> list, final Function<V, Edge> to_edges, final Direction dir) {

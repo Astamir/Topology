@@ -35,7 +35,9 @@ public interface Grid {
 
     Optional<TopologyElement> findElementByName(String name);
 
-    Collection<TopologyElement> findElements(Point point);
+    Collection<TopologyElement> findAllElements(Point point);
+
+    Optional<TopologyElement> findElement(Point point);
 
     <V extends TopologyElement> Collection<V> findAllOfType(Class<? extends V> type);
 

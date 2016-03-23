@@ -1,21 +1,15 @@
 package ru.etu.astamir.compression.commands.compression;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import ru.etu.astamir.common.Pair;
-import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.BorderPart;
-import ru.etu.astamir.compression.commands.MoveContourCommand;
-import ru.etu.astamir.compression.commands.MoveContourSideCommand;
-import ru.etu.astamir.compression.commands.UpdateBorderCommand;
 import ru.etu.astamir.compression.grid.VirtualGrid;
 import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.model.TopologicalCell;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.TopologyLayer;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
-import ru.etu.astamir.model.regions.Bulk;
+import ru.etu.astamir.model.regions.Well;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,7 +41,7 @@ public class CompressTopologicalCellCommand extends CompressContourCommand {
         double length = 0;
         BorderPart closest_border = null;
         for (Border border : borders) {
-            Optional<BorderPart> closest = border.without(grid.getSymbolsOfClass(Bulk.class)).getClosestPartWithConstraints(edge, cell.getSymbol(), direction);
+            Optional<BorderPart> closest = border.without(grid.getSymbolsOfClass(Well.class)).getClosestPartWithConstraints(edge, cell.getSymbol(), direction);
             if (closest.isPresent()) {
                 BorderPart closest_border_part = closest.get();
                 for (Point coordinate : edge.getPoints()) {

@@ -29,18 +29,18 @@ public class DefaultElementFactory implements ElementFactory {
         cache.put("KP", new ElementCreator() { // p- карман, включающий n- транзисторы
             @Override
             public Entity create(Point... coordinates) {
-                Bulk bulk = new Bulk("KP", Polygon.of(coordinates));
-                bulk.setConductionType(ConductionType.P);
-                return bulk;
+                Well well = new Well("KP", Polygon.of(coordinates));
+                well.setConductionType(ConductionType.P);
+                return well;
             }
         });
         cache.put("KN", new ElementCreator() { // n- карман, включающий p- транзисторы
             @Override
             public Entity create(Point... coordinates) {
-                Bulk bulk = new Bulk("KN", Polygon.of(coordinates));
-                bulk.setConductionType(ConductionType.N);
+                Well well = new Well("KN", Polygon.of(coordinates));
+                well.setConductionType(ConductionType.N);
 
-                return bulk;
+                return well;
             }
         });
 

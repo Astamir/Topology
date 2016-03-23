@@ -1,6 +1,7 @@
 package ru.etu.astamir.compression;
 
 import com.google.common.base.Preconditions;
+import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Polygon;
@@ -109,6 +110,15 @@ public class BorderPart {
     public void correct() {
         if (!axis.getDirection().isUpOrRight()) {
             axis.reverse();
+        }
+    }
+
+    public boolean isOfType(Class<? extends TopologyElement> clazz) {
+        if (element != null) {
+            return clazz.equals(element.getClass());
+        } else {
+            Class<? extends TopologyElement> entityClass = ProjectObjectManager.getElementFactory().getEntityClass(symbol);
+            return clazz.equals(entityClass);
         }
     }
 

@@ -1012,6 +1012,7 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
      */
     // TODO вообще-то, нужно еще смотреть, что нам ничего не мешает, однако, если на что-то мешает, это странная ситуация
     // TODO так как коррекция должна вызываться сразу! после деформации.
+    // TODO fails to work with no knees
     public void correct(Direction direction) {
         while (!checkLength(direction.toOrientation())) { // we need this, because we can make long parts while correcting the other ones
             for (SimpleWire part : orientationParts(orientationPredicate(direction.toOrientation()))) {

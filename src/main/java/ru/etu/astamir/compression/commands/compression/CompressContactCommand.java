@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
+import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.common.collections.CollectionUtils;
 import ru.etu.astamir.common.collections.EntitySet;
@@ -62,14 +63,14 @@ public class CompressContactCommand extends CompressCommand {
         Collection<Border> affectedBorders = getAffectedBorders();
 
         // first we have to figure out our moving distance
-        double length = getContactMoveDistance(contact, affectedBorders, direction);
+        ActiveBorder length = getContactMoveDistance(contact, affectedBorders, direction);
 
         // find out if some other contacts or contours are in the way
         //length = diagonalAnalysis(length, contact, grid.getElementsOfType(Contact.class));
 
         // find and move connected wires;
-        moveConnected(contact, length);
-        move(contact, length, affectedBorders);
+        moveConnected(contact, length.getLength());
+        move(contact, length.getLength(), affectedBorders);
 
         return true;
     }
@@ -125,7 +126,7 @@ public class CompressContactCommand extends CompressCommand {
     }
 
     private double diagonalDistance(Collection<Point> one, Collection<Point> another) {
-        double diagonal = -1D;
+        double diagonal = Utils.LENGTH_NAN;
         for (Point onePoint : one) {
             for (Point anotherPoint : another) {
                 diagonal = Utils.assignIfSmaller(diagonal, Point.distance(onePoint, anotherPoint));
@@ -134,22 +135,18 @@ public class CompressContactCommand extends CompressCommand {
         return Utils.round(diagonal);
     }
 
-    private double getContactMoveDistance(Contact contact, Collection<Border> borders, Direction direction) {
-        double length = Utils.LENGTH_NAN;
+    private ActiveBorder getContactMoveDistance(Contact contact, Collection<Border> borders, Direction direction) {
+        ActiveBorder length = ActiveBorder.NAN;
         boolean insideActiveRegion = !ConnectionUtils.isContainedIn(grid, contact, ActiveRegion.class).isEmpty(); // todo different distances might be
         for (Border border : borders) {
-            final Collection<String> connected_names = contact.getConnectedNames();
-            Border working_border = new Border(border.getOrientation(), border.getTechnology(), Collections2.filter(border.getParts(), new Predicate<BorderPart>() {
-                @Override
-                public boolean apply(BorderPart input) {
-                    String name = input.getElement() != null ? input.getElement().getName() : null;
-                    return name == null || !connected_names.contains(name);
-                }
-            })); // this filtration is needed to skip border parts based on connected elements.
-            TopologyLayer borderLayer = border.getLayer();
-            working_border.setLayer(borderLayer);
+            Border working = CompressionUtils.borderWithoutConnectedElements(contact, border, grid);
 
-            length = Utils.assignIfSmaller(length, CompressionUtils.getMovingLength(contact, direction, working_border)); // moving length from the center of contact
+            TopologyLayer borderLayer = border.getLayer();
+            working.setLayer(borderLayer);
+
+            ActiveBorder movingLength = CompressionUtils.getMovingLength(contact, direction, working);
+
+            length = Utils.assignIfSmaller(length, movingLength); // moving length from the center of contact
 
             Map<Material, ContactWindow> contact_windows = contact.getContactWindows();
             if (contact_windows.isEmpty()) {
@@ -162,11 +159,11 @@ public class CompressContactCommand extends CompressCommand {
                     continue;
                 }
 
-                // todo check for sertain elements in the border who might be ignored inspite of being in the same layer.
-
-                length = Utils.assignIfSmaller(length, CompressionUtils.getMovingLength(windowEntry.getValue(), direction, working_border));
+                // todo check for certain elements in the border who might be ignored inspite of being in the same layer.
+                length = Utils.assignIfSmaller(length, CompressionUtils.getMovingLength(window, direction, working));
             }
         }
+        System.out.println(length);
 
         return length;
     }
