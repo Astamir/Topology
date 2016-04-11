@@ -1,6 +1,5 @@
 package ru.etu.astamir.compression.commands.compression;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
@@ -29,10 +28,7 @@ import ru.etu.astamir.model.regions.ContactWindow;
 import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Astamir on 11.01.2015.
@@ -95,7 +91,13 @@ public class CompressContactCommand extends CompressCommand {
                     wire.stretchOnly(part, connection_point, direction, length);
                 } else {
                     // create empty link
-                    SimpleWire link = wire.addEmptyLinkToPart(part, connection_point);
+                    SimpleWire link;
+                    Optional<SimpleWire> l = wire.findLink(connection_point);
+                    if (!l.isPresent()) {
+                        link = wire.addEmptyLinkToPart(part, connection_point);
+                    } else {
+                        link = l.get();
+                    }
                     wire.stretchOnly(link, connection_point, direction, length);
                 }
             }

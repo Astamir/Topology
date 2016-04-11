@@ -1,6 +1,5 @@
 package ru.etu.astamir.compression.commands.compression;
 
-import com.google.common.base.Optional;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.BorderPart;
 import ru.etu.astamir.compression.grid.VirtualGrid;
@@ -11,10 +10,7 @@ import ru.etu.astamir.model.TopologyLayer;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
 import ru.etu.astamir.model.regions.Well;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Artem Mon'ko

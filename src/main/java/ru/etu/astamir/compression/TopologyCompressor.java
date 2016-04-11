@@ -1,6 +1,5 @@
 package ru.etu.astamir.compression;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
 import ru.etu.astamir.compression.commands.*;
@@ -48,10 +47,10 @@ public class TopologyCompressor {
         commands.clear();
 
         prepareBorders();
-        compress(Direction.UP);
-        //compress(Direction.RIGHT);
-        //straightenWires(Direction.LEFT);
-//        compress(Direction.UP);
+        compress(Direction.LEFT);
+        compress(Direction.RIGHT);
+        straightenWires(Direction.LEFT);
+    //    compress(Direction.UP);
 //        compress(Direction.DOWN);
 //        straightenWires(Direction.UP);
         // todo compressing wires for another direction
@@ -114,7 +113,7 @@ public class TopologyCompressor {
             clearProcessedContours();
             for (TopologyElement element : column) {
                 if (element instanceof Wire) {
-                    if (!isElementProcessed(element)) {
+                    if (!isElementProcessed(element, direction)) {
                         commands.addCommand(new StraightenWireCommand(topology.getGrid(), borders, element.getName(), direction));
                         updateProcessedStatus(element, direction);
                     }
@@ -124,14 +123,24 @@ public class TopologyCompressor {
 
     }
 
-    private boolean isElementProcessed(TopologyElement element) {
+    private boolean isElementProcessed(TopologyElement element, Direction direction) {
         if (!processed_elements.containsKey(element)) {
             processed_elements.put(element, 0);
             return false;
         }
 
         int processed = processed_elements.get(element);
-        return processed >= 1;
+        int max_processed = 1;
+        if (element instanceof Wire) {
+            Wire wire = (Wire) element;
+            if (!wire.getOrientation().isOrthogonal(direction.toOrientation())) {
+                long count = wire.getParts().stream().filter(part -> part.getAxis().getOrientation().isOrthogonal(wire.getOrientation())).count();
+                if (count > 0) {
+                    max_processed = (int) count;
+                }
+            }
+        }
+        return processed >= max_processed;
     }
 
     private void clearProcessedContours() {
@@ -145,7 +154,7 @@ public class TopologyCompressor {
     }
 
     private void processElement(TopologyElement element, Collection<Border> affectedBorders, final Direction compressionDirection) {
-        if (!isElementProcessed(element)) {
+        if (!isElementProcessed(element, compressionDirection)) {
             if (element instanceof Contact) {
                 processContact((Contact) element, affectedBorders, compressionDirection, Collections.<Contact>emptyList());
             } else if (element instanceof Wire) {
@@ -271,7 +280,7 @@ public class TopologyCompressor {
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     void move(TopologyElement element, Direction direction, double length, Collection<Border> borders) {

@@ -1,11 +1,11 @@
 package ru.etu.astamir.compression;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import ru.etu.astamir.common.Utils;
+import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.compression.commands.compression.ActiveBorder;
 import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.dao.ProjectObjectManager;
@@ -97,19 +97,12 @@ public class CompressionUtils {
     public static Border borderWithoutConnectedElements(final TopologyElement element, Border border, Grid grid) {
         boolean isGate = element instanceof Gate;
 
-        final Collection<String> connected_names = ConnectionUtils.getElementsNames(element);
+        final Collection<String> elementNames = ConnectionUtils.getElementsNames(element);
+        List<String> connectedNames = ConnectionUtils.getConnectedElements(element, grid).stream().map(ConnectionUtils::getElementsNames).flatMap(Collection::stream).collect(Collectors.toList());
 
-        List<BorderPart> parts = border.getParts().stream().filter(part-> { // filter out active regions if element is gate
-            if (isGate) {
-                TopologyElement e = part.getElement();
-                if (e instanceof ActiveRegion) {
-                    return ((ActiveRegion)e).contains(e);
-                }
-            }
-            return true;
-        }).filter(part -> {
+        List<BorderPart> parts = border.getParts().stream().filter(part -> {
             TopologyElement e = part.getElement();
-            return e == null || !connected_names.contains(e.getName());
+            return e == null || (!elementNames.contains(e.getName()) && !connectedNames.contains(e.getName()));
         }).collect(Collectors.toList());
 
         Border result = new Border(border.getOrientation(), border.getTechnology());

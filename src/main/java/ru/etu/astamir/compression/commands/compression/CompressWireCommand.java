@@ -1,8 +1,8 @@
 package ru.etu.astamir.compression.commands.compression;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import ru.etu.astamir.common.Pair;
+import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.commands.Command;
 import ru.etu.astamir.compression.commands.UpdateBorderCommand;
@@ -12,8 +12,7 @@ import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.model.Flap;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.TopologyLayer;
-import ru.etu.astamir.model.connectors.ConnectionPoint;
-import ru.etu.astamir.model.connectors.SimpleConnectionPoint;
+import ru.etu.astamir.model.connectors.ConnectionUtils;
 import ru.etu.astamir.model.contacts.Contact;
 import ru.etu.astamir.model.contacts.ContactType;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
@@ -84,21 +83,12 @@ public class CompressWireCommand extends CompressCommand {
      * Подготовка соединенных элементов для последующего перемещения.
      */
     protected void handleConnections() {
-        Set<String> connected_names = new HashSet<>();
-        for (ConnectionPoint connection_point : wire.getConnections()) {
-            if (connection_point instanceof SimpleConnectionPoint) {
-                connected_names.addAll(connection_point.getConnectedNames());
-            } else {
-                connected_names.add(connection_point.getName());
-            }
-        }
-
-        final Collection<TopologyElement> connected_elements = grid.toElements(connected_names, TopologyElement.class);
-        for (TopologyElement connected_element : connected_elements) {
-            if (connected_element instanceof Contact) {
-                handleConnectedContact((Contact) connected_element);
-            } else if (connected_element instanceof Wire) {
-                handleConnectedWire((Wire) connected_element);
+        EntitySet<TopologyElement> connectedElements = ConnectionUtils.getConnectedElementsForWire(wire, grid);
+        for (TopologyElement connectedElement : connectedElements) {
+            if (connectedElement instanceof Contact) {
+                handleConnectedContact((Contact) connectedElement);
+            } else if (connectedElement instanceof Wire) {
+                handleConnectedWire((Wire) connectedElement);
             }
         }
     }

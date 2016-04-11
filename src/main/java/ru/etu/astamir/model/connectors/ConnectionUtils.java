@@ -1,6 +1,5 @@
 package ru.etu.astamir.model.connectors;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -27,19 +26,33 @@ public class ConnectionUtils {
             Optional<TopologyElement> element = grid.findElementByName(name);
             if (element.isPresent()) {
                 result.add((V) element.get());
+            } else { //
+                Optional<TopologyElement> first = grid.getAllElements().stream().filter(e -> e instanceof ComplexElement).filter(e -> ((ComplexElement) e).getElements().contains(name)).findFirst();
             }
         }
 
         return result;
     }
 
-    public static <V extends TopologyElement> EntitySet<V> getConnectedElements(Wire wire, Grid grid) {
+    public static <V extends TopologyElement> EntitySet<V> getConnectedElementsForWire(Wire wire, Grid grid) {
         EntitySet<V> connected_elements = new EntitySet<>();
         for (ConnectionPoint connection_point : wire.getConnections()) {
             connected_elements.addAll(ConnectionUtils.<V>resolveConnectedElements(connection_point, grid));
         }
 
         return connected_elements;
+    }
+
+    public static <V extends TopologyElement> EntitySet<V> getConnectedElements(TopologyElement element, Grid grid) {
+        if (element instanceof Wire) {
+            return getConnectedElementsForWire((Wire) element, grid);
+        } else if (element instanceof ConnectionPoint) {
+            return resolveConnectedElements((ConnectionPoint) element, grid);
+        } else if (element instanceof Contour) {
+
+        }
+
+        return new EntitySet<>();
     }
 
     public static Collection<String> getElementsNames(TopologyElement element) {

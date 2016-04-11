@@ -1,16 +1,12 @@
 package ru.etu.astamir.geom.common;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.model.Movable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Различные вспомогательные геометрические функции.
@@ -77,7 +73,7 @@ public class GeomUtils {
 
     public static Optional<Point> getClosestPoint(Collection<Point> points, Point target_point) {
         if (target_point == null || points.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         if (points.size() == 1) {
@@ -94,7 +90,7 @@ public class GeomUtils {
             }
         }
 
-        return Optional.fromNullable(closest);
+        return Optional.ofNullable(closest);
     }
 
     public static boolean isOnOneLine(Point one, Point two) {

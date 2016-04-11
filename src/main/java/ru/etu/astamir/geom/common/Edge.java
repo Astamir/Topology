@@ -1,7 +1,6 @@
 package ru.etu.astamir.geom.common;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Doubles;
@@ -16,11 +15,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Класс ребро.
@@ -686,7 +681,7 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
         }
 
         if (distList.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(Collections.min(distList, new Comparator<Pair<V, Double>>() {

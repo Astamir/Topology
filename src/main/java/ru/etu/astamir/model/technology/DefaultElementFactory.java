@@ -114,6 +114,7 @@ public class DefaultElementFactory implements ElementFactory {
                 List<SimpleWire> parts = Lists.newArrayList();
                 for (Edge edge : edges) {
                     SimpleWire wire = new SimpleWire(edge);
+                    wire.setStretchable(true);
                     wire.setMaxLength(2.5);
                     parts.add(wire);
                 }
@@ -135,6 +136,7 @@ public class DefaultElementFactory implements ElementFactory {
                 List<SimpleWire> parts = Lists.newArrayList();
                 for (Edge edge : edges) {
                     SimpleWire wire = new SimpleWire(edge);
+                    wire.setStretchable(true);
                     wire.setMaxLength(2.5);
                     parts.add(wire);
                 }

@@ -1,7 +1,6 @@
 package ru.etu.astamir.compression.grid;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.*;
 import ru.etu.astamir.common.Pair;
@@ -99,12 +98,7 @@ public class VirtualGrid implements Grid, Serializable {
         for (double x : rowMap.keySet()) {
             Map<Double, Collection<String>> row = rowMap.get(x);
             for (double y : row.keySet()) {
-                final Optional<String> element = Iterables.tryFind(row.get(y), new Predicate<String>() {
-                    @Override
-                    public boolean apply(String input) {
-                        return input.equals(name);
-                    }
-                });
+                final Optional<String> element = row.get(y).stream().filter(input -> input.equals(name)).findFirst();
                 if (element.isPresent()) {
                     keys.add(Pair.of(x, y));
                 }
@@ -209,7 +203,7 @@ public class VirtualGrid implements Grid, Serializable {
     }
 
     public Optional<TopologyElement> findElementByName(String name) {
-        return Optional.fromNullable(elements.get(name));
+        return Optional.ofNullable(elements.get(name));
     }
 
     @Override
@@ -228,7 +222,7 @@ public class VirtualGrid implements Grid, Serializable {
     public Optional<TopologyElement> findElement(Point point) {
         Collection<TopologyElement> allElements = findAllElements(point);
         if (allElements.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         TopologyElement result = null;
@@ -241,7 +235,7 @@ public class VirtualGrid implements Grid, Serializable {
                 }
             }
         }
-        return Optional.fromNullable(result);
+        return Optional.ofNullable(result);
     }
 
     @Override
@@ -295,7 +289,7 @@ public class VirtualGrid implements Grid, Serializable {
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

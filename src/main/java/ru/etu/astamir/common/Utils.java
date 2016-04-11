@@ -55,9 +55,9 @@ public class Utils {
             }
         };
 
-        public static final Function<SimpleWire, Iterable<Point>> WIRE_TO_COORDINATES_FUNCTION = new Function<SimpleWire, Iterable<Point>>() {
+        public static final Function<SimpleWire, Collection<Point>> WIRE_TO_COORDINATES_FUNCTION = new Function<SimpleWire, Collection<Point>>() {
             @Override
-            public Iterable<Point> apply(SimpleWire input) {
+            public Collection<Point> apply(SimpleWire input) {
                 return input.getCoordinates();
             }
         };

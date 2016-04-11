@@ -1,7 +1,6 @@
 package ru.etu.astamir.compression.virtual;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
@@ -31,6 +30,7 @@ import ru.etu.astamir.model.technology.Technology;
 import ru.etu.astamir.model.wires.*;
 
 import java.util.*;
+
 
 /**
  * Класс предназначен для перевода топологии из реальных в виртуальные коориданты.

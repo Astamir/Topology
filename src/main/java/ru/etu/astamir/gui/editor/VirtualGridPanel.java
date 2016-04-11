@@ -1,7 +1,6 @@
 package ru.etu.astamir.gui.editor;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.compression.Border;
@@ -25,10 +24,11 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class VirtualGridPanel extends JPanel {
     private static final int OFFSET = -100;
-    private static final Insets COORDINATE_WINDOW = new Insets(500, 500, 500, 500);
+    private static final Insets COORDINATE_WINDOW = new Insets(1500, 1500, 1500, 1500);
 
     ElementModel model;
     double step = 10;

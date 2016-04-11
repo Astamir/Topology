@@ -1,6 +1,5 @@
 package ru.etu.astamir.compression.commands.compression;
 
-import com.google.common.base.Optional;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.BorderPart;
 import ru.etu.astamir.compression.commands.MoveContourCommand;
@@ -13,14 +12,19 @@ import ru.etu.astamir.geom.common.Rectangle;
 import ru.etu.astamir.model.TopologicalCell;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.TopologyLayer;
+import ru.etu.astamir.model.connectors.ConnectionUtils;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
+import ru.etu.astamir.model.regions.ActiveRegion;
 import ru.etu.astamir.model.regions.Well;
 import ru.etu.astamir.model.regions.Contour;
 import ru.etu.astamir.model.technology.Technology;
+import ru.etu.astamir.model.wires.Gate;
+import ru.etu.astamir.model.wires.SimpleWire;
+import ru.etu.astamir.model.wires.WireUtils;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Artem Mon'ko
@@ -57,9 +61,27 @@ public class CompressContourCommand extends CompressCommand {
             length = container_l < length ? container_l : length;
         }
 
+        moveConnected(contour, edge, length);
         move(contour, length, affectedBorders);
 
         return true;
+    }
+
+    protected void moveConnected(Contour contour, Edge side, double length) {
+        if (contour instanceof ActiveRegion) {
+            List<TopologyElement> gates = contour.getElements().stream().filter(e -> e instanceof Gate).collect(Collectors.toList());
+            for (TopologyElement gate : gates) {
+                Gate g = (Gate) gate;
+                List<Edge> collect = g.getParts().stream().map(SimpleWire::getAxis).collect(Collectors.toList());
+                Optional<Point> connectionPoint = WireUtils.getConnectionPoint(collect.toArray(new Edge[collect.size()]), side);
+                if (connectionPoint.isPresent()) {
+                    Optional<SimpleWire> partWithPoint = g.findPartWithPoint(connectionPoint.get());
+                    if (partWithPoint.isPresent()) {
+                        g.stretch(partWithPoint.get(), direction, length);
+                    }
+                }
+            }
+        }
     }
 
     protected void move(Contour contour, double length, Collection<Border> affectedBorders) {

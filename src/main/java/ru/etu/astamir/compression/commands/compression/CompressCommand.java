@@ -1,6 +1,5 @@
 package ru.etu.astamir.compression.commands.compression;
 
-import com.google.common.base.Optional;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.CompressionUtils;
 import ru.etu.astamir.compression.commands.Command;
@@ -13,6 +12,7 @@ import ru.etu.astamir.model.exceptions.UnexpectedException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Команда сжатия. Содержит все частоколы и сетку, а так же направления сжатия.

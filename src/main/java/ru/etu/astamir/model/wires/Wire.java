@@ -1,26 +1,24 @@
 package ru.etu.astamir.model.wires;
 
-import com.google.common.base.*;
-import com.google.common.base.Optional;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.*;
-import com.google.common.primitives.Doubles;
 import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.common.collections.CollectionUtils;
-import ru.etu.astamir.common.collections.EntitySet;
-import ru.etu.astamir.compression.Border;
-import ru.etu.astamir.compression.BorderPart;
 import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.model.ComplexElement;
 import ru.etu.astamir.model.Movable;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.connectors.ConnectionPoint;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
-import ru.etu.astamir.model.technology.DefaultTechnologicalCharacteristics;
 import ru.etu.astamir.serialization.LookIntoAttribute;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Wire extends TopologyElement implements ComplexElement, Movable, Serializable {
 
@@ -503,7 +501,8 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
         });
         if (canMove) {
             partsToMove.add(part);
-            stretchParts(getConnectedParts(partsToMove), Iterables.concat(Iterables.transform(partsToMove, Utils.Functions.WIRE_TO_COORDINATES_FUNCTION)), direction, width);
+
+            stretchParts(getConnectedParts(partsToMove), partsToMove.stream().map(SimpleWire::getCoordinates).flatMap(Collection::stream).collect(Collectors.toList()), direction, width);
             moveParts(partsToMove, direction, width);
             //rebuildBounds();
 
@@ -536,15 +535,10 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
         return true;
     }
 
-    static boolean stretchParts(Collection<SimpleWire> partsToStretch, Iterable<Point> connectedPartsPoints, Direction direction, double length) {
+    static boolean stretchParts(Collection<SimpleWire> partsToStretch, Collection<Point> connectedPartsPoints, Direction direction, double length) {
         for (final SimpleWire part : partsToStretch) {
             final Collection<Point> part_coordinates = part.getCoordinates();
-            Optional<Point> base = Iterables.tryFind(connectedPartsPoints, new Predicate<Point>() {
-                @Override
-                public boolean apply(Point input) {
-                    return part_coordinates.contains(input);
-                }
-            });
+            Optional<Point> base = connectedPartsPoints.stream().filter(part_coordinates::contains).findFirst();
 
             if (base.isPresent() && part.isStretchable()) {
                 part.stretchDirectly(base.get(), direction, length);
@@ -629,12 +623,7 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
         // all we have to do is to call movePart on the connected part if it exists, or simply stretch otherwise.
         final Point workingPoint = (axisDirection == direction) ? axis.getEnd() : axis.getStart();
         List<SimpleWire> connectedParts = getConnectedParts(index);
-        Optional<SimpleWire> startingPart = Iterables.tryFind(connectedParts, new Predicate<SimpleWire>() {
-            @Override
-            public boolean apply(SimpleWire input) {
-                return input.getAxis().isOnEdges(workingPoint);
-            }
-        });
+        Optional<SimpleWire> startingPart = connectedParts.stream().filter(input -> input.getAxis().isOnEdges(workingPoint)).findFirst();
         if (startingPart.isPresent()) {
             movePart(startingPart.get(), direction, length);
             rebuildBounds();
@@ -734,7 +723,7 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
         }
 
         if (distances.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(Collections.min(distances, new Comparator<Pair<SimpleWire, Double>>() {
@@ -764,7 +753,11 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
+    }
+
+    public Optional<SimpleWire> findLink(Point point) {
+        return parts.stream().filter(part -> part.isLink() && part.getAxis().isOnEdges(point)).findAny();
     }
 
     /**

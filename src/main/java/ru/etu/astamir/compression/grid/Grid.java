@@ -1,7 +1,6 @@
 package ru.etu.astamir.compression.grid;
 
 
-import com.google.common.base.Optional;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.model.TopologyElement;
@@ -9,6 +8,7 @@ import ru.etu.astamir.model.TopologyElement;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Эта сетка для элементов топологии, которые должны учавствовать в сжатии.

@@ -1,7 +1,6 @@
 package ru.etu.astamir.compression;
 
 import com.google.common.base.*;
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -24,6 +23,7 @@ import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
 
 import java.util.*;
+import java.util.Optional;
 
 /**
  * Частокол. Набор отрезков с разными классами элементов.
@@ -423,7 +423,7 @@ public class Border {
         }
 
         if (distances.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         
         return Optional.of(Collections.min(distances, new Comparator<Pair<BorderPart, Double>>() {
@@ -464,7 +464,7 @@ public class Border {
         }
 
         if (distances.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(Collections.min(distances, new Comparator<Pair<BorderPart, Double>>() {
@@ -535,7 +535,7 @@ public class Border {
         }
 
         if (distances.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(Collections.min(distances, new Comparator<Pair<BorderPart, Double>>() {
@@ -549,7 +549,7 @@ public class Border {
     public Optional<BorderPart> getMaxPart(Direction direction) {
         List<BorderPart> orientationParts = orientationParts();
         if (orientationParts.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         Comparator<BorderPart> cmp = BorderPart.getAxisComparator(direction.getEdgeComparator());
@@ -577,11 +577,10 @@ public class Border {
 
     // TODO
     public static void imitate(Wire bus, Border border, Direction direction, boolean deformation_allowed) {
-        //bus.correctBus();
-        if (!bus.isChained()) {
-            bus.ensureChained();
-        }
         bus.round();
+        if (!bus.isChained()) {
+            //bus.ensureChained();
+        }
         if (deformation_allowed)
             border.createEmptyLinks(bus, direction);
 
@@ -598,8 +597,8 @@ public class Border {
             }
         }
 
-        bus.removeEmptyParts();
-        bus.correct(direction.getOppositeDirection());
+        bus.removeEmptyParts(false);
+       // bus.correct(direction.getOppositeDirection());
     }
 
     public void imitate(Wire bus, Direction direction, Grid grid) {

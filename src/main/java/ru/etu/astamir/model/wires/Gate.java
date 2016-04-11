@@ -1,6 +1,5 @@
 package ru.etu.astamir.model.wires;
 
-import com.google.common.base.Optional;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Orientation;
 import ru.etu.astamir.geom.common.Point;
@@ -9,9 +8,9 @@ import ru.etu.astamir.model.Material;
 import ru.etu.astamir.model.TopologyLayer;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Затвор транзистора. По идее ничем от шины не отличается, только разве что более жесткими ограничениями.
@@ -105,7 +104,7 @@ public class Gate extends Wire {
         Flap end_flap = getFlap(Flap.Position.END);
         working_point = end_flap.getCenter().getStart();
         Optional<SimpleWire> for_end = wire.findPartWithPoint(working_point);
-        return for_end.isPresent() ? Optional.of(working_point) : Optional.<Point>absent();
+        return for_end.isPresent() ? Optional.of(working_point) : Optional.<Point>empty();
     }
 
     @Override

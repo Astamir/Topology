@@ -1,6 +1,5 @@
 package ru.etu.astamir.model.wires;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
@@ -101,7 +100,23 @@ public class WireUtils {
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
+    }
+
+    public static Optional<Point> getConnectionPoint(Edge[] one, Edge... another) {
+        if (another.length == 0) {
+            return Optional.empty();
+        }
+        for (Edge o : one) {
+            for (Edge a : another) {
+                Point crossing = o.crossing(a);
+                if (crossing != null) {
+                    return Optional.of(crossing);
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     public static boolean isConnected(Wire wire, TopologyElement element) {
@@ -136,14 +151,14 @@ public class WireUtils {
                 hadBeenChanged |= straighten(wire, part, border, direction, connectionPoints);
             }
 
-            wire.removeEmptyParts();
+            wire.removeEmptyParts(false);
         } while (hadBeenChanged);
         return false;
     }
 
     private static Optional<Double> getConnectionPoints(Wire wire, Direction direction, Grid grid) {
         List<Double> points = new ArrayList<>();
-        for (TopologyElement connected_element : ConnectionUtils.getConnectedElements(wire, grid)) {
+        for (TopologyElement connected_element : ConnectionUtils.getConnectedElementsForWire(wire, grid)) {
             if (connected_element instanceof Contact) {
                 final Point connection_point = ((Contact) connected_element).getCenter().getStart();
                 points.add(direction.getDirectionalComponent(connection_point));
@@ -157,7 +172,7 @@ public class WireUtils {
             for (int i = 1; i < points.size(); i++) {
                 double next = points.get(i);
                 if (MathUtils.compare(d, next, MathUtils.getPrecision(MathUtils.EPS)) != 0) {
-                    return Optional.absent();
+                    return Optional.empty();
                 }
                 d = next;
             }
@@ -165,7 +180,7 @@ public class WireUtils {
             return Optional.of(d);
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public static boolean straighten(Wire wire, SimpleWire part, Border border, Direction direction, Optional<Double> preferable) {

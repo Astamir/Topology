@@ -33,6 +33,8 @@ public class EntitySet<V extends Entity> extends AbstractEntitySet<V> implements
         return new EntitySet<>(Arrays.asList(entities));
     }
 
+
+
     public static <V extends Entity> EntitySet<V> clone(Iterable<V> entities) {
         return new EntitySet<V>(Iterables.transform(Iterables.filter(entities, Predicates.notNull()), new Function<V, V>() {
             @Override
