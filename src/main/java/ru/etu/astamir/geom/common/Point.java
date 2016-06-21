@@ -33,7 +33,7 @@ public class Point implements Serializable, Cloneable, Drawable, Movable, Rounda
     /**
      * Возможные положение точки относительно прямой.
      */
-    public static enum Position {LEFT,  RIGHT,  BEYOND,  BEHIND, BETWEEN, ORIGIN, DESTINATION;
+    public enum Position {LEFT,  RIGHT,  BEYOND,  BEHIND, BETWEEN, ORIGIN, DESTINATION;
         public boolean isOnEdge() {
             return this == ORIGIN || this == BETWEEN || this == DESTINATION;
         }

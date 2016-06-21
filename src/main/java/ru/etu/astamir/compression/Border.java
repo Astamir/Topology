@@ -1,29 +1,25 @@
 package ru.etu.astamir.compression;
 
-import com.google.common.base.*;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.common.collections.CollectionUtils;
-import ru.etu.astamir.common.collections.UniqueIterator;
 import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.model.TopologicalCell;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.TopologyLayer;
-import ru.etu.astamir.model.contacts.Contact;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
-import ru.etu.astamir.model.regions.ContactWindow;
-import ru.etu.astamir.model.regions.Contour;
 import ru.etu.astamir.model.technology.Technology;
 import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
 
 import java.util.*;
-import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Частокол. Набор отрезков с разными классами элементов.
@@ -111,12 +107,7 @@ public class Border {
     }
 
     public List<Edge> getEdges() {
-        return Lists.transform(parts, new Function<BorderPart, Edge>() {
-            @Override
-            public Edge apply(BorderPart input) {
-                return input.getAxis();
-            }
-        });
+        return parts.stream().map(BorderPart::getAxis).collect(Collectors.toList());
     }
 
     public Technology.TechnologicalCharacteristics getTechnology() {
@@ -144,13 +135,12 @@ public class Border {
         this.parts.addAll(parts);
     }
 
-    public Predicate<BorderPart> orientationPredicate() {
-        return new Predicate<BorderPart>() {
-            @Override
-            public boolean apply(BorderPart input) {
-                return input.getAxis().getOrientation() == orientation;
-            }
-        };
+    public Predicate<BorderPart> orientation() {
+        return input -> input.getAxis().getOrientation() == orientation;
+    }
+
+    public Predicate<BorderPart> orientation(Direction direction) {
+        return input -> input.getAxis().getOrientation() == direction.orthogonal().toOrientation();
     }
 
     public double getMinDistance(BorderPart part, String symbol) {
@@ -212,7 +202,7 @@ public class Border {
         }        
         
         if (!topCross && !botCross) {
-            Edge reverseRay = Edge.ray(addedAxis.getStart(), dir.getOppositeDirection());
+            Edge reverseRay = Edge.ray(addedAxis.getStart(), dir.opposite());
             if (reverseRay.cross(wasAxis) == Edge.EdgeRelation.SKEW_CROSS) {
                 return Lists.newArrayList();
             } else {
@@ -230,10 +220,7 @@ public class Border {
      */
     public void overlay(List<BorderPart> newParts, Direction dir) {
         List<BorderPart> result = Lists.newArrayList();
-
-        final Predicate<BorderPart> orientationPredicate = orientationPredicate();
-        List<BorderPart> allParts = Lists.newArrayList(Iterables.filter(Iterables.concat(newParts, parts),
-                orientationPredicate)); // we need only parts of border's orientation to work with.
+        List<BorderPart> allParts = Stream.concat(newParts.stream(), parts.stream()).filter(orientation()).collect(Collectors.toList());// we need only parts of border's orientation to work with.
 
         List<List<BorderPart>> columns = CollectionUtils.divideEdgedElements(allParts, Utils.Functions.BORDER_PART_AXIS_FUNCTION, dir); // lets divide our parts into sorted columns.
         int columnSize = columns.size();
@@ -370,13 +357,7 @@ public class Border {
                 axis.reverse();
             }
         } // reversing all down or left oriented parts
-
-        return Lists.newArrayList(UniqueIterator.create(Iterators.filter(UniqueIterator.create(parts.iterator()), new Predicate<BorderPart>() {
-            @Override
-            public boolean apply(BorderPart input) {
-                return !input.getAxis().isPoint();
-            }
-        })));
+        return parts.stream().distinct().filter(borderPart -> !borderPart.getAxis().isPoint()).collect(Collectors.toList());
     }
 
     /**
@@ -440,7 +421,7 @@ public class Border {
         double sign = direction.getDirectionSign();
 
         List<Pair<BorderPart, Double>> distances = Lists.newArrayList();
-        for (BorderPart part : orientationParts(direction)) {
+        for (BorderPart part : orthogonalParts(direction)) {
             double min = sign * getMinDistance(part, symbol);
             Edge axis = part.getAxis();
             if (axis.cross(topRay) == Edge.EdgeRelation.SKEW_CROSS) {
@@ -451,8 +432,8 @@ public class Border {
                 distances.add(Pair.of(part, Math.abs(axis.distanceToPoint(edge.getEnd()) + min)));
             }
 
-            Edge bRay = Edge.ray(axis.getStart(), direction.getOppositeDirection());
-            Edge tRay = Edge.ray(axis.getEnd(), direction.getOppositeDirection());
+            Edge bRay = Edge.ray(axis.getStart(), direction.opposite());
+            Edge tRay = Edge.ray(axis.getEnd(), direction.opposite());
 
             if (bRay.cross(edge) == Edge.EdgeRelation.SKEW_CROSS) {
                 distances.add(Pair.of(part, Math.abs(edge.distanceToPoint(axis.getStart()) + min)));
@@ -481,7 +462,7 @@ public class Border {
         double sign = direction.getDirectionSign();
 
         Map<BorderPart, Double> distances = new HashMap<>();
-        for (BorderPart part : orientationParts(direction)) {
+        for (BorderPart part : orthogonalParts(direction)) {
             double min = sign * getMinDistance(part, symbol);
             Edge axis = part.getAxis();
             if (axis.cross(topRay) == Edge.EdgeRelation.SKEW_CROSS) {
@@ -492,8 +473,8 @@ public class Border {
                 distances.put(part, Math.abs(axis.distanceToPoint(edge.getEnd()) + min));
             }
 
-            Edge bRay = Edge.ray(axis.getStart(), direction.getOppositeDirection());
-            Edge tRay = Edge.ray(axis.getEnd(), direction.getOppositeDirection());
+            Edge bRay = Edge.ray(axis.getStart(), direction.opposite());
+            Edge tRay = Edge.ray(axis.getEnd(), direction.opposite());
 
             if (bRay.cross(edge) == Edge.EdgeRelation.SKEW_CROSS) {
                 distances.put(part, Math.abs(edge.distanceToPoint(axis.getStart()) + min));
@@ -522,8 +503,8 @@ public class Border {
                 distances.add(Pair.of(part, axis.distanceToPoint(edge.getEnd())));
             }
 
-            Edge bRay = Edge.ray(axis.getStart(), direction.getOppositeDirection());
-            Edge tRay = Edge.ray(axis.getEnd(), direction.getOppositeDirection());
+            Edge bRay = Edge.ray(axis.getStart(), direction.opposite());
+            Edge tRay = Edge.ray(axis.getEnd(), direction.opposite());
 
             if (bRay.cross(edge) == Edge.EdgeRelation.SKEW_CROSS) {
                 distances.add(Pair.of(part, edge.distanceToPoint(axis.getStart())));
@@ -558,21 +539,11 @@ public class Border {
     }
     
     public List<BorderPart> orientationParts() {
-        return Lists.newArrayList(Iterables.filter(parts, new Predicate<BorderPart>() {
-            @Override
-            public boolean apply(BorderPart input) {
-                return input.getAxis().getOrientation() == orientation;
-            }
-        }));
+        return parts.stream().filter(orientation()).collect(Collectors.toList());
     }
 
-    public List<BorderPart> orientationParts(final Direction direction) {
-        return Lists.newArrayList(Iterables.filter(parts, new Predicate<BorderPart>() {
-            @Override
-            public boolean apply(BorderPart input) {
-                return input.getAxis().getOrientation() == direction.getOrthogonalDirection().toOrientation();
-            }
-        }));
+    public List<BorderPart> orthogonalParts(final Direction direction) {
+        return parts.stream().filter(orientation(direction)).collect(Collectors.toList());
     }
 
     // TODO
@@ -598,7 +569,7 @@ public class Border {
         }
 
         bus.removeEmptyParts(false);
-       // bus.correct(direction.getOppositeDirection());
+       // bus.correct(direction.opposite());
     }
 
     public void imitate(Wire bus, Direction direction, Grid grid) {
@@ -615,8 +586,7 @@ public class Border {
 
     // TODO
     private void createEmptyLinks(Wire bus, Direction direction) {
-        List<BorderPart> nonOrientParts =
-                Lists.newArrayList(Iterables.filter(parts, Predicates.not(orientationPredicate())));
+        List<BorderPart> nonOrientParts = parts.stream().filter(orientation().negate()).collect(Collectors.toList());
         //boolean wasEmptyPartsOnEdges = bus.hasEmptyPartsOnEdges();
         for (BorderPart part : nonOrientParts) {
             double min = getMinDistance(part, bus.getSymbol());
@@ -625,8 +595,8 @@ public class Border {
             Point another = part.getAxis().getStart().clone();
             GeomUtils.move(another, direction.counterClockwise(), min);
             
-            bus.createAnEmptyLink(one, direction.getOppositeDirection());
-            bus.createAnEmptyLink(another, direction.getOppositeDirection());
+            bus.createAnEmptyLink(one, direction.opposite());
+            bus.createAnEmptyLink(another, direction.opposite());
         }
 
 

@@ -18,7 +18,7 @@ import java.util.*;
 public class CompressTopologicalCellCommand extends CompressContourCommand {
 
     public CompressTopologicalCellCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, String element_name, Direction direction) {
-        super(grid, borders, element_name, direction, direction.getOppositeDirection());
+        super(grid, borders, element_name, direction, direction.opposite());
     }
 
 

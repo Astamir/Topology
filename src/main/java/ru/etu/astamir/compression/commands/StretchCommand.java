@@ -37,7 +37,7 @@ public class StretchCommand<T extends TopologyElement & Stretchable> implements 
 
     @Override
     public boolean unexecute() {
-        return source.stretch(direction.getOppositeDirection(), length, stretchPoint);
+        return source.stretch(direction.opposite(), length, stretchPoint);
     }
 
     @Override

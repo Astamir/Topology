@@ -13,6 +13,7 @@ import ru.etu.astamir.compression.CompressionUtils;
 import ru.etu.astamir.compression.commands.CompositeCommand;
 import ru.etu.astamir.compression.commands.MoveCommand;
 import ru.etu.astamir.compression.commands.UpdateBorderCommand;
+import ru.etu.astamir.compression.commands.UpdateBorderWithContactCommand;
 import ru.etu.astamir.compression.grid.VirtualGrid;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Edge;
@@ -41,7 +42,7 @@ public class CompressContactCommand extends CompressCommand {
         }
     };
     private MoveCommand move;
-    private UpdateBorderCommand update_border;
+    private UpdateBorderWithContactCommand update_border;
 
     public CompressContactCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, Direction direction, String element_name) {
         super(grid, borders, element_name, direction);
@@ -108,7 +109,7 @@ public class CompressContactCommand extends CompressCommand {
         move = new MoveCommand(contact, direction, length);
         move.execute();
 
-        update_border = new UpdateBorderCommand(borders, contact, direction);
+        update_border = new UpdateBorderWithContactCommand(borders, contact, direction);
         update_border.execute();
     }
 

@@ -671,7 +671,7 @@ public class Polygon implements Cloneable, Serializable, Drawable, Movable, Roun
                 curPoint = clockwisePoint.get();
                 System.out.println(curPoint + "found");
             } else {
-                dir = dir.getOppositeDirection();
+                dir = dir.opposite();
                 System.out.println("trying " + dir);
                 Optional<Point> counterclockwisePoint = findOnTheWay(pool, curPoint, dir);
                 if (counterclockwisePoint.isPresent()) {

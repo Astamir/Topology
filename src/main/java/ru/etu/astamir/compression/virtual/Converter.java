@@ -342,7 +342,7 @@ public class Converter {
 //                double d = m1 / 2 + m1_active;
 //                for (Direction direction : directions) {
 //                    if (direction.isUpOrDown()) {
-//                        direction = direction.getOppositeDirection();
+//                        direction = direction.opposite();
 //                    }
 //                    GeomUtils.move(center, direction, d);
 //                }

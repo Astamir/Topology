@@ -59,7 +59,7 @@ public class WireChainingTest {
         wire.setFirstPart(axis, 0, 1000, true, true, true);
         Direction currentDirection = axis.getDirection();
         for (int i = 0; i < parts - 1; i++) {
-            currentDirection = currentDirection.getOrthogonalDirection();
+            currentDirection = currentDirection.orthogonal();
             wire.addPart(currentDirection, new Random().nextInt(50), 1000, true);
         }
         return wire;
@@ -103,7 +103,7 @@ public class WireChainingTest {
             Edge axis = simpleWire.getAxis();
             Point center = axis.getCenter().clone();
             center.setPoint(center.intX(), center.intY());
-            links.add(Pair.of(center, axis.getDirection().getOrthogonalDirection()));
+            links.add(Pair.of(center, axis.getDirection().orthogonal()));
             linksToCreate--;
             if (linksToCreate <= 0) {
                 break;

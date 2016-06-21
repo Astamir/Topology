@@ -236,7 +236,7 @@ public class Rectangle extends Polygon {
             public boolean apply(Edge input) {
                 return input.getOrientation().isOrthogonal(dir.toOrientation());
             }
-        })), dir.getOppositeDirection().getEdgeComparator());
+        })), dir.opposite().getEdgeComparator());
         moveEdge(edge, dir, length);
     }
 

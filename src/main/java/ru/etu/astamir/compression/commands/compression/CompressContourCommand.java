@@ -12,7 +12,6 @@ import ru.etu.astamir.geom.common.Rectangle;
 import ru.etu.astamir.model.TopologicalCell;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.TopologyLayer;
-import ru.etu.astamir.model.connectors.ConnectionUtils;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
 import ru.etu.astamir.model.regions.ActiveRegion;
 import ru.etu.astamir.model.regions.Well;
@@ -22,7 +21,6 @@ import ru.etu.astamir.model.wires.Gate;
 import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.WireUtils;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,7 +53,7 @@ public class CompressContourCommand extends CompressCommand {
         Optional<Contour> container = grid.getElementsContainer(element_name);
         if (container.isPresent()) {
             Contour cnt = container.get();
-            Border container_border = Border.of(direction.getOrthogonalDirection().toOrientation(), affectedBorders.iterator().next().getTechnology(), cnt); // TODO technology
+            Border container_border = Border.of(direction.orthogonal().toOrientation(), affectedBorders.iterator().next().getTechnology(), cnt); // TODO technology
             container_border.setLayer(cnt.getLayer());
             double container_l = getMoveDistanceForEdge(edge, contour, Collections.singleton(container_border), direction);
             length = container_l < length ? container_l : length;

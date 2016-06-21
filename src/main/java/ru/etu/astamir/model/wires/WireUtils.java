@@ -1,7 +1,6 @@
 package ru.etu.astamir.model.wires;
 
 import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -24,6 +23,7 @@ import ru.etu.astamir.model.contacts.Contact;
 import ru.etu.astamir.model.contacts.ContactType;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Утилитный класс для различных действий над шинами и контурами.
@@ -281,13 +281,12 @@ public class WireUtils {
             }
         }
 
-        wire.removeEmptyParts();
+        //wire.removeEmptyParts();
         return commands;
     }
 
     private static void createEmptyLinks(Wire bus, Border border, Direction direction) {
-        List<BorderPart> nonOrientParts =
-                Lists.newArrayList(Iterables.filter(border.getParts(), Predicates.not(border.orientationPredicate())));
+        List<BorderPart> nonOrientParts = border.getParts().stream().filter(border.orientation().negate()).collect(Collectors.toList());
         //boolean wasEmptyPartsOnEdges = bus.hasEmptyPartsOnEdges();
         for (BorderPart part : nonOrientParts) {
             double min = border.getMinDistance(part, bus.getSymbol());
@@ -296,8 +295,8 @@ public class WireUtils {
             Point another = part.getAxis().getStart().clone();
             GeomUtils.move(another, direction.counterClockwise(), min);
 
-            bus.createAnEmptyLink(one, direction.getOppositeDirection());
-            bus.createAnEmptyLink(another, direction.getOppositeDirection());
+            bus.createAnEmptyLink(one, direction.opposite());
+            bus.createAnEmptyLink(another, direction.opposite());
         }
 
 

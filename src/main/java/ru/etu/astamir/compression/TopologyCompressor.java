@@ -47,10 +47,10 @@ public class TopologyCompressor {
         commands.clear();
 
         prepareBorders();
-        compress(Direction.LEFT);
-        compress(Direction.RIGHT);
-        straightenWires(Direction.LEFT);
-    //    compress(Direction.UP);
+       // compress(Direction.LEFT);
+        //compress(Direction.RIGHT);
+      //  straightenWires(Direction.LEFT);
+      compress(Direction.UP);
 //        compress(Direction.DOWN);
 //        straightenWires(Direction.UP);
         // todo compressing wires for another direction
@@ -109,7 +109,7 @@ public class TopologyCompressor {
 
     void straightenWires(Direction direction) {
         processed_elements.clear();
-        for (List<TopologyElement> column : topology.getGrid().walk(direction.getOppositeDirection())) {
+        for (List<TopologyElement> column : topology.getGrid().walk(direction.opposite())) {
             clearProcessedContours();
             for (TopologyElement element : column) {
                 if (element instanceof Wire) {
@@ -253,7 +253,7 @@ public class TopologyCompressor {
     void processContour(Contour contour, Collection<Border> affectedBorders, Direction direction) {
         Direction side = direction;
         if (processed_contours.containsEntry(contour.getName(), direction)) {
-            side = side.getOppositeDirection();
+            side = side.opposite();
         }
 
 //        double move = getMoveDistanceForEdge(new Rectangle(contour.getBounds()).getEdge(direction), contour.getSymbol(), borders, direction);

@@ -71,7 +71,7 @@ public enum Direction {
         return isLeftOrRight() ? Orientation.HORIZONTAL : Orientation.VERTICAL;
     }
 
-    public Direction getOrthogonalDirection() {
+    public Direction orthogonal() {
         if (equals(UP)) {
             return RIGHT;
         } else if (equals(RIGHT)) {
@@ -85,7 +85,7 @@ public enum Direction {
         throw new UnexpectedException();
     }
 
-    public Direction getOppositeDirection() {
+    public Direction opposite() {
         if (equals(UP)) {
             return DOWN;
         } else if (equals(RIGHT)) {

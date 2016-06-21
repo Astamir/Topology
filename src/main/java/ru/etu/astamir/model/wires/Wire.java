@@ -18,7 +18,6 @@ import ru.etu.astamir.serialization.LookIntoAttribute;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Wire extends TopologyElement implements ComplexElement, Movable, Serializable {
 
@@ -682,7 +681,7 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
     }
 
     List<SimpleWire> orientationParts(Direction dir) {
-        return Lists.newArrayList(Iterables.filter(parts, orientationPredicate(dir.getOrthogonalDirection().toOrientation())));
+        return Lists.newArrayList(Iterables.filter(parts, orientationPredicate(dir.orthogonal().toOrientation())));
     }
 
     List<SimpleWire> orientationParts(Orientation orientation) {
@@ -699,7 +698,7 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
      * @return Ближайшая, к заданной точке поиска, часть шины.
      */
     public Optional<SimpleWire> getClosestPart(Point point, Direction direction) {
-        return getClosestPart(point, direction, orientationPredicate(direction.getOrthogonalDirection().toOrientation()));
+        return getClosestPart(point, direction, orientationPredicate(direction.orthogonal().toOrientation()));
     }
 
     /**
@@ -1011,7 +1010,7 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
             for (SimpleWire part : orientationParts(orientationPredicate(direction.toOrientation()))) {
                 double length = part.length();
                 if (length > part.maxLength) {
-                    stretch(part, direction.getOppositeDirection(), -(length - part.maxLength));
+                    stretch(part, direction.opposite(), -(length - part.maxLength));
                 }
             }
         }
