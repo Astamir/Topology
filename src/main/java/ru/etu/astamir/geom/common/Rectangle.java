@@ -450,11 +450,7 @@ public class Rectangle extends Polygon {
         return super.toString();
     }
 
-    @Override
-    public void draw(Graphics2D g) {
-        super.draw(g);
-    }
-    
+
     private class VertexIterator implements Iterator<Point> {
         /**
          * Индекс элемента, который вернет функция next().

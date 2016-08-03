@@ -7,7 +7,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Doubles;
-import ru.etu.astamir.model.Drawable;
 import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.common.Pairs;
 import ru.etu.astamir.model.Movable;
@@ -28,7 +27,7 @@ import java.util.*;
  * @author astamir
  */
 @XmlRootElement
-public class Polygon implements Cloneable, Serializable, Drawable, Movable, Roundable {
+public class Polygon implements Cloneable, Serializable, Movable, Roundable {
     /**
      * Список вершин полигона.
      */
@@ -447,7 +446,7 @@ public class Polygon implements Cloneable, Serializable, Drawable, Movable, Roun
     public boolean isPointInConvexPolygon(Point p) {
         int size = size();
         if (size == 1)
-            return (p.equals(get(0)));
+            return (p.eq(get(0)));
         if (size == 2) {
             return getEdge(0).isPointInOrOnEdges(p);
         }
@@ -867,22 +866,6 @@ public class Polygon implements Cloneable, Serializable, Drawable, Movable, Roun
         builder.append("]");
         
         return builder.toString();
-    }
-
-    @Override
-    public void draw(Graphics2D g) {
-        Graphics2D graphics = (Graphics2D) g.create();
-        graphics.draw(toAWTPolygon());
-        graphics.dispose();
-
-        /*int k = 0;
-        for (Point vertex : vertices) {
-            vertex.draw(g);
-            g.drawString(String.valueOf(k), vertex.intX(), vertex.intY());
-            k++;
-        }*/
-
-        //getCenter().draw(g);
     }
 
     public static void main(String[] args) {

@@ -36,8 +36,8 @@ public class GeomUtilsTest {
         System.out.println("coordinates = " + Arrays.toString(toPointsInitialArray));
         System.out.println("points = " + Arrays.toString(points));
         for (Point point : points) {
-            Assert.assertEquals("index = " + k, point.x(), Utils.round(toPointsInitialArray[k]));
-            Assert.assertEquals("index = " + k, point.y(), Utils.round(toPointsInitialArray[k + 1]));
+            Assert.assertEquals("index = " + k, point.x(), toPointsInitialArray[k]);
+            Assert.assertEquals("index = " + k, point.y(), toPointsInitialArray[k + 1]);
             k += 2;
         }
     }

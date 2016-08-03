@@ -157,7 +157,7 @@ public class Border {
     public double getMoveDistance(BorderPart part, String symbol, Direction dir, Point point) {
         //Preconditions.checkArgument(axis.getDirection().isOrthogonal(dir));
         double min = getMinDistance(part, symbol);
-        return Utils.round(Math.abs(part.getAxis().distanceToPoint(point) - min));
+        return Math.abs(part.getAxis().distanceToPoint(point) - min);
     }
 
     public double getMoveDistance(SimpleWire wire, Direction dir) {

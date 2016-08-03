@@ -19,7 +19,7 @@ public class DrawingUtils {
         try {
             g = graphics.create();
             g.fillOval((point.intX() - radius / 2), (point.intY() - radius / 2), radius, radius);
-            if (false) {
+            if (drawCoordinates) {
                 g.drawString(point.toString(), point.intX(), point.intY());
             }
         } finally {
@@ -35,7 +35,9 @@ public class DrawingUtils {
             g = graphics.create();
             g.drawLine(edge.startIntX(), edge.startIntY(), edge.endIntX(), edge.endIntY());
             if (drawPoints) {
+                g.drawString("s", edge.getStart().intX() - 5, edge.getStart().intY());
                 drawPoint(edge.getStart(), radius, true,  g);
+                g.drawString("e", edge.getEnd().intX() - 5, edge.getEnd().intY());
                 drawPoint(edge.getEnd(), radius, true, g);
             }
         } finally {

@@ -105,4 +105,8 @@ public final class Pair<L, R> implements Serializable, Cloneable {
     public static <L, R> Pair<L, R> of(L left, R right) {
         return new Pair<L, R>(left, right);
     }
+
+    public static <L, R> Pair<L, R> nullPair() {
+        return new Pair<>(null, null);
+    }
 }

@@ -32,8 +32,8 @@ public class MoveCommand implements DescribableCommand {
     
     private MoveCommand(TopologyElement element, double dx, double dy) {
         this.source = element;
-        this.dx = Utils.round(dx);
-        this.dy = Utils.round(dy);
+        this.dx = dx;
+        this.dy = dy;
     }
 
     private MoveCommand(TopologyElement element, Pair<Double, Double> dPair) {

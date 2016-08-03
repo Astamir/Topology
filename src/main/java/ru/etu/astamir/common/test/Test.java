@@ -1,15 +1,9 @@
 package ru.etu.astamir.common.test;
 
-import com.google.common.collect.*;
-import ru.etu.astamir.geom.common.Edge;
-
-import java.awt.*;
-import java.awt.print.PageFormat;
-import java.awt.print.Printable;
-import java.awt.print.PrinterException;
-import java.awt.print.PrinterJob;
-import java.io.File;
-import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,4 +14,20 @@ import java.io.IOException;
  */
 public class Test {
 
+    void foo(List<? super Number> list) {
+        list.add(1);
+        System.out.println("linked ");
+    }
+
+    public static void main(String... args) {
+        double d1 = 4.64;
+        double d2 = 2;
+        double d3 = d1 - d2;
+        BigDecimal d4 = BigDecimal.valueOf(d1);
+        BigDecimal d5 = BigDecimal.valueOf(d2);
+        BigDecimal d6 = BigDecimal.valueOf(d3);
+        d6 = d6.setScale(2, BigDecimal.ROUND_HALF_UP);
+        System.out.println(d1 - d2 == d3);
+        System.out.println(d4.subtract(d5).equals(d6));
+    }
 }

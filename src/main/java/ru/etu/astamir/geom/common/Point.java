@@ -1,14 +1,12 @@
 package ru.etu.astamir.geom.common;
 
-import com.google.common.base.Preconditions;
-import ru.etu.astamir.common.Utils;
-import ru.etu.astamir.model.Drawable;
+import ru.etu.astamir.math.MathUtils;
 import ru.etu.astamir.model.Movable;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
 
+import javax.annotation.Nonnull;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 import java.util.regex.Matcher;
@@ -21,7 +19,7 @@ import java.util.regex.Pattern;
  *  @author astamir
  */
 @XmlRootElement
-public class Point implements Serializable, Cloneable, Drawable, Movable, Roundable, Comparable<Point> {
+public class Point implements Serializable, Cloneable, Movable, Roundable, Comparable<Point> {
     private static final long serialVersionUID = 1L;
 
     @XmlAttribute
@@ -48,13 +46,11 @@ public class Point implements Serializable, Cloneable, Drawable, Movable, Rounda
     public Point(double x, double y) {
         this.x = x;
         this.y = y;
-        round();
     }
 
     public Point(Point p) {
         this.x = p.x;
         this.y = p.y;
-        round();
     }
 
     public Point() {
@@ -92,37 +88,31 @@ public class Point implements Serializable, Cloneable, Drawable, Movable, Rounda
     public boolean move(double dx, double dy) {
         this.x += dx;
         this.y += dy;
-        round();
-        
+
         return true;
     }
 
     public void moveByAngle(double xAngle, double length) {
         this.x += Math.cos(xAngle) * length;
         this.y += Math.sin(xAngle) * length;
-        round();
     }
 
     public void shiftX(double dx) {
         this.x += dx;
-        round();
     }
 
     public void shiftY(double dy) {
         this.y += dy;
-        round();
     }
 
     public void setPoint(double x, double y) {
         this.x = x;
         this.y = y;
-        round();
     }
 
     public void setPoint(final Point p) {
         this.x = p.x;
         this.y = p.y;
-        round();
     }
 
     public static Point plus(final Point p1, final Point p2) {
@@ -132,8 +122,7 @@ public class Point implements Serializable, Cloneable, Drawable, Movable, Rounda
     public Point plus(final Point p) {
         x += p.x;
         y += p.y;
-        round();
-        
+
         return this;
     }
 
@@ -148,81 +137,33 @@ public class Point implements Serializable, Cloneable, Drawable, Movable, Rounda
     public Point multiply(double s) {
         x *= s;
         y *= s;
-        round();
 
         return this;
     }
 
     public static double distanceSq(final Point p1, final Point p2) {
-        return Utils.round(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+        return Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2);
     }
 
     public static double distance(final Point p1, final Point p2) {
-        double sqrt = Math.sqrt(distanceSq(p1, p2));
-       // BigDecimal toRound = new BigDecimal(sqrt).setScale(1, RoundingMode.HALF_UP);
-        return Utils.round(sqrt);//toRound.doubleValue();
+        return Math.sqrt(distanceSq(p1, p2));
     }
 
     /**
      * Сравнение двух точек в лексикографическом порядке.
      */
-    public int compareTo(final Point p) {
-        if (p != null) {
-            if ((x > p.x) || ((x == p.x) && (y > p.y))) {
-                return 1;
-            } else if ((x < p.x) || ((x == p.x) && (y < p.y))) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-
-        return 0;
+    public int compareTo(final @Nonnull Point p) {
+        int xCmp = MathUtils.compare(x, p.x);
+        int yCmp = MathUtils.compare(y, p.y);
+        return xCmp != 0 ? xCmp : yCmp;
     }
 
     public double length() {
         return Math.sqrt(x*x + y*y);
     }
 
-    /**
-     * Получение полярного угла.
-     * @return
-     */
-    public double polarAngle() {
-        if ((x == 0.0) && (y == 0.0))
-            return -1.0;
-        if (x == 0.0)
-            return ((y > 0.0) ? 90 : 270);
-        double theta = Math.atan(y/x);                    // в радианах
-        theta *= 360 / (2 * Math.PI);            // перевод в градусы
-        if (x > 0.0)                                 // 1 и 4 квадранты
-            return ((y >= 0.0) ? theta : 360 + theta);
-        else                                         // 2 и З квадранты
-            return (180 + theta);
-    }
-
-    /**
-     * Функция orientation возвращает значение 1,
-     * если обрабатываемые три точки ориентированы положительно,
-     * -1, если они ориентированы отрицательно, или 0, если они коллинеарны.
-     * @param p0
-     * @param p1
-     * @param p2
-     * @return
-     */
-    public static int orientation(final Point p0, final Point p1, final Point p2) {
-        Point a = Point.minus(p1, p0);
-        Point b = Point.minus(p2, p0);
-        double sa = a.x * b.y - b.x * a.y;
-        if (sa > 0.0)
-            return 1;
-        if (sa < 0.0)
-            return -1;
-        return 0;
-    }
-
     public double distance(Edge e) {
-        Edge ab = (Edge) e.clone();
+        Edge ab = e.clone();
         ab.flip().rotate();          // поворот ab на 90 градусов
                                      // против часовой стрелки
         Point n = Point.minus(ab.getEnd(), ab.getStart());
@@ -233,16 +174,16 @@ public class Point implements Serializable, Cloneable, Drawable, Movable, Rounda
                                     // ребро f = n позиционируется
                                     // на текущей точке
                                     // t = расстоянию со знаком
-        return Utils.round(f.intersectionCoefficient(e));// вдоль вектора f до точки,
+        return f.intersectionCoefficient(e);// вдоль вектора f до точки,
                                     // в которой ребро f пересекает ребро е
     }
 
     /**
-     * Округляет координаты точки. Нацелено на избежание ситуаций типа 12.5000000000002 != 12.5
+     * Округляет координаты точки.
      */
     public void round() {
-        x = Utils.round(x);
-        y = Utils.round(y);
+        x = MathUtils.round(x);
+        y = MathUtils.round(y);
     }
 
     /**
@@ -253,8 +194,7 @@ public class Point implements Serializable, Cloneable, Drawable, Movable, Rounda
         return p.x * q.x + p.y * q.y;
     }
 
-    public Point rotate(double angle, Point center) {
-        Preconditions.checkNotNull(center);
+    public Point rotate(double angle, @Nonnull Point center) {
         double oldX = x;
         double oldY = y;
 
@@ -268,17 +208,18 @@ public class Point implements Serializable, Cloneable, Drawable, Movable, Rounda
         Point a = Point.minus(p2, p1);
         Point b = Point.minus(this, p1);
         double sa = a. x * b.y - b.x * a.y;
-        if (sa > 0.0)
+        int saToZero = MathUtils.compare(sa, 0.0);
+        if (saToZero == 1)
             return Position.LEFT;
-        if (sa < 0.0)
+        if (saToZero == -1)
             return Position.RIGHT;
-        if ((a.x * b.x < 0.0) || (a.y * b.y < 0.0))
+        if ( MathUtils.compare(a.x * b.x, 0.0) == -1 || MathUtils.compare(a.y * b.y, 0.0) == -1)
             return Position.BEHIND;
-        if (a.length() < b.length())
+        if (MathUtils.compare(a.length(), b.length()) == -1)
             return Position.BEYOND;
-        if (this.equals(p1))
+        if (this.eq(p1))
             return Position.ORIGIN;
-        if (this.equals(p2))
+        if (this.eq(p2))
             return Position.DESTINATION;
         return Position.BETWEEN;
     }
@@ -306,7 +247,9 @@ public class Point implements Serializable, Cloneable, Drawable, Movable, Rounda
         result = prime * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
+
     @Override
+    @Deprecated
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
@@ -315,11 +258,13 @@ public class Point implements Serializable, Cloneable, Drawable, Movable, Rounda
         if (getClass() != obj.getClass())
             return false;
         Point other = (Point) obj;
-        if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
-            return false;
-        if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
-            return false;
-        return true;
+        return Double.doubleToLongBits(x) == Double.doubleToLongBits(other.x) &&
+                Double.doubleToLongBits(y) == Double.doubleToLongBits(other.y);
+    }
+
+    public boolean eq(Point p) {
+        return this == p || p != null && MathUtils.equals(x, p.x) && MathUtils.equals(y, p.y);
+
     }
 
     public Point clone() {
@@ -332,7 +277,7 @@ public class Point implements Serializable, Cloneable, Drawable, Movable, Rounda
 
     @Override
     public String toString() {
-        return "(" + x + ", " + y + ")";
+        return "(" + MathUtils.round(x) + ", " + MathUtils.round(y) + ")";
     }
 
     /**
@@ -346,11 +291,5 @@ public class Point implements Serializable, Cloneable, Drawable, Movable, Rounda
             throw new UnexpectedException("Wrong pattern for point deserialization");
         }
         return Point.of(Double.valueOf(m.group(0)), Double.valueOf(m.group(1)));
-    }
-
-    @Override
-    public void draw(Graphics2D g) {
-        int radius = 4;
-        g.fillOval((int) (x - radius / 2), (int) (y - radius / 2), radius, radius);
     }
 }

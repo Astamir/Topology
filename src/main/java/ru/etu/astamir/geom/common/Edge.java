@@ -1,27 +1,22 @@
 package ru.etu.astamir.geom.common;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.primitives.Doubles;
-import ru.etu.astamir.common.Utils;
-import ru.etu.astamir.model.Drawable;
+import ru.etu.astamir.math.MathUtils;
 import ru.etu.astamir.model.Movable;
 import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Класс ребро.
  */
 @XmlRootElement
-public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundable {
+public class Edge implements Serializable, Cloneable, Movable, Roundable {
 
 	@XmlElement
     private Point start = new Point();
@@ -32,10 +27,10 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
     /**
      * Возможные отношения векторов
      */
-    public static enum EdgeRelation{ COLLINEAR, PARALLEL, SKEW /*наклон*/, SKEW_CROSS, SKEW_NO_CROSS
+    public enum EdgeRelation{ COLLINEAR, PARALLEL, SKEW /*наклон*/, SKEW_CROSS, SKEW_NO_CROSS
     }
 
-    public static enum StretchMethod{FORWARD, BACKWARD}
+    public enum StretchMethod{FORWARD, BACKWARD}
 
     public Edge(Point start, Point end) {
         this.start = start;
@@ -139,15 +134,15 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
 	 * @return returns n points of this edge, where 0 < n < 3
 	 */
 	public Collection<Point> getPoints() {
-		return start.equals(end) ? Collections.singleton(start) : Lists.newArrayList(start, end);
+		return isPoint() ? Collections.singleton(start) : Arrays.asList(start, end);
 	}
 
     public Point getTopPoint() {
-        return isHorizontal() ? start : (start.y() > end.y() ? start : end);
+        return isHorizontal() ? start : (MathUtils.compare(start.y(), end.y()) >= 0 ? start : end);
     }
 
     public Point getLeftPoint() {
-        return isVertical() ? start : (start.x() < end.x() ? start : end);
+        return isVertical() ? start : (MathUtils.compare(start.x(), end.x()) <= 0 ? start : end);
     }
 
     public Point getRightPoint() {
@@ -175,14 +170,6 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
         Point tmp = start;
         start = end;
         end = tmp;
-    }
-
-    public void correct() {
-        if (getOrientation() != Orientation.BOTH) {
-            if (!getDirection().isUpOrRight()) {
-                reverse();
-            }
-        }
     }
 
     /**
@@ -220,9 +207,8 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
      * @param length
      */
     public void shrink(double length) {
-        double eps = 1e-6; // error
         Point center = getCenter();
-        if ((length() - (2 * length)) < eps) {
+        if (MathUtils.compare(length(), 2 * length) <= 0) {
             setEdge(center.clone(), center.clone());
         } else {
             stretch(-length);
@@ -234,7 +220,6 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
         start.multiply(scale);
         end.multiply(scale);
     }
-
 
     public Edge stretch(Direction direction, double length) {
         Orientation orientation = getOrientation();
@@ -260,27 +245,32 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
         return this;
     }
 
-    public Edge stretch(Point workingPoint, Direction dir, double length) {
+    public Edge stretch(Point workingPoint, Direction dir, double length, boolean useStartForLinks) {
         double signedD = length * dir.getDirectionSign();
-        Orientation orientation = getOrientation();
+        Orientation orientation = dir.toOrientation();
         if (isPoint()) {
-            orientation = dir.toOrientation();
-        }
-        if (start.equals(workingPoint)) {
-            if (orientation == Orientation.HORIZONTAL) {
-                start.shiftX(signedD);
+            if (useStartForLinks) {
+                shift(start, orientation, signedD);
             } else {
-                start.shiftY(signedD);
+                shift(end, orientation, signedD);
             }
-        } else if (end.equals(workingPoint)) {
-            if (orientation == Orientation.HORIZONTAL) {
-                end.shiftX(signedD);
-            } else {
-                end.shiftY(signedD);
+        } else {
+            if (start.eq(workingPoint)) {
+                shift(start, orientation, signedD);
+            } else if (end.eq(workingPoint)) {
+                shift(end, orientation, signedD);
             }
         }
 
         return this;
+    }
+
+    private static void shift(Point point, Orientation orientation, double signedD) {
+        if (orientation == Orientation.HORIZONTAL) {
+            point.shiftX(signedD);
+        } else {
+            point.shiftY(signedD);
+        }
     }
 
 
@@ -288,10 +278,10 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
      *Возвращает левый нижний конец отрезка.
      */
     public Point getLeftBottomPoint() {
-        if (end.x() < start.x()) {
+        if (MathUtils.compare(end.x(), start.x()) < 0) {
             return end;
-        } else if (start.x() == end.x()) {
-            return start.y() <= end.x() ? start : end;
+        } else if (MathUtils.equals(start.x(), end.x())) {
+            return MathUtils.compare(start.y(), end.x()) <= 0 ? start : end;
         }
 
         return start;
@@ -306,15 +296,15 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
      * @return
      */
     public boolean isVertical() {
-        return start.x() == end.x();
+        return MathUtils.equals(start.x(), end.x());
     }
 
     public boolean isHorizontal() {
-        return start.y() == end.y();
+        return MathUtils.equals(start.y(),end.y());
     }
 
     public boolean isPoint() {
-        return start.equals(end);
+        return start.eq(end);
     }
 
     /**
@@ -332,7 +322,6 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
         Point.Position pos = point.classify(this);
         return pos == Point.Position.BETWEEN || pos == Point.Position.ORIGIN || pos == Point.Position.DESTINATION;
     }
-
 
     /**
      * Возвращает величину наклона текущего ребра
@@ -377,34 +366,17 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
         return isPointIn(edge.start) ? edge.start : edge.end;
     }
 
-
-    /**
-     * Для компонентной функции у задается значение х и она возвращает значение у,
-     * соответствующее точке (х, у) на текущей бесконечной прямой линии.
-     * Если ребро вертикально, возвращается у координата начала отрезка.
-     *
-     * @param x
-     * @return
-     */
-    public double у(double x) {
-        if (isVertical()) {
-            return start.y();
-        }
-
-        return slope() * (x - start.x()) + start.y();
-    }
-
     public EdgeRelation intersect(Edge e) {
-        Point a = (Point) start.clone();
-        Point b = (Point) end.clone();
+        Point a = start.clone();
+        Point b = end.clone();
 
-        Point c = (Point) e.start.clone();
-        Point d = (Point) e.end.clone();
+        Point c = e.start.clone();
+        Point d = e.end.clone();
 
         Point n = new Point(Point.minus(d, c).y(), Point.minus(c, d).x());
 
         double denom = Point.dotProduct(n, Point.minus(b, a));
-        if (denom == 0.0) {
+        if (MathUtils.equals(denom, 0.0)) {
             Point.Position pointPosition = start.classify(e);
             if ((pointPosition == Point.Position.LEFT) || (pointPosition == Point.Position.RIGHT)) {
                 return EdgeRelation.PARALLEL;
@@ -427,7 +399,7 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
 
         double denom = Point.dotProduct(n, Point.minus(b, a));
         double num = Point.dotProduct(n, Point.minus(a, c));
-        if (denom == 0.0) {
+        if (MathUtils.equals(denom, 0.0)) {
             throw new IllegalCoefficientException(-num / denom);
         }
 
@@ -454,7 +426,7 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
             }
 
             double t = intersectionCoefficient(e);
-            if ((0.0 <= t) && (t <= 1.0)) {
+            if (MathUtils.compare(t, 0) >= 0 && MathUtils.compare(t, 1.0) <= 0) {
                 return EdgeRelation.SKEW_CROSS;
             } else {
                 return EdgeRelation.SKEW_NO_CROSS;
@@ -497,8 +469,8 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
         double angle = 0.0;
         Point commonPoint = findCommonPoint(e);
         if (commonPoint != null) {
-            Point one = (Point) getOtherPoint(commonPoint).clone();
-            Point another = (Point) e.getOtherPoint(commonPoint).clone();
+            Point one = getOtherPoint(commonPoint).clone();
+            Point another = e.getOtherPoint(commonPoint).clone();
 
             double dx1 = one.x() - commonPoint.x();
             double dy1 = one.y() - commonPoint.y();
@@ -512,21 +484,24 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
     }
     
     public Point findCommonPoint(Edge e) {
-        if (equals(e)) {
+        if (eq(e)) {
             return start; // this scenario is undefined, but we will return start.
         }
-        if (start.equals(e.getStart()) || start.equals(e.getEnd())) {
+        if (start.eq(e.getStart()) || start.eq(e.getEnd())) {
             return start.clone();
         }
 
-        if (end.equals(e.getStart()) || end.equals(e.getEnd())) {
+        if (end.eq(e.getStart()) || end.eq(e.getEnd())) {
             return end.clone();
         }
 
         return null;
     }
 
-    public double getConstantComponent() {
+    /**
+     * Получить неизменяему координату отрезка. Работает только для вертикальных или горизонтальных.
+     */
+    public double constant() {
         if (isVertical()) {
             return start.x();
         } else if (isHorizontal()) {
@@ -541,25 +516,24 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
     }
 
     /**
-     * Отрезки пересекаются и точка пересечения не лежит на каком нибудь из отрезков.
-     * @return
+     * Отрезки пересекаются и точка пересечения не лежит на границе какого-нибудь из отрезков.
      */
     public boolean pureCross(Edge edge) {
         if (cross(edge) == EdgeRelation.SKEW_CROSS) {
             Point crossPoint = crossing(edge);
-            return !crossPoint.equals(start) && !crossPoint.equals(end) &&
-                   !crossPoint.equals(edge.start) && !crossPoint.equals(edge.end);
+            return !crossPoint.eq(start) && !crossPoint.eq(end) &&
+                   !crossPoint.eq(edge.start) && !crossPoint.eq(edge.end);
         }
         
         return false;  
     }
     
     public Point getOtherPoint(Point p) {
-        return start.equals(p) ? end : start;
+        return start.eq(p) ? end : start;
     }
 
     public boolean isOnEdges(Point point) {
-        return start.equals(point) || end.equals(point);
+        return start.eq(point) || end.eq(point);
     }
 
     /**
@@ -610,32 +584,19 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
                 (isVertical() ? Orientation.VERTICAL : Orientation.BOTH);
     }
 
-    public Direction getDirection(Orientation orientation) {
-        Preconditions.checkArgument(orientation != Orientation.BOTH, "orientation should be either horizontal or vertical");
-        Orientation workingOrientation = getOrientation();
-        if (workingOrientation == Orientation.BOTH) {
-            workingOrientation = orientation;
-        }
-
-        if (workingOrientation == Orientation.HORIZONTAL) {
-            return start.x() > end.x() ? Direction.LEFT : Direction.RIGHT;
-        } else {
-            return start.y() > end.y() ? Direction.DOWN : Direction.UP;
-        }
-    }
-
-
     /**
      * Работает только для ортогональных векторов.
      * @return
      */
     public Direction getDirection() {
         Orientation orientation = getOrientation();
-
+        if (orientation == Orientation.BOTH) {
+            return Direction.UNDETERMINED;
+        }
         if (orientation == Orientation.HORIZONTAL) {
-            return start.x() > end.x() ? Direction.LEFT : Direction.RIGHT;
+            return MathUtils.compare(start.x(), end.x()) > 0 ? Direction.LEFT : Direction.RIGHT;
         } else {
-            return start.y() > end.y() ? Direction.DOWN : Direction.UP;
+            return MathUtils.compare(start.y(), end.y()) > 0 ? Direction.DOWN : Direction.UP;
         }
     }
 
@@ -646,12 +607,11 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
      *  @return Расстояние до точки p.
      */
     public double distanceToPoint(Point p) {
-        return Utils.round(Math.abs((start.y() - end.y()) * p.x() + p.y() * (end.x() - start.x()) +
-                (start.x() * end.y() - end.x()*start.y())) / (Math.sqrt(Math.pow((end.x() - start.x()),2) + Math.pow((end.y() - start.y()),2))));
+        return Math.abs((start.y() - end.y()) * p.x() + p.y() * (end.x() - start.x()) +
+                (start.x() * end.y() - end.x()*start.y())) / (Math.sqrt(Math.pow((end.x() - start.x()),2) + Math.pow((end.y() - start.y()),2)));
     }
     
-    
-    public double distanceToEdge(final Edge edge) {        
+    public double distanceToEdge(final Edge edge) {
         if (isHorizontal() && edge.isHorizontal()) {
             double ourY = start.y();
             double otherY = edge.start.y();
@@ -667,157 +627,18 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
         }
         
         // it is pretty unlikely that we would face such a case, so its just for the hell of it
-        
-        List<Double> distances = Lists.newArrayList(distanceToPoint(edge.start), distanceToPoint(edge.end),
+        List<Double> distances = Arrays.asList(distanceToPoint(edge.start), distanceToPoint(edge.end),
                                                     edge.distanceToPoint(start), edge.distanceToPoint(end));
-        return Utils.round(Collections.min(distances));
+        return Collections.min(distances);
     }
     
     public <V> Optional<V> closestEdge(List<V> data, Function<V, Edge> toEdge) {
-        List<Pair<V, Double>> distList = Lists.newArrayList();
-        for (V elem : data) {
-            Edge edge = toEdge.apply(elem);
-            distList.add(Pair.of(elem, distanceToEdge(edge)));
-        }
-
-        if (distList.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(Collections.min(distList, new Comparator<Pair<V, Double>>() {
-            @Override
-            public int compare(Pair<V, Double> o1, Pair<V, Double> o2) {
-                return Doubles.compare(o1.right, o2.right);
-            }
-        }).left);
+        return Optional.ofNullable(data.stream().map(d -> Pair.of(d, distanceToEdge(toEdge.apply(d))))
+                .min((o1, o2) -> MathUtils.compare(o1.right, o2.right)).orElse(Pair.nullPair()).left);
     }
-
-    /**
-     * Поиск конца отрезка по точке внутри отрезка, направлению деформации и половине.
-     * Работает для вертикальных или горизонтальных отрезков.
-     * @param point
-     * @param direction
-     * @param half
-     * @return
-     */
-    public Point findEdgePoint(Point point, Direction direction, Direction half) {
-        if (!isPointIn(point)) {
-            throw new UnexpectedException("given point is outside or on the edge boundaries");
-        }
-
-        if (!half.isLeftOrRight()) {
-            throw new IllegalArgumentException("Половина для деформации задана некорректно. Половина : " + half);
-        }
-
-        boolean isHalfRight = (half == Direction.RIGHT);
-
-        final Point rightPoint = getRightPoint();
-        final Point leftPoint = getLeftPoint();
-        final Point bottomPoint = getBottomPoint();
-        final Point topPoint = getTopPoint();
-        switch (direction) {
-            case UP: return isHalfRight ? rightPoint : leftPoint;
-            case DOWN: return isHalfRight ? leftPoint : rightPoint;
-            case RIGHT: return isHalfRight ? bottomPoint : topPoint;
-            case LEFT: return isHalfRight ? topPoint : bottomPoint;
-            default: return null;
-        }
-    }
-
-
-    /**
-     * Деформация, подразумевая, что {@param point} лежит на прямой.
-     *
-     * @param point
-     * @param direction
-     * @param half
-     * @param width
-     * @return
-     */
-    public List<Edge> deform(Point point, Direction direction, Direction half, double width) {
-        if (!isPointIn(point)) {
-            throw new IllegalArgumentException("Точка излома не лежит внутри отрезка");
-        }
-
-        if (!half.isLeftOrRight()) {
-            throw new IllegalArgumentException("Половина для деформации задана некорректно. Половина : " + half);
-        }
-        
-        if ((isHorizontal() && !direction.isUpOrDown()) || (isVertical() && !direction.isLeftOrRight())) {
-            throw new IllegalArgumentException("Направление деформации задано некорректно. Направление : " + direction);
-        }
-
-        double directedWidth = direction.isUpOrRight() ? width : -width;
-        Edge workingEdge = (Edge) clone();
-
-        boolean reverse = workingEdge.start.compareTo(end) >= 0; 
-        
-        if (reverse) {
-            workingEdge.flip();
-        }
-
-        if (direction.isUpOrDown()) {
-            // horizontal deform
-
-            Point c = new Point(point.x(), point.y() + directedWidth);
-            ArrayList<Edge> upRightOrDownLeft = Lists.newArrayList(new Edge(workingEdge.start, point),
-                    new Edge(point, c), new Edge(c, new Point(workingEdge.end.x(), c.y())));
-            ArrayList<Edge> downRightOrUpLeft = Lists.newArrayList(new Edge(Point.of(workingEdge.start.x(), c.y()), c),
-                    new Edge(c, point), new Edge(point, workingEdge.end));
-            if (half.equals(Direction.RIGHT)) {
-                if (direction == Direction.UP) {
-                    return wrapDeformedEdges(upRightOrDownLeft, reverse);
-                } else {
-                    return wrapDeformedEdges(downRightOrUpLeft, reverse);
-                }
-            } else {
-                if (direction == Direction.UP) {
-                    return wrapDeformedEdges(downRightOrUpLeft, reverse);
-                } else {
-                    return wrapDeformedEdges(upRightOrDownLeft, reverse);
-                }
-            }
-        } else {
-            // vertical deform
-            Point c = new Point(point.x() + directedWidth, point.y());
-            ArrayList<Edge> rightLeftOrLeftRight = Lists.newArrayList(new Edge(workingEdge.start, point),
-                    new Edge(point, c), new Edge(c, new Point(c.x(), workingEdge.end.y())));
-            ArrayList<Edge> leftLeftOrRightRight = Lists.newArrayList(new Edge(Point.of(c.x(), workingEdge.start.y()), c),
-                    new Edge(c, point), new Edge(point, workingEdge.end));
-            if (half.equals(Direction.RIGHT)) {
-                if (direction == Direction.RIGHT) {
-                    return wrapDeformedEdges(leftLeftOrRightRight, reverse);
-                } else {
-                    return wrapDeformedEdges(rightLeftOrLeftRight, reverse);
-                }
-            } else {
-                if (direction == Direction.RIGHT) {
-                    return wrapDeformedEdges(rightLeftOrLeftRight, reverse);
-                } else {
-                    return wrapDeformedEdges(leftLeftOrRightRight, reverse);
-                }
-            }
-        }
-
-
-    }
-    
-    private List<Edge> wrapDeformedEdges(List<Edge> deformedEdges, boolean reverse) {
-        if (!reverse) {
-            return deformedEdges;
-        }
-
-        // all edges have wrong direction
-        for (Edge edge : deformedEdges) {
-            edge.reverse();
-        }
-
-        // and wrong order
-        return Lists.reverse(deformedEdges);
-    }
-
 
     @Override
+    @Deprecated
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -832,6 +653,11 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
         }
 
         return true;
+    }
+
+    public boolean eq(Edge e) {
+        return this == e || e != null &&
+                start.eq(e.getStart()) && end.eq(e.getEnd());
     }
 
     @Override
@@ -854,19 +680,10 @@ public class Edge implements Serializable, Cloneable, Drawable, Movable, Roundab
 
     @Override
     public String toString() {
-        return start + " - " + end;
+        return "[" + start + ";" + end + "]";
     }
 
     public Line2D.Double toLine2D() {
         return new Line2D.Double(start.x(), start.y(), end.x(), end.y());
-    }
-
-    @Override
-    public void draw(Graphics2D g) {
-        g.draw(toLine2D());
-      //  start.draw(g);
-     //   end.draw(g);
-//        g.drawString("A", start.intX(), start.intY());
-//        g.drawString("B", end.intX(), end.intY());
     }
 }

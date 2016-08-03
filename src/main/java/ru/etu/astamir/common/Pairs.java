@@ -1,12 +1,10 @@
 package ru.etu.astamir.common;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Утилитный класс для работы с парами.
@@ -24,13 +22,10 @@ public final class Pairs {
         FirstByIncrease, FirstByDecrease, SecondByIncrease, SecondByDecrease
     }
 
+    private static final Predicate<Pair> CONTAINS_PREDICATE = pair -> pair.right.equals(pair.right) && pair.left.equals(pair.left);
+
     public static <L, R> boolean containsPair(List<Pair<L, R>> pairs, final Pair<L, R> pair) {
-        return Iterables.any(pairs, new Predicate<Pair<L, R>>() {
-            @Override
-            public boolean apply(Pair<L, R> input) {
-                return input.right.equals(pair.right) && input.left.equals(pair.left);
-            }
-        });
+        return pairs.stream().anyMatch(CONTAINS_PREDICATE);
     }
 
     @SuppressWarnings("unchecked")
@@ -50,12 +45,12 @@ public final class Pairs {
 
     public static <F extends Comparable<? super F>, S extends Comparable<? super S>> void sortArray(
             Pair<F, S>[] pairs, Order order) {
-        Arrays.sort(pairs, new ComparatorHelper2<F, S>().getComparator(order));
+        Arrays.sort(pairs, getComparator(order));
     }
 
     public static <F extends Comparable<? super F>, S extends Comparable<? super S>> void sort(
             Pair<F, S>[] pairs, Order order) {
-        Arrays.sort(pairs, new ComparatorHelper<F, S>().getComparator(order));
+        Arrays.sort(pairs, getComparator(order));
     }
 
     public static <F extends Comparable<F>, S extends Comparable<S>> void sort(
@@ -65,7 +60,7 @@ public final class Pairs {
 
     public static <F extends Comparable<F>, S extends Comparable<? super S>> void sort(
             List<Pair<F, S>> pairs, Order order) {
-        Collections.sort(pairs, new ComparatorHelper<F, S>().getComparator(order));
+        Collections.sort(pairs, getComparator(order));
     }
 
     public static <F extends Comparable<F>, S extends Comparable<S>> void sortList(
@@ -75,7 +70,7 @@ public final class Pairs {
 
     public static <F extends Comparable<F>, S extends Comparable<? super S>> void sortList(
             List<Pair<F, S>> pairs, Order order) {
-        Collections.sort(pairs, new ComparatorHelper2<F, S>().getComparator(order));
+        Collections.sort(pairs, getComparator(order));
     }
     
     public static <F extends Comparable<F>, S extends Comparable<? super S>> F min(List<Pair<F, S>> pairs) {
@@ -83,92 +78,22 @@ public final class Pairs {
             return null;
         }
         
-        return Collections.min(pairs, new ComparatorHelper<F, S>().getComparator(Order.SecondByIncrease)).left;
+        return Collections.min(pairs, getComparator(Order.SecondByIncrease)).left;
     }
 
-    private static class ComparatorHelper
-            <F extends Comparable<? super F>, S extends Comparable<? super S>> {
+    static <F extends Comparable<? super F>, S extends Comparable<? super S>> Comparator<Pair<F, S>> getComparator(Order order) {
+        switch (order) {
+            case FirstByIncrease:
+                return (o1, o2) -> o1.left.compareTo(o2.left);
+            case FirstByDecrease:
+                return (o1, o2) -> o2.left.compareTo(o1.left);
+            case SecondByIncrease:
+                return (o1, o2) -> o1.right.compareTo(o2.right);
+            case SecondByDecrease:
+                return (o1, o2) -> o2.right.compareTo(o1.right);
 
-        Comparator<Pair<F, S>> getComparator(Order order) {
-            switch (order) {
-                case FirstByIncrease:
-                    return new Comparator<Pair<F, S>>() {
-                        @Override
-                        public int compare(Pair<F, S> o1, Pair<F, S> o2) {
-                            return o1.left.compareTo(o2.left);
-                        }
-                    };
-                case FirstByDecrease:
-                    return new Comparator<Pair<F, S>>() {
-                        @Override
-                        public int compare(Pair<F, S> o1, Pair<F, S> o2) {
-                            return o2.left.compareTo(o1.left);
-                        }
-                    };
-                case SecondByIncrease:
-                    return new Comparator<Pair<F, S>>() {
-                        @Override
-                        public int compare(Pair<F, S> o1, Pair<F, S> o2) {
-                            return o1.right.compareTo(o2.right);
-                        }
-                    };
-
-                case SecondByDecrease:
-                    return new Comparator<Pair<F, S>>() {
-                        @Override
-                        public int compare(Pair<F, S> o1, Pair<F, S> o2) {
-                            return o2.right.compareTo(o1.right);
-                        }
-                    };
-
-                default:
-                    throw new RuntimeException();
-            }
+            default:
+                throw new RuntimeException();
         }
     }
-
-    private static class ComparatorHelper2
-            <F extends Comparable<? super F>, S extends Comparable<? super S>> {
-
-        Comparator<Pair<F, S>> getComparator(Order order) {
-            switch (order) {
-                case FirstByIncrease:
-                    return new Comparator<Pair<F, S>>() {
-                        @Override
-                        public int compare(Pair<F, S> o1, Pair<F, S> o2) {
-                            return o1.left.compareTo(o2.left);
-                        }
-                    };
-                case FirstByDecrease:
-                    return new Comparator<Pair<F, S>>() {
-                        @Override
-                        public int compare(Pair<F, S> o1,
-                                           Pair<F, S> o2) {
-                            return o2.left.compareTo(o1.left);
-                        }
-                    };
-                case SecondByIncrease:
-                    return new Comparator<Pair<F, S>>() {
-                        @Override
-                        public int compare(Pair<F, S> o1,
-                                           Pair<F, S> o2) {
-                            return o1.right.compareTo(o2.right);
-                        }
-                    };
-
-                case SecondByDecrease:
-                    return new Comparator<Pair<F, S>>() {
-                        @Override
-                        public int compare(Pair<F, S> o1,
-                                           Pair<F, S> o2) {
-                            return o2.right.compareTo(o1.right);
-                        }
-                    };
-
-                default:
-                    throw new RuntimeException();
-            }
-        }
-    }
-
 }

@@ -60,7 +60,7 @@ public class WireChainingTest {
         Direction currentDirection = axis.getDirection();
         for (int i = 0; i < parts - 1; i++) {
             currentDirection = currentDirection.orthogonal();
-            wire.addPart(currentDirection, new Random().nextInt(50), 1000, true);
+            wire.addPart(currentDirection, new Random().nextInt(50)+1, 1000, true);
         }
         return wire;
     }
@@ -68,21 +68,15 @@ public class WireChainingTest {
     private static void move(Wire wire) {
         for (SimpleWire simpleWire : wire.getParts()) {
             for (int i = 0; i < new Random().nextInt(5); i++) {
-                if (simpleWire.isLink()) {
-                    continue;
-                }
                 Direction direction = Direction.randomDirection(simpleWire.getAxis().getOrientation().getOppositeOrientation());
                 wire.movePart(simpleWire, direction, new Random().nextInt(10));
-                wire.ensureChained();
+               // wire.ensureChained();
             }
         }
     }
 
     private static void stretch(Wire wire) {
         for (SimpleWire simpleWire : wire.getParts()) {
-            if (simpleWire.isLink()) {
-                continue; // don't move link
-            }
             for (int i = 0; i < new Random().nextInt(5); i++) {
                 Direction direction = Direction.randomDirection(simpleWire.getAxis().getOrientation());
                 wire.stretch(simpleWire, direction, new Random().nextDouble()*10);
@@ -102,7 +96,6 @@ public class WireChainingTest {
             }
             Edge axis = simpleWire.getAxis();
             Point center = axis.getCenter().clone();
-            center.setPoint(center.intX(), center.intY());
             links.add(Pair.of(center, axis.getDirection().orthogonal()));
             linksToCreate--;
             if (linksToCreate <= 0) {
@@ -122,13 +115,14 @@ public class WireChainingTest {
 
         Assert.assertEquals(true, w2.isChained());
         Assert.assertEquals(true, w2.isConnected());
+        Assert.assertEquals(true, w2.isOrthogonal());
     }
 
     @Test
     public void testChainedMove() {
         Assert.assertEquals(true, w2.isChained());
         Assert.assertEquals(true, w2.isConnected());
-        for (int i = 0; i < TEST_ITERATIONS; i++) {
+        for (int i = 0; i < TEST_ITERATIONS * TEST_ITERATIONS; i++) {
             move(w2);
             Assert.assertEquals(true, w2.isChained());
             Assert.assertEquals(true, w2.isConnected());
@@ -141,7 +135,7 @@ public class WireChainingTest {
     public void testChainedStretch() {
         Assert.assertEquals(true, w2.isChained());
         Assert.assertEquals(true, w2.isConnected());
-        for (int i = 0; i < TEST_ITERATIONS; i++) {
+        for (int i = 0; i < TEST_ITERATIONS * TEST_ITERATIONS; i++) {
             stretch(w2);
             Assert.assertEquals(true, w2.isChained());
             Assert.assertEquals(true, w2.isConnected());
@@ -152,12 +146,14 @@ public class WireChainingTest {
 
     @Test
     public void testChainedWithLinks() {
-        for (int i = 0; i < TEST_ITERATIONS; i++) {
+        for (int i = 0; i < 10; i++) {
             Assert.assertEquals(true, w3.isChained());
             Assert.assertEquals(true, w3.isConnected());
+            Assert.assertEquals(true, w3.isOrthogonal());
             createLinks(w3);
             Assert.assertEquals(true, w3.isChained());
             Assert.assertEquals(true, w3.isConnected());
+            Assert.assertEquals(true, w3.isOrthogonal());
         }
     }
 

@@ -135,7 +135,7 @@ public class CompressContactCommand extends CompressCommand {
                 diagonal = Utils.assignIfSmaller(diagonal, Point.distance(onePoint, anotherPoint));
             }
         }
-        return Utils.round(diagonal);
+        return diagonal;
     }
 
     private ActiveBorder getContactMoveDistance(Contact contact, Collection<Border> borders, Direction direction) {

@@ -13,6 +13,7 @@ import ru.etu.astamir.gui.common.ElementContainer;
 import ru.etu.astamir.gui.painters.*;
 import ru.etu.astamir.gui.painters.Painter;
 import ru.etu.astamir.launcher.VirtualTopology;
+import ru.etu.astamir.math.MathUtils;
 import ru.etu.astamir.model.TopologyElement;
 
 import javax.swing.*;
@@ -346,7 +347,7 @@ public class VirtualGridPanel extends JPanel {
                 double y = Math.abs(one.y() - another.y());
                 l = x > y ? x : y;
             }
-            label.setText(point.toString() + (l >= 0 ? ("l=" + Utils.round(l)) : ""));
+            label.setText(point.toString() + (l >= 0 ? ("l=" + MathUtils.round(l)) : ""));
         }
 
         @Override

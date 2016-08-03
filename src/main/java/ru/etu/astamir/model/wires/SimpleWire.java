@@ -227,15 +227,15 @@ public class SimpleWire extends TopologyElement implements Movable, Stretchable,
 		return moveDirectly(dx, dy);
 	}
 
-	boolean stretchDirectly(Point base, Direction direction, double d) {
-        axis.stretch(base, direction, d);
+	boolean stretchDirectly(Point base, Direction direction, double d, boolean useStartIfPoint) {
+        axis.stretch(base, direction, d, useStartIfPoint);
         rebuildBounds();
 		return true;
     }
 
 	@Override
 	public boolean stretch(Direction direction, double length, Point stretchPoint) {
-		return stretchDirectly(stretchPoint, direction, length);
+		return stretchDirectly(stretchPoint, direction, length, true);
 	}
 
     public double length() {

@@ -68,7 +68,7 @@ public class MoveCommandTest {
         double dy = 0;
         for (int i = 0; i < moveCount; i++) {
             Direction direction = Direction.randomDirection();
-            double length = Utils.round(new Random().nextDouble());
+            double length = new Random().nextDouble();
             double signedD = GeomUtils.getSignedLength(direction, length);
             if (direction.isLeftOrRight()) {
                 dx += signedD;

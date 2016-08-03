@@ -9,11 +9,9 @@ import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Orientation;
 import ru.etu.astamir.geom.common.Point;
-import ru.etu.astamir.math.MathUtils;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.wires.SimpleWire;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 
 /**
@@ -110,10 +108,6 @@ public class Utils {
 
     public static boolean isEven(int number) {
         return (number & 1) == 0;
-    }
-
-    public static double round(double value) {
-        return new BigDecimal(value).setScale(MathUtils.MAX_PRECISION, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     public static double assignIfSmaller(double current, double new_one, double nan) {

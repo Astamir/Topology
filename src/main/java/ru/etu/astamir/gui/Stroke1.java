@@ -161,7 +161,8 @@ public class Stroke1 extends JFrame {
             g2d.setColor(color);
         }
 
-        g.drawString(direction.toString(), 25, 10);
+        g.drawString(direction.toString(), 100, 150);
+        ((Graphics2D) g).drawString(wire.isChained() ? "chained" : "not chained", 150, 150);
         g.setColor(Color.red);
         if (selected_point != null) {
             DrawingUtils.drawPoint(selected_point, 5, false, g);

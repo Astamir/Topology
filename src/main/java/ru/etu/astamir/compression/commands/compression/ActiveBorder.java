@@ -8,7 +8,7 @@ import ru.etu.astamir.compression.BorderPart;
  * Created by astamir on 10/24/15.
  */
 public class ActiveBorder implements Comparable<ActiveBorder> {
-    public static ActiveBorder NAN = new ActiveBorder(null, Utils.LENGTH_NAN);
+    public static final ActiveBorder NAN = new ActiveBorder(null, Utils.LENGTH_NAN);
     private BorderPart part;
     private double length;
 

@@ -204,7 +204,7 @@ public class WireUtils {
         double to_closest_part = isMin(wire, part, direction) ? 0.0 : closest_part.isPresent() ? part.axis.distanceToEdge(closest_part.get().axis) : 0.0;
 
         if (preferable.isPresent()) {
-            to_closest_part = Utils.round(GeomUtils.distance(part.axis.getConstantComponent(), preferable.get()));
+            to_closest_part = GeomUtils.distance(part.axis.constant(), preferable.get());
         }
         double to_closest_border = getBorderMoveDistance(wire, part, border, direction);
 
@@ -307,7 +307,7 @@ public class WireUtils {
 
     public static boolean isMin(Wire wire, SimpleWire part, Direction dir) {
         boolean min = true;
-        double constant = part.getAxis().getConstantComponent();
+        double constant = part.getAxis().constant();
         for (SimpleWire p : wire.getParts()) {
             Edge axis = p.getAxis();
             double start = dir.getDirectionalComponent(axis.getStart());
