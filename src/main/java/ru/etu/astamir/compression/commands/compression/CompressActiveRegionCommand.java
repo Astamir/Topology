@@ -15,5 +15,8 @@ public class CompressActiveRegionCommand extends CompressContourCommand {
         super(grid, borders, element_name, direction, side);
     }
 
-
+    @Override
+    public boolean execute() {
+        return super.execute();
+    }
 }

@@ -374,18 +374,25 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
             return; // already chained
         }
 
-        for (int i = 0; i < size(); i++) {
-            final Edge current = parts.get(i).getAxis();
-            if (i + 1 < size()) {
-                final Edge next = parts.get(i + 1).getAxis();
+        for (ListIterator<SimpleWire> i = parts.listIterator(); i.hasNext();) {
+            final Edge current = i.next().getAxis();
+            if (i.hasNext()) {
+                final Edge next = i.next().getAxis();
                 final Point commonPoint = current.findCommonPoint(next);
                 if (commonPoint == null) {
-                    throw new UnexpectedException("Two consecutive wire parts does not have common point");
+                    i.remove();
+                    i.previous();
+                    continue;
+                    //throw new UnexpectedException("Two consecutive wire parts does not have common point");
                 }
+
                 if (!current.getEnd().eq(next.getStart())) {
-                    // we have to chain them somehow
-                    next.reverse();
+                    i.remove();
+                    i.previous();
+                    continue;
                 }
+                i.previous();
+
             }
             if (isChained()) {
                 break;
@@ -398,7 +405,7 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
             SimpleWire current = i.next();
             if (i.hasNext()) {
                 SimpleWire next = i.next();
-                if (!MathUtils.equals(current.getAxis().getEnd(), next.getAxis().getStart())) {
+                if (!current.getAxis().getEnd().eq(next.getAxis().getStart())) {
                     return false;
                 }
                 i.previous();
@@ -411,6 +418,12 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
     public boolean isOrthogonal() {
         SimpleWire previous = null;
         int size = size();
+        if (size < 1) {
+            return true;
+        }
+        if (size == 1) {
+            return !parts.get(0).isLink();
+        }
         for (int i = 0; i < size; i++) {
             SimpleWire current = parts.get(i);
             if (i + 1 < size) {
@@ -477,7 +490,7 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
      * @return true, если получилось передвинуть заданный кусок, false иначе.
      */
     public boolean movePart(int partIndex, Direction direction, double width) {
-        if (width == 0) {
+        if (MathUtils.equals(width, 0D)) {
             return false;
         }
 
@@ -505,7 +518,7 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
                     connectedPart.stretchDirectly(WireUtils.getCommonPoint(part, connectedPart), direction, width, partIndex < connectedPart.getIndex()); // TODO common point
                 }
                 part.moveDirectly(direction, width); // if direction is orthogonal we just moving the part
-                ensureChained();
+
 
                 //rebuildBounds();
                 return true;
@@ -540,13 +553,6 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
 //        }
 
         return false;
-    }
-
-    public void round() {
-        for (SimpleWire part : parts) {
-            part.getAxis().getStart().round();
-            part.getAxis().getEnd().round();
-        }
     }
 
     /**
@@ -777,17 +783,17 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
             }
         }
 
-        if (found_parts.size() == 1) {
-            return Optional.of(found_parts.iterator().next());
+        if (found_parts.isEmpty()) {
+            return Optional.empty();
         }
 
         for (SimpleWire found_part : found_parts) {
-            if (!found_part.getAxis().isPoint()) {
+            if (found_part.getAxis().isPoint()) {
                 return Optional.of(found_part);
             }
         }
 
-        return Optional.empty();
+        return Optional.of(found_parts.iterator().next());
     }
 
     public Optional<SimpleWire> findLink(Point point) {
@@ -803,7 +809,7 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
 
             while (i.hasNext()) {
                 SimpleWire next = i.next();
-                if (next.getAxis().equals(part.getAxis())) {
+                if (next.getAxis().eq(part.getAxis())) {
                     i.remove();
                 } else {
                     i.previous();
@@ -908,7 +914,7 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
     private boolean hasEmptyLink(Point p) {
         for (SimpleWire part : parts) {
             Edge partAxis = part.getAxis();
-            if (partAxis.isPoint() && partAxis.getStart().equals(p)) {
+            if (partAxis.isPoint() && partAxis.getStart().eq(p)) {
                 return true;
             }
         }
@@ -921,20 +927,30 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
         if (closestPart.isPresent()) {
             SimpleWire part = closestPart.get();
             if (part.deformable) { // only in that case we can create an empty link
-                return createAnEmptyLink(getDeformPoint(part.getAxis(), p, direction), part, maxBendLength);
+                Edge axis = part.getAxis();
+                Point deformPoint = getDeformPoint(axis, p, direction);
+                if (axis.isOnEdges(deformPoint)) {
+                    List<SimpleWire> connectedParts = getConnectedParts(part);
+                    if (connectedParts.size() > 1 || connectedParts.stream().filter(sw -> sw.getAxis().isOnEdges(deformPoint)).count() > 0) {
+                        return Lists.newArrayList();
+                    }
+                }
+                return createAnEmptyLink(deformPoint, part, maxBendLength);
             }
         }
-//        if (!isConnected()) {
+        if (!isConnected()) {
 //            throw new UnexpectedException("not connected");
-//        }
+        }
         return Lists.newArrayList();
     }
 
     // TODO links on edges
     protected List<SimpleWire> createAnEmptyLink(Point p, SimpleWire closestPart, double maxBendLength) {
-        p.round();
         Preconditions.checkArgument(closestPart.getAxis().isPointInOrOnEdges(p),
                 "Given wire part does not contain link point: part=" + closestPart.getAxis() + ", point=" + p);
+        if (!isChained()) {
+            //throw new UnexpectedException("wire should be chained");
+        }
         if (!hasEmptyLink(p)) {
             Edge partAxis = closestPart.getAxis();
 
@@ -963,6 +979,10 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
             i.add(left);
             i.add(link);
             i.add(right);
+
+            if (!isChained()) {
+//                throw new UnexpectedException("wire should be chained");
+            }
 
             return Lists.newArrayList(left, link, right);
         }

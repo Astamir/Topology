@@ -47,10 +47,10 @@ public class TopologyCompressor {
         commands.clear();
 
         prepareBorders();
-       // compress(Direction.LEFT);
-        //compress(Direction.RIGHT);
-      //  straightenWires(Direction.LEFT);
-      compress(Direction.UP);
+        compress(Direction.LEFT);
+        compress(Direction.RIGHT);
+        straightenWires(Direction.LEFT);
+     // compress(Direction.UP);
 //        compress(Direction.DOWN);
 //        straightenWires(Direction.UP);
         // todo compressing wires for another direction

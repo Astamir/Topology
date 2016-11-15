@@ -264,7 +264,6 @@ public class WireUtils {
 //        if (!wire.isChained()) {
 //            wire.ensureChained();
 //        }
-        wire.round();
         if (deformation_allowed)
             createEmptyLinks(wire, overlay, direction);
 
@@ -303,6 +302,14 @@ public class WireUtils {
         //bus.removeEmptyPartsOnEdges(); // handle more carefully
         //bus.removeEmptyParts(!wasEmptyPartsOnEdges);
         // todo remove empty links on 5the edges ?
+    }
+
+    private void fixWire(Wire wire) {
+        if (!wire.isChained() || !wire.isOrthogonal()) {
+
+        }
+
+        wire.removeEmptyParts(false);
     }
 
     public static boolean isMin(Wire wire, SimpleWire part, Direction dir) {

@@ -24,7 +24,7 @@ public class BorderPainter implements Painter<Border> {
         for (BorderPart part : border.getParts()) {
             Color color = ProjectObjectManager.getColorCentral().getColor(part.getSymbol());
             graphics.setColor(color);
-            DrawingUtils.drawEdge(part.getAxis(), 0, g2d, coordinateTranslator);
+           // DrawingUtils.drawEdge(part.getAxis(), 0, g2d, coordinateTranslator);
             Point axisCenter = coordinateTranslator.apply(part.getAxis().getCenter());
             //g2d.drawString(String.valueOf(System.identityHashCode(part)), (float) axisCenter.x(), (float) axisCenter.y());
         }

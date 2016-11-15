@@ -548,12 +548,15 @@ public class Border {
 
     // TODO
     public static void imitate(Wire bus, Border border, Direction direction, boolean deformation_allowed) {
-        bus.round();
         if (!bus.isChained()) {
             //bus.ensureChained();
         }
         if (deformation_allowed)
             border.createEmptyLinks(bus, direction);
+
+        if (!bus.isConnected()) {
+            bus.ensureChained();
+        }
 
         for (SimpleWire part : bus.getParts()) {
             if (!part.getAxis().getOrientation().isOrthogonal(direction.toOrientation()) || part.isLink()) {
@@ -580,7 +583,7 @@ public class Border {
         Border copy = CompressionUtils.borderWithoutConnectedElements(bus, this, grid);
         imitate(bus, copy.getOverlay(direction), direction, deformation_allowed);
         if (!bus.isConnected()) {
-            throw new UnexpectedException("not connected");
+          //  throw new UnexpectedException(bus.getSymbol() + " not connected");
         }
     }
 
