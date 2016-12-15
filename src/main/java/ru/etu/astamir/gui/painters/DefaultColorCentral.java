@@ -29,6 +29,7 @@ public class DefaultColorCentral implements ColorCentral{
         colorMap.put("SN", Color.GREEN);
         colorMap.put("CNA", Color.BLACK);
         colorMap.put("TC", Color.BLACK);
+        colorMap.put("PIN", Color.ORANGE);
     }
 
     @Override

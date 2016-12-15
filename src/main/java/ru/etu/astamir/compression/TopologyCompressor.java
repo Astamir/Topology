@@ -10,6 +10,7 @@ import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.launcher.Topology;
 import ru.etu.astamir.model.*;
 import ru.etu.astamir.model.contacts.Contact;
+import ru.etu.astamir.model.contacts.Pin;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
 import ru.etu.astamir.model.regions.Contour;
 import ru.etu.astamir.model.wires.Wire;
@@ -167,6 +168,8 @@ public class TopologyCompressor {
                 commands.addCommand(command);
             } else if (element instanceof Contour) {
                 processContour((Contour) element, affectedBorders, compressionDirection);
+            } else if (element instanceof Pin) {
+                processContact((Contact) element, affectedBorders, compressionDirection, Collections.<Contact>emptyList());
             } else {
 
             }

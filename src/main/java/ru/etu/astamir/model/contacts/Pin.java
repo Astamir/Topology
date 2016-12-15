@@ -1,0 +1,157 @@
+package ru.etu.astamir.model.contacts;
+
+import com.google.common.primitives.Doubles;
+import ru.etu.astamir.geom.common.Edge;
+import ru.etu.astamir.geom.common.Point;
+import ru.etu.astamir.geom.common.Polygon;
+import ru.etu.astamir.model.*;
+import ru.etu.astamir.model.connectors.ConnectionPoint;
+import ru.etu.astamir.model.regions.ContactWindow;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+public class Pin extends TopologyElement implements ConnectionPoint, Serializable, ComplexElement, Movable, Edged {
+    private static final long serialVersionUID = 1L;
+
+    protected Edge center;
+
+    protected Map<Material, ContactWindow> contactWindows = new HashMap<>();
+
+    protected ContactType type = ContactType.USUAL;
+
+    protected Collection<String> connectedElements = new HashSet<>();
+
+    private Map<Integer, Integer> constrain = new HashMap<>();
+
+    public Pin(String name, Edge center) {
+        super(name);
+        this.center = center;
+    }
+
+    public Pin(Edge center) {
+        super();
+        this.center = center;
+    }
+
+    protected Pin() {
+    }
+
+    public Edge getCenter() {
+        return center;
+    }
+
+    public void setCenter(Edge center) {
+        this.center = center;
+    }
+
+    public ContactType getType() {
+        return type;
+    }
+
+    public void setType(ContactType type) {
+        this.type = type;
+    }
+
+    public Map<Material, ContactWindow> getContactWindows() {
+        return contactWindows;
+    }
+
+    public void setContactWindows(Map<Material, ContactWindow> contactWindows) {
+        this.contactWindows = contactWindows;
+    }
+
+    @Override
+    public Collection<Point> getCoordinates() {
+        return center.getPoints();
+    }
+
+    @Override
+    public boolean setCoordinates(Collection<Point> coordinates) {
+        throw new NotImplementedException();
+    }
+
+    public void setConnectedElements(Collection<String> connectedElements) {
+        this.connectedElements = connectedElements;
+    }
+
+    public void addConnectedElement(String name) {
+        connectedElements.add(name);
+    }
+
+    public void removeConnectedElement(String name) {
+        connectedElements.remove(name);
+    }
+
+    @Override
+    public Collection<String> getConnectedNames() {
+        return connectedElements;
+    }
+
+    @Override
+    public Polygon getBounds() {
+        //return new Polygon(); // it's heavily dependent on the technology
+        return !contactWindows.isEmpty() ? contactWindows.values().stream().max((o1, o2) -> Doubles.compare(o1.getBounds().area(), o2.getBounds().area())).get().getBounds() : Polygon.emptyPolygon();
+    }
+
+    @Override
+    public Pin clone() {
+        Pin clone = (Pin) super.clone();
+        clone.setType(type);
+        clone.setCenter(center.clone());
+
+        clone.connectedElements = new HashSet<>(connectedElements);
+
+        Map<Material, ContactWindow> windows = new HashMap<>();
+        for (Map.Entry<Material, ContactWindow> entry : contactWindows.entrySet()) {
+            windows.put(entry.getKey(), (ContactWindow) entry.getValue().clone());
+        }
+        clone.setContactWindows(windows);
+
+        return clone;
+    }
+
+    @Override
+    public boolean isSimple() {
+        return false;
+    }
+
+    @Override
+    public Collection<? extends TopologyElement> getElements() {
+        return contactWindows.values();
+    }
+
+    @Override
+    public boolean move(double dx, double dy) {
+        boolean success = false;
+        for (ContactWindow contactWindow : contactWindows.values()) {
+
+            if(getConstrain() != null) {
+                success = center.move(dx, dy);
+                success &= contactWindow.move(dx, dy);
+            }
+            else {
+                success = center.move(dx, dy);
+                success &= contactWindow.move(dx, dy);
+            }
+        }
+        return success;
+    }
+
+    @Override
+    public Edge getAxis() {
+        return center;
+    }
+
+    public Map<Integer, Integer> getConstrain() {
+        return constrain;
+    }
+
+    public void setConstrain(Map<Integer, Integer> constrain) {
+        this.constrain = constrain;
+    }
+}

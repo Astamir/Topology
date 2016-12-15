@@ -193,6 +193,38 @@ public class DefaultElementFactory implements ElementFactory {
         });
 
         /* Контактные окна*/
+        cache.put("PIN", new ElementCreator() {//Контактное окно между М1C_  и NA_
+            @Override
+            public Entity create(Point... coordinates) {
+                if (coordinates.length == 0) {
+                    throw new UnexpectedException("there are no coordinates");
+                }
+
+                Edge center;
+                if (coordinates.length == 1) {
+                    center = Edge.of(coordinates[0]);
+                } else {
+                    center = new Edge(coordinates[0], coordinates[1]);
+                }
+
+                Contact contact = new Contact(center);
+                contact.setSymbol("PIN");
+                contact.setConductionType(ConductionType.N);
+                contact.setType(ContactType.USUAL);
+
+                ContactWindow window1 = new ContactWindow("CNA", Rectangle.of(center, 0, 0));
+                window1.setMaterial(Material.POLYSILICON);
+                window1.setLayer(ProjectObjectManager.getLayerFactory().forName("SI"));
+                contact.getContactWindows().put(window1.getMaterial(), window1);
+
+                ContactWindow window2 = new ContactWindow("M1", Rectangle.of(center, 0, 0));
+                window2.setMaterial(Material.METAL);
+                window2.setLayer(ProjectObjectManager.getLayerFactory().forName("M1"));
+                contact.getContactWindows().put(window2.getMaterial(), window2);
+
+                return contact;
+            }
+        });
         cache.put("CNA", new ElementCreator() {//Контактное окно между М1C_  и NA_
             @Override
             public Entity create(Point... coordinates) {

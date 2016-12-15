@@ -2,6 +2,7 @@ package ru.etu.astamir.gui.painters;
 
 import ru.etu.astamir.model.Entity;
 import ru.etu.astamir.model.contacts.Contact;
+import ru.etu.astamir.model.contacts.Pin;
 import ru.etu.astamir.model.regions.ActiveRegion;
 import ru.etu.astamir.model.wires.Gate;
 import ru.etu.astamir.model.wires.Wire;
@@ -27,6 +28,7 @@ public class DefaultColorFactory implements ColorFactory {
         colors.put(ActiveRegion.class, Color.RED);
         colors.put(Contact.class, Color.BLACK);
         colors.put(Wire.class, Color.BLACK);
+        colors.put(Pin.class, Color.ORANGE);
     }
 
     @Override

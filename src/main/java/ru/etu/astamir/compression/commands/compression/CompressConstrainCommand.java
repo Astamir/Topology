@@ -14,10 +14,7 @@ import ru.etu.astamir.model.contacts.Contact;
 import java.util.Collection;
 import java.util.Map;
 
-/**
- * Created by Astamir on 11.01.2015.
- */
-public class CompressLimitationCommand extends CompressCommand {
+public class CompressConstrainCommand extends CompressCommand {
     private static final Predicate<Contact> DIAGONAL_CONTACTS_ANALYSIS = new Predicate<Contact>() {
         @Override
         public boolean apply(Contact input) {
@@ -27,7 +24,7 @@ public class CompressLimitationCommand extends CompressCommand {
     private MoveCommand move;
     private UpdateBorderWithContactCommand update_border;
 
-    public CompressLimitationCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, Direction direction, String element_name) {
+    public CompressConstrainCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, Direction direction, String element_name) {
         super(grid, borders, element_name, direction);
     }
 
