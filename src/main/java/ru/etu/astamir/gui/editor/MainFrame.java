@@ -79,6 +79,33 @@ public class MainFrame extends JFrame {
         initComponents();
     }
 
+    public MainFrame(String currentTopology) {
+        this.currentTopology = currentTopology;
+        this.defaultTopology = (VirtualTopology) Preconditions.checkNotNull(ProjectObjectManager.getCurrentProject().getTopologies().get(currentTopology));
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+        });
+
+        addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (editing != null) {
+
+                }
+            }
+        });
+
+
+        initComponents();
+    }
+
     private void initComponents() {
         setLayout(new MigLayout("ins 0"));
         setJMenuBar(createMainMenu());
@@ -96,8 +123,10 @@ public class MainFrame extends JFrame {
         tb.add(new AddElementAction());
         tb.add(new ConvertAction());
         tb.add(new CompressAction());
+        tb.add(new FullCompressAction());
         return tb;
     }
+
     private JMenuBar createMainMenu() {
         JMenuBar mainMenu = new JMenuBar();
 
@@ -167,7 +196,7 @@ public class MainFrame extends JFrame {
                 Collection<Border> affectedBorders = ((CompressCommand) peek).getAffectedBorders();
                 if (peek instanceof CompressWireCommand) {
                     Border border = affectedBorders.iterator().next();
-                    border = CompressionUtils.borderWithoutConnectedElements((Wire)((CompressWireCommand) peek).getElement(), border, defaultTopology.getGrid());
+                    border = CompressionUtils.borderWithoutConnectedElements((Wire) ((CompressWireCommand) peek).getElement(), border, defaultTopology.getGrid());
                     border = border.getOverlay(Direction.LEFT);
                     paintPanel.setBorders(Collections.singletonList(border));
                 } else {
@@ -181,7 +210,6 @@ public class MainFrame extends JFrame {
                 border_painted = false;
             }
             compressor.step(1);
-
 
 
             paintPanel.setModel(new VirtualElementModel(defaultTopology));
@@ -348,6 +376,67 @@ public class MainFrame extends JFrame {
             dialog.setContentPane(editorPanel);
             dialog.setSize(400, 500);
             dialog.setVisible(true);
+        }
+    }
+
+    private class FullCompressAction extends AbstractAction {
+
+        public FullCompressAction() {
+            super("Сжатие топологии целиком");
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            TopologyCompressor compressor;// = ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology);
+            Command peek;
+            compressor = ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology);
+
+            while(compressor.commands.getCommands().size() > 0) {
+                try {
+                    int mode = defaultTopology.getMode();
+                    if (mode != VirtualTopology.REAL_MODE) {
+                        Converter converter = new Converter(defaultTopology);
+                        try {
+                            converter.convert();
+                            defaultTopology.setMode(VirtualTopology.REAL_MODE);
+                        } catch (ConvertException e1) {
+                            JOptionPane.showMessageDialog(MainFrame.this, e1.getMessage(), "Ошибка перевода координат", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                    compressor = ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology);
+                    peek = compressor.commands.peek();
+                    if (peek instanceof CompressCommand) {
+                        Collection<Border> affectedBorders = ((CompressCommand) peek).getAffectedBorders();
+                        if (peek instanceof CompressWireCommand) {
+                            Border border = affectedBorders.iterator().next();
+                            border = CompressionUtils.borderWithoutConnectedElements((Wire) ((CompressWireCommand) peek).getElement(), border, defaultTopology.getGrid());
+                            border = border.getOverlay(Direction.LEFT);
+                            paintPanel.setBorders(Collections.singletonList(border));
+                        } else {
+                            paintPanel.setBorders(affectedBorders);
+                        }
+                        if (!border_painted) {
+                            paintPanel.repaint();
+                            border_painted = true;
+                            continue;
+                        }
+                        border_painted = false;
+                    }
+                    compressor.step(1);
+
+
+                    paintPanel.setModel(new VirtualElementModel(defaultTopology));
+                } catch (UnexpectedException e1) {
+                    continue;
+                }
+            }
+            //full compress done
+            //compressor.commands.rollback();
+
+            //compress again
+
+
         }
     }
 }

@@ -92,6 +92,10 @@ public class CommandManager<T extends Command> {
             T command_to_unexecute = executed_commands.pop();
             command_to_unexecute.unexecute();
         }
+        while (!failed_commands.isEmpty()) {
+            T command_to_unexecute = failed_commands.pop();
+            command_to_unexecute.unexecute();
+        }
     }
 
     private void fireCommandAdded(List<? extends Command> commands) {

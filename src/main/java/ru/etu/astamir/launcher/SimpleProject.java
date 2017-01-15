@@ -44,7 +44,7 @@ public class SimpleProject implements Project, Serializable{
     public void load() {
         try (ObjectInputStream stream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(projectFile)))){
             SimpleProject project = (SimpleProject) stream.readObject();
-            topologies = project.topologies;
+            topologies = topologies.size() == 0 ? project.topologies : topologies;
             VirtualTopology topology = (VirtualTopology) topologies.get("default_topology");
             if (topology != null) {
                 Technology technology = topology.getTechnology();
@@ -54,6 +54,18 @@ public class SimpleProject implements Project, Serializable{
                     parser.parse();
 
                     topology.setTechnology(new CMOSTechnology("def", base));
+                }
+
+            }
+            VirtualTopology topology2 = (VirtualTopology) topologies.get("default_topology_2");
+            if (topology2 != null) {
+                Technology technology = topology2.getTechnology();
+                if (technology == null) {
+                    Technology.TechnologicalCharacteristics.Base base = new DefaultTechnologicalCharacteristics();
+                    CharacteristicParser parser = new CharacteristicParser(new File("tehnol.txt"), base);
+                    parser.parse();
+
+                    topology2.setTechnology(new CMOSTechnology("def", base));
                 }
 
             }

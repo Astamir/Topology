@@ -149,7 +149,9 @@ public class ProjectObjectManager {
         if (CURRENT_PROJECT == null) {
             CURRENT_PROJECT = new SimpleProject(new File("default_project.atop"), "default_project"); // TODO temp
             VirtualTopology defaultTopology = new VirtualTopology(VirtualTopology.VIRTUAL_MODE);
+            VirtualTopology defaultTopology2 = new VirtualTopology(VirtualTopology.VIRTUAL_MODE);
             CURRENT_PROJECT.getTopologies().put("default_topology", defaultTopology);
+            CURRENT_PROJECT.getTopologies().put("default_topology_2", defaultTopology2);
             CURRENT_PROJECT.load();
         }
 

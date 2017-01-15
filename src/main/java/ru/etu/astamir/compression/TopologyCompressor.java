@@ -169,7 +169,7 @@ public class TopologyCompressor {
             } else if (element instanceof Contour) {
                 processContour((Contour) element, affectedBorders, compressionDirection);
             } else if (element instanceof Pin) {
-                processContact((Contact) element, affectedBorders, compressionDirection, Collections.<Contact>emptyList());
+                processPin((Pin) element, affectedBorders, compressionDirection, Collections.<Contact>emptyList());
             } else {
 
             }
@@ -233,6 +233,20 @@ public class TopologyCompressor {
 //
 //        move(contact, direction, length, affectedBorders);
         commands.addCommand(new CompressContactCommand(topology.getGrid(), borders, direction, contact.getName()));
+    }
+    /**
+     * Обработка контакта. Тут просто передвигаем в направлении сжатия на сколько может.
+     * Может мешать частокол и другие контакты(диагональные расстояния)
+     */
+    void processPin(Pin pin, Collection<Border> affectedBorders, Direction direction, Collection<Contact> otherContacts) {
+        // first we have to figure out our moving distance
+//        double length = getContactMoveDistance(contact, affectedBorders, direction, otherContacts);
+//
+//        // find out if some other contacts are in the way
+//        length = diagonalAnalysis(length, contact, otherContacts);
+//
+//        move(contact, direction, length, affectedBorders);
+        commands.addCommand(new CompressPinCommand(topology.getGrid(), borders, direction, pin.getName()));
     }
 
     private double diagonalAnalysis(double moveLength, Contact contact, Collection<Contact> otherContacts) {
