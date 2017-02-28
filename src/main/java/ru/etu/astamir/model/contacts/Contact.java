@@ -122,22 +122,11 @@ public class Contact extends TopologyElement implements ConnectionPoint, Seriali
 
     @Override
     public boolean move(double dx, double dy) {
-        /*boolean success = center.move(dx, dy);
+        boolean success = center.move(dx, dy);
         for (ContactWindow contactWindow : contactWindows.values()) {
             success &= contactWindow.move(dx, dy);
-        }*/
-        boolean success = false;
-        for (ContactWindow contactWindow : contactWindows.values()) {
-
-            if(true) {
-                success = center.move(dx, dy);
-                success &= contactWindow.move(dx, dy);
-            }
-            else {
-                success = center.move(dx, dy);
-                success &= contactWindow.move(dx, dy);
-            }
         }
+
         return success;
     }
 

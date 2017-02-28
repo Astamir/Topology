@@ -26,7 +26,7 @@ public class TopologyCompressor {
     //VirtualGrid working_grid;
     int mode;
     public Map<TopologyLayer, Map<Direction, Border>> borders = new HashMap<>(); // public for debug
-    private Map<Entity, Integer> processed_elements = new HashMap<>();
+    private Map<TopologyElement, Integer> processed_elements = new HashMap<>();
     private Multimap<String, Direction> processed_contours = ArrayListMultimap.create();
 
     private enum CompressionStage {
@@ -145,7 +145,7 @@ public class TopologyCompressor {
     }
 
     private void clearProcessedContours() {
-        for (Entity elem : processed_elements.keySet()) {
+        for (TopologyElement elem : processed_elements.keySet()) {
             if (elem instanceof Contour) {
                 int processed = processed_elements.get(elem);
                 processed = processed == 0 ? processed : --processed;
@@ -303,5 +303,9 @@ public class TopologyCompressor {
     void move(TopologyElement element, Direction direction, double length, Collection<Border> borders) {
         commands.addCommand(new CompositeCommand(new MoveCommand(element, direction, length)/*, new UpdateBorderCommand(borders, element, direction)*/));
         new UpdateBorderCommand(borders, element, direction).execute();
+    }
+
+    public Map<TopologyElement, Integer> getProcessed_elements() {
+        return processed_elements;
     }
 }

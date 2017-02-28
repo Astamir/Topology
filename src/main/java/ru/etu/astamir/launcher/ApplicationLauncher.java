@@ -1,6 +1,7 @@
 package ru.etu.astamir.launcher;
 
 import ru.etu.astamir.compression.TopologyParser;
+import ru.etu.astamir.compression.controller.PinMatchingController;
 import ru.etu.astamir.compression.grid.VirtualGrid;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.gui.editor.MainFrame;
@@ -21,19 +22,22 @@ public class ApplicationLauncher {
         loadProject();
 
         // open main frame
-        MainFrame mw = new MainFrame();
-        mw.setTitle(ProjectObjectManager.getCurrentProject().getName());
+        MainFrame mw = new MainFrame("default_topology");
+        mw.setTitle("default_topology");
         mw.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         mw.setSize(600, 600);
         mw.setVisible(true);
 
-        /*loadProject2();
+        loadProject2();
 
         MainFrame mw2 = new MainFrame("default_topology_2");
-        mw2.setTitle(ProjectObjectManager.getCurrentProject().getName());
+        mw2.setTitle("default_topology_2");
         mw2.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         mw2.setSize(600, 600);
-        mw2.setVisible(true);*/
+        mw2.setVisible(true);
+
+        PinMatchingController pinMatchingController = new PinMatchingController(mw, mw2);
+        pinMatchingController.matchCells();
     }
 
     private static void loadProject() throws IOException {
@@ -60,12 +64,12 @@ public class ApplicationLauncher {
     private static void loadProject2() throws IOException {
         Project project = ProjectObjectManager.getCurrentProject();
 
-        try (ObjectOutputStream create = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(project.getProjectFilePath().toFile())))) {
+        /*try (ObjectOutputStream create = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(project.getProjectFilePath().toFile())))) {
             create.writeObject(project);
             create.flush();
         }
 
-        project.load();
+        project.load();*/
         // load default topology
         File topologyFile = new File("default_topology_2.txt");
         if (topologyFile.exists()) {

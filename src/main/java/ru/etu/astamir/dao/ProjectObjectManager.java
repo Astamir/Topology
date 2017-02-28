@@ -152,7 +152,7 @@ public class ProjectObjectManager {
             VirtualTopology defaultTopology2 = new VirtualTopology(VirtualTopology.VIRTUAL_MODE);
             CURRENT_PROJECT.getTopologies().put("default_topology", defaultTopology);
             CURRENT_PROJECT.getTopologies().put("default_topology_2", defaultTopology2);
-            CURRENT_PROJECT.load();
+            //CURRENT_PROJECT.load();
         }
 
         return CURRENT_PROJECT;

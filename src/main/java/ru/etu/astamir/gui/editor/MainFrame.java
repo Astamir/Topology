@@ -20,7 +20,6 @@ import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.gui.editor.creation.ContactCreationDialog;
 import ru.etu.astamir.gui.editor.creation.ElementCreationDialog;
-import ru.etu.astamir.gui.widgets.CommandTrackerPanel;
 import ru.etu.astamir.launcher.Project;
 import ru.etu.astamir.launcher.Topology;
 import ru.etu.astamir.launcher.VirtualTopology;
@@ -154,22 +153,7 @@ public class MainFrame extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            int mode = defaultTopology.getMode();
-            if (mode == VirtualTopology.REAL_MODE) {
-                defaultTopology.setMode(VirtualTopology.VIRTUAL_MODE);
-            } else {
-                Converter converter = new Converter(defaultTopology);
-                try {
-                    converter.convert();
-                    defaultTopology.setMode(VirtualTopology.REAL_MODE);
-                    TopologyCompressor compressor = ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology);
-                    compressor.compress();
-                } catch (ConvertException e1) {
-                    JOptionPane.showMessageDialog(MainFrame.this, e1.getMessage(), "Ошибка перевода координат", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-
-            paintPanel.setModel(new VirtualElementModel(defaultTopology));
+            convertAction();
         }
     }
 
@@ -387,56 +371,80 @@ public class MainFrame extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-
-            TopologyCompressor compressor;// = ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology);
-            Command peek;
-            compressor = ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology);
-
-            while(compressor.commands.getCommands().size() > 0) {
-                try {
-                    int mode = defaultTopology.getMode();
-                    if (mode != VirtualTopology.REAL_MODE) {
-                        Converter converter = new Converter(defaultTopology);
-                        try {
-                            converter.convert();
-                            defaultTopology.setMode(VirtualTopology.REAL_MODE);
-                        } catch (ConvertException e1) {
-                            JOptionPane.showMessageDialog(MainFrame.this, e1.getMessage(), "Ошибка перевода координат", JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
-                    compressor = ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology);
-                    peek = compressor.commands.peek();
-                    if (peek instanceof CompressCommand) {
-                        Collection<Border> affectedBorders = ((CompressCommand) peek).getAffectedBorders();
-                        if (peek instanceof CompressWireCommand) {
-                            Border border = affectedBorders.iterator().next();
-                            border = CompressionUtils.borderWithoutConnectedElements((Wire) ((CompressWireCommand) peek).getElement(), border, defaultTopology.getGrid());
-                            border = border.getOverlay(Direction.LEFT);
-                            paintPanel.setBorders(Collections.singletonList(border));
-                        } else {
-                            paintPanel.setBorders(affectedBorders);
-                        }
-                        if (!border_painted) {
-                            paintPanel.repaint();
-                            border_painted = true;
-                            continue;
-                        }
-                        border_painted = false;
-                    }
-                    compressor.step(1);
-
-
-                    paintPanel.setModel(new VirtualElementModel(defaultTopology));
-                } catch (UnexpectedException e1) {
-                    continue;
-                }
-            }
-            //full compress done
-            //compressor.commands.rollback();
-
-            //compress again
-
-
+            fullCompress();
         }
+    }
+
+    public void fullCompress() {
+        TopologyCompressor compressor;// = ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology);
+        Command peek;
+        compressor = ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology);
+
+        while (compressor.commands.getCommands().size() > 0) {
+            try {
+                int mode = defaultTopology.getMode();
+                if (mode != VirtualTopology.REAL_MODE) {
+                    Converter converter = new Converter(defaultTopology);
+                    try {
+                        converter.convert();
+                        defaultTopology.setMode(VirtualTopology.REAL_MODE);
+                    } catch (ConvertException e1) {
+                        JOptionPane.showMessageDialog(MainFrame.this, e1.getMessage(), "Ошибка перевода координат", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                compressor = ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology);
+                peek = compressor.commands.peek();
+                if (peek instanceof CompressCommand) {
+                    Collection<Border> affectedBorders = ((CompressCommand) peek).getAffectedBorders();
+                    if (peek instanceof CompressWireCommand) {
+                        Border border = affectedBorders.iterator().next();
+                        border = CompressionUtils.borderWithoutConnectedElements((Wire) ((CompressWireCommand) peek).getElement(), border, defaultTopology.getGrid());
+                        border = border.getOverlay(Direction.LEFT);
+                        paintPanel.setBorders(Collections.singletonList(border));
+                    } else {
+                        paintPanel.setBorders(affectedBorders);
+                    }
+                    if (!border_painted) {
+                        paintPanel.repaint();
+                        border_painted = true;
+                        continue;
+                    }
+                    border_painted = false;
+                }
+                compressor.step(1);
+
+
+                paintPanel.setModel(new VirtualElementModel(defaultTopology));
+            } catch (UnexpectedException e1) {
+                continue;
+            }
+        }
+        //full compress done
+        //compressor.commands.rollback();
+        System.out.println("full compressed");
+        //compress again
+    }
+
+    public void convertAction() {
+        int mode = defaultTopology.getMode();
+        if (mode == VirtualTopology.REAL_MODE) {
+            defaultTopology.setMode(VirtualTopology.VIRTUAL_MODE);
+        } else {
+            Converter converter = new Converter(defaultTopology);
+            try {
+                converter.convert();
+                defaultTopology.setMode(VirtualTopology.REAL_MODE);
+                TopologyCompressor compressor = ProjectObjectManager.getCompressorsPool().getCompressor(defaultTopology);
+                compressor.compress();
+            } catch (ConvertException e1) {
+                JOptionPane.showMessageDialog(MainFrame.this, e1.getMessage(), "Ошибка перевода координат", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        paintPanel.setModel(new VirtualElementModel(defaultTopology));
+    }
+
+    public VirtualTopology getDefaultTopology() {
+        return defaultTopology;
     }
 }
