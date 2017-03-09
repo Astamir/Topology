@@ -15,6 +15,9 @@ import java.util.*;
 public class PinMatchingController {
     private MainFrame rightTopologyFrame;
     private MainFrame leftTopologyFrame;
+    private static List<Map<Point, Double>> currentProcessingPins;
+
+    public static boolean pinProcessed = false;
 
     public PinMatchingController(MainFrame leftTopologyFrame, MainFrame rightTopologyFrame) {
         this.setLeftTopologyFrame(leftTopologyFrame);
@@ -24,19 +27,57 @@ public class PinMatchingController {
     public void matchCells() {
         List<Point> leftPins = new ArrayList<>();
         List<Point> rightPins = new ArrayList<>();
+        List<Map<Point, Double>> leftOutPins = new ArrayList<>();
+        List<Map<Point, Double>> rightOutPins = new ArrayList<>();
         //full compressing first
         this.leftTopologyFrame.convertAction();
         this.rightTopologyFrame.convertAction();
         this.leftTopologyFrame.fullCompress();
         this.rightTopologyFrame.fullCompress();
         //get pin coordinates
+        //System.out.println(getPinsFromTopologyCompressor(this.leftTopologyFrame).toString());
+        //System.out.println(getPinsFromTopologyCompressor(this.rightTopologyFrame).toString());
         leftPins = getPinsForMatching(getPinsFromTopologyCompressor(this.leftTopologyFrame), 0);
         rightPins = getPinsForMatching(getPinsFromTopologyCompressor(this.rightTopologyFrame), 1);
 
         //create matching query
+        pinProcessed = true;
+        for (int i = 0; i < leftPins.size(); i++) {
+            Map<Point, Double> currPointLeft = new HashMap<>();
+            Map<Point, Double> currPointRight = new HashMap<>();
+            if (leftPins.get(i).y()-rightPins.get(i).y() < 0) {
+                currPointLeft.put(leftPins.get(i), (double) 0);
+                leftOutPins.add(currPointLeft);
+                currPointRight.put(rightPins.get(i), leftPins.get(i).y()-rightPins.get(i).y());
+                rightOutPins.add(currPointRight);
+            } else if (leftPins.get(i).y()-rightPins.get(i).y() > 0) {
+                currPointLeft.put(leftPins.get(i), (double) 0);
+                leftOutPins.add(currPointLeft);
+                currPointRight.put(rightPins.get(i), leftPins.get(i).y()-rightPins.get(i).y());
+                rightOutPins.add(currPointRight);
+            }
+            else {
+                currPointLeft.put(leftPins.get(i), (double) 0);
+                leftOutPins.add(currPointLeft);
+                currPointRight.put(rightPins.get(i), (double) 0);
+                rightOutPins.add(currPointRight);
+            }
+            //if ()
+//            System.out.println("//////"+leftPins.get(i).compareTo(rightPins.get(i)));
+//            System.out.println("//////"+Point.distance(leftPins.get(i), rightPins.get(i)));
+            //System.out.println("//////"+(leftPins.get(i).y()-rightPins.get(i).y()));
+        }
 
         //compress again
+        this.leftTopologyFrame.convertAction();
+        this.rightTopologyFrame.convertAction();
+        this.leftTopologyFrame.convertAction();
+        this.rightTopologyFrame.convertAction();
 
+        currentProcessingPins = leftOutPins;
+        this.leftTopologyFrame.fullCompress();
+        currentProcessingPins = rightOutPins;
+        this.rightTopologyFrame.fullCompress();
     }
 
     private List<Collection<Point>> getPinsFromTopologyCompressor(MainFrame topologyFrame) {
@@ -61,28 +102,32 @@ public class PinMatchingController {
         double[] xArray = new double[20];
         int i = 0;
         List<Point> outPins = new ArrayList<>();
+        //собираем все координаты по x
         for (Collection<Point> pointCollection : pins) {
             for (Point point : pointCollection) {
                 xArray[i] = point.x();
                 i++;
             }
         }
+        //отрезаем лишнее и сортируем
         xArray = Arrays.copyOfRange(xArray, 0, i);
         Arrays.sort(xArray);
+        //проходим по всем, заполняем выходной массив в завистимости от мода (правее/левее середины)
         for (Collection<Point> pointCollection : pins) {
             for (Point point : pointCollection) {
                 if (mode == 0) {
-                    if (point.x() > (xArray[0] + xArray[xArray.length-1]) / 2) {
+                    if (point.x() > (xArray[0] + xArray[xArray.length - 1]) / 2) {
                         outPins.add(point);
                     }
                 } else {
-                    if (point.x() < (xArray[0] + xArray[xArray.length-1]) / 2) {
+                    if (point.x() < (xArray[0] + xArray[xArray.length - 1]) / 2) {
                         outPins.add(point);
                     }
                 }
             }
         }
-        System.out.println(outPins.toString());
+        //System.out.println(outPins.toString());
+        outPins.sort(Point::compareTo);
         return outPins;
     }
 
@@ -101,4 +146,20 @@ public class PinMatchingController {
     public void setLeftTopologyFrame(MainFrame leftTopologyFrame) {
         this.leftTopologyFrame = leftTopologyFrame;
     }
+
+    public static List<Map<Point, Double>> getCurrentProcessingPins() {
+        return currentProcessingPins;
+    }
+
+    /*public void setCurrentProcessingPins(List<Point> currentProcessingPins) {
+        this.currentProcessingPins = currentProcessingPins;
+    }*/
+
+    public boolean isPinProcessed() {
+        return pinProcessed;
+    }
+
+    /*public void setPinProcessed(boolean pinProcessed) {
+        this.pinProcessed = pinProcessed;
+    }*/
 }
