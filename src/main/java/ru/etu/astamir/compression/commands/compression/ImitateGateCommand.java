@@ -9,8 +9,8 @@ import ru.etu.astamir.model.wires.Gate;
  * @author Artem Mon'ko
  */
 public class ImitateGateCommand extends ImitateCommand {
-    public ImitateGateCommand(Gate source, Border border, Direction direction, boolean allow_deformation, Grid grid) {
-        super(source, border, direction, allow_deformation, grid);
+    public ImitateGateCommand(Gate source, Border border, Direction direction, boolean allowDeformation, Grid grid) {
+        super(source, border, direction, allowDeformation, grid);
     }
 
     @Override

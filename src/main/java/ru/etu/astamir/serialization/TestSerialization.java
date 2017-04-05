@@ -37,7 +37,7 @@ public class TestSerialization {
 		Edge entity = adapter.getEntity(parse);
 
 		System.out.println(entity);
-		System.out.println(p.equals(entity));
+		System.out.println(p.eq(entity));
 
 		ConductionType type = ConductionType.N;
 		EnumAdapter<ConductionType> ad = new EnumAdapter<>(ConductionType.class);

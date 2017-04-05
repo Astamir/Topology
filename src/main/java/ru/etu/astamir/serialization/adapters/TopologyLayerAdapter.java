@@ -1,6 +1,5 @@
 package ru.etu.astamir.serialization.adapters;
 
-import com.google.common.base.Optional;
 import ru.etu.astamir.model.Material;
 import ru.etu.astamir.model.TopologyLayer;
 import ru.etu.astamir.serialization.Attribute;

@@ -13,7 +13,7 @@ import java.util.Queue;
  */
 public class CompositeCommand implements Command{
     Queue<Command> commands = new LinkedList<>();
-    Queue<Command> executed_commands = new LinkedList<>();
+    Queue<Command> executedCommands = new LinkedList<>();
 
     public CompositeCommand(Command... commands) {
         this(Arrays.asList(commands));
@@ -31,7 +31,7 @@ public class CompositeCommand implements Command{
                 return false;
             }
 
-            executed_commands.add(command);
+            executedCommands.add(command);
         }
         return true;
     }
@@ -39,7 +39,7 @@ public class CompositeCommand implements Command{
     @Override
     public boolean unexecute() {
         boolean success = true;
-        for (Command executed_command : executed_commands) {
+        for (Command executed_command : executedCommands) {
             success &= executed_command.unexecute();
         }
 

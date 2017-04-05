@@ -11,9 +11,12 @@ import java.util.Map;
  * Created by amonko on 20/07/16.
  */
 public class CompressActiveRegionCommand extends CompressContourCommand {
-    public CompressActiveRegionCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, String element_name, Direction direction, Direction side) {
-        super(grid, borders, element_name, direction, side);
+    public CompressActiveRegionCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, String elementName, Direction direction, Direction side) {
+        super(grid, borders, elementName, direction, side);
     }
 
-
+    @Override
+    public boolean execute() {
+        return super.execute();
+    }
 }

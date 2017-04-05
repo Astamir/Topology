@@ -1,15 +1,16 @@
 package ru.etu.astamir.serialization.adapters;
 
-import com.google.common.base.Optional;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.serialization.Attribute;
 import ru.etu.astamir.serialization.AttributeAdapter;
 import ru.etu.astamir.serialization.AttributeContainer;
 import ru.etu.astamir.serialization.AttributeFactory;
-import ru.etu.astamir.serialization.ComplexAttribute;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Artem Mon'ko

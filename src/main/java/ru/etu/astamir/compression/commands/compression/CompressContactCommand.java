@@ -1,18 +1,10 @@
 package ru.etu.astamir.compression.commands.compression;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
-import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.common.Utils;
-import ru.etu.astamir.common.collections.CollectionUtils;
 import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.compression.Border;
-import ru.etu.astamir.compression.BorderPart;
 import ru.etu.astamir.compression.CompressionUtils;
-import ru.etu.astamir.compression.commands.CompositeCommand;
 import ru.etu.astamir.compression.commands.MoveCommand;
-import ru.etu.astamir.compression.commands.UpdateBorderCommand;
 import ru.etu.astamir.compression.commands.UpdateBorderWithContactCommand;
 import ru.etu.astamir.compression.grid.VirtualGrid;
 import ru.etu.astamir.geom.common.Direction;
@@ -30,22 +22,20 @@ import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
 
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Created by Astamir on 11.01.2015.
  */
 public class CompressContactCommand extends CompressCommand {
-    private static final Predicate<Contact> DIAGONAL_CONTACTS_ANALYSIS = new Predicate<Contact>() {
-        @Override
-        public boolean apply(Contact input) {
-            return true; // todo
-        }
-    };
-    private MoveCommand move;
-    private UpdateBorderWithContactCommand update_border;
+    private static final Predicate<Contact> DIAGONAL_CONTACTS_ANALYSIS = input -> true; // TODO
 
-    public CompressContactCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, Direction direction, String element_name) {
-        super(grid, borders, element_name, direction);
+    private MoveCommand move;
+    private UpdateBorderWithContactCommand updateBorder;
+
+    public CompressContactCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, Direction direction, String elementName) {
+        super(grid, borders, elementName, direction);
     }
 
     @Override
@@ -78,28 +68,28 @@ public class CompressContactCommand extends CompressCommand {
             return; // todo implement for long contacts
         }
 
-        Point connection_point = center.getStart();
+        Point connectionPoint = center.getStart();
         // find all connected wires
-        Collection<Wire> connected_wires = grid.toElements(contact.getConnectedNames(), Wire.class);
-        for (Wire wire : connected_wires) {
+        Collection<Wire> connectedWires = grid.toElements(contact.getConnectedNames(), Wire.class);
+        for (Wire wire : connectedWires) {
             // create an empty link at the connection point if we don't have one already
-            Optional<SimpleWire> part_o = wire.findPartWithPoint(connection_point);
-            if (part_o.isPresent()) {
-                SimpleWire part = part_o.get();
+            Optional<SimpleWire> partO = wire.findPartWithPoint(connectionPoint);
+            if (partO.isPresent()) {
+                SimpleWire part = partO.get();
                 Edge axis = part.getAxis();
                 if (axis.isPoint() || axis.getOrientation().equals(direction.toOrientation())) {
                     // just stretch
-                    wire.stretchOnly(part, connection_point, direction, length);
+                    wire.stretchOnly(part, connectionPoint, direction, length);
                 } else {
                     // create empty link
                     SimpleWire link;
-                    Optional<SimpleWire> l = wire.findLink(connection_point);
+                    Optional<SimpleWire> l = wire.findLink(connectionPoint);
                     if (!l.isPresent()) {
-                        link = wire.addEmptyLinkToPart(part, connection_point);
+                        link = wire.addEmptyLinkToPart(part, connectionPoint);
                     } else {
                         link = l.get();
                     }
-                    wire.stretchOnly(link, connection_point, direction, length);
+                    wire.stretchOnly(link, connectionPoint, direction, length);
                 }
             }
         }
@@ -109,12 +99,12 @@ public class CompressContactCommand extends CompressCommand {
         move = new MoveCommand(contact, direction, length);
         move.execute();
 
-        update_border = new UpdateBorderWithContactCommand(borders, contact, direction);
-        update_border.execute();
+        updateBorder = new UpdateBorderWithContactCommand(borders, contact, direction);
+        updateBorder.execute();
     }
 
     private double diagonalAnalysis(double moveLength, Contact contact, Collection<Contact> otherContacts) {
-        EntitySet<Contact> contactSet = EntitySet.clone(Iterables.filter(otherContacts, DIAGONAL_CONTACTS_ANALYSIS));
+        EntitySet<Contact> contactSet = EntitySet.clone(otherContacts.stream().filter(DIAGONAL_CONTACTS_ANALYSIS).collect(Collectors.toList()));
         if (contactSet.contains(contact)) {
             contactSet.remove(contact);
         }
@@ -151,12 +141,12 @@ public class CompressContactCommand extends CompressCommand {
 
             length = Utils.assignIfSmaller(length, movingLength); // moving length from the center of contact
 
-            Map<Material, ContactWindow> contact_windows = contact.getContactWindows();
-            if (contact_windows.isEmpty()) {
+            Map<Material, ContactWindow> contactWindows = contact.getContactWindows();
+            if (contactWindows.isEmpty()) {
                 throw new UnexpectedException("There are no contact windows in contact " + contact);
             }
             // todo look through
-            for (Map.Entry<Material, ContactWindow> windowEntry : contact_windows.entrySet()) {
+            for (Map.Entry<Material, ContactWindow> windowEntry : contactWindows.entrySet()) {
                 ContactWindow window = windowEntry.getValue();
                 if (borderLayer != null && !borderLayer.equals(window.getLayer())) { // if border has different layer from contact window we skip it
                     continue;
@@ -173,8 +163,8 @@ public class CompressContactCommand extends CompressCommand {
 
     @Override
     public boolean unexecute() {
-        if (move != null && update_border != null) {
-            return update_border.unexecute() & move.unexecute();
+        if (move != null && updateBorder != null) {
+            return updateBorder.unexecute() & move.unexecute();
         }
 
         return false;

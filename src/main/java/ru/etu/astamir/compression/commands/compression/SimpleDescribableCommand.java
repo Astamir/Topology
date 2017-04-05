@@ -43,17 +43,10 @@ public class SimpleDescribableCommand implements DescribableCommand {
     }
 
     public static SimpleDescribableCommand of(final Runnable func, String desc) {
-        return new SimpleDescribableCommand(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                func.run();
-                return true;
-            }
-        }, new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                return false;
-            }
-        }, desc);
+        return new SimpleDescribableCommand(() -> {
+            func.run();
+            return true;
+        }, () -> false,
+                desc);
     }
 }

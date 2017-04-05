@@ -1,8 +1,8 @@
 package ru.etu.astamir.gui;
 
 import com.google.common.collect.Lists;
-import ru.etu.astamir.common.collections.UniqueIterator;
-import ru.etu.astamir.geom.common.*;
+import ru.etu.astamir.geom.common.Direction;
+import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Polygon;
 import ru.etu.astamir.geom.common.Rectangle;
 
@@ -12,6 +12,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.stream.Collectors;
 
 /**
  * @author Artem Mon'ko
@@ -85,7 +86,7 @@ public class PolygonPanel extends JFrame {
                 }
         }
 
-        Polygon polygon = Polygon.of(Lists.newArrayList(UniqueIterator.create(currentPoints)));
+        Polygon polygon = Polygon.of(currentPoints.stream().distinct().collect(Collectors.toList()));
 //        polygon.walk();
         return polygon;
     }

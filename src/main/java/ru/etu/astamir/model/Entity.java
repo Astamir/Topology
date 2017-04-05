@@ -41,9 +41,9 @@ public abstract class Entity implements Serializable, Cloneable {
     }
 
     @Override
-    public Object clone() {
+    public Entity clone() {
         try {
-            return super.clone();
+            return (Entity) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new InternalError("cant happen, since we're cloneable");
         }

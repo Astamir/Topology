@@ -11,7 +11,6 @@ import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.model.TopologicalCell;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.TopologyLayer;
-import ru.etu.astamir.model.exceptions.UnexpectedException;
 import ru.etu.astamir.model.technology.Technology;
 import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
@@ -167,10 +166,10 @@ public class Border {
 
     public double getMoveDistance(Edge axis, String symbol, Direction dir) {
         double d = 0.0;
-        Optional<BorderPart> closest_part = getClosestPartWithConstraints(axis, symbol, dir);
-        if (closest_part.isPresent()) {
-            double start = getMoveDistance(closest_part.get(), symbol, dir, axis.getStart());
-            double end = getMoveDistance(closest_part.get(), symbol, dir, axis.getEnd());
+        Optional<BorderPart> closestPart = getClosestPartWithConstraints(axis, symbol, dir);
+        if (closestPart.isPresent()) {
+            double start = getMoveDistance(closestPart.get(), symbol, dir, axis.getStart());
+            double end = getMoveDistance(closestPart.get(), symbol, dir, axis.getEnd());
 
             return Math.min(start, end);
         }
@@ -222,7 +221,7 @@ public class Border {
         List<BorderPart> result = Lists.newArrayList();
         List<BorderPart> allParts = Stream.concat(newParts.stream(), parts.stream()).filter(orientation()).collect(Collectors.toList());// we need only parts of border's orientation to work with.
 
-        List<List<BorderPart>> columns = CollectionUtils.divideEdgedElements(allParts, Utils.Functions.BORDER_PART_AXIS_FUNCTION, dir); // lets divide our parts into sorted columns.
+        List<List<BorderPart>> columns = CollectionUtils.divideEdgedElements(allParts, Utils.Transformers.BORDER_PART_AXIS_FUNCTION, dir); // lets divide our parts into sorted columns.
         int columnSize = columns.size();
         for (int i = 0; i < columnSize; i++) {
             // find i-st column
@@ -547,13 +546,16 @@ public class Border {
     }
 
     // TODO
-    public static void imitate(Wire bus, Border border, Direction direction, boolean deformation_allowed) {
-        bus.round();
+    public static void imitate(Wire bus, Border border, Direction direction, boolean deformationAllowed) {
         if (!bus.isChained()) {
             //bus.ensureChained();
         }
-        if (deformation_allowed)
+        if (deformationAllowed)
             border.createEmptyLinks(bus, direction);
+
+        if (!bus.isConnected()) {
+            bus.ensureChained();
+        }
 
         for (SimpleWire part : bus.getParts()) {
             if (!part.getAxis().getOrientation().isOrthogonal(direction.toOrientation()) || part.isLink()) {
@@ -576,11 +578,11 @@ public class Border {
         imitate(bus, direction, true, grid);
     }
 
-    public void imitate(Wire bus, Direction direction, boolean deformation_allowed, Grid grid) {
+    public void imitate(Wire bus, Direction direction, boolean deformationAllowed, Grid grid) {
         Border copy = CompressionUtils.borderWithoutConnectedElements(bus, this, grid);
-        imitate(bus, copy.getOverlay(direction), direction, deformation_allowed);
+        imitate(bus, copy.getOverlay(direction), direction, deformationAllowed);
         if (!bus.isConnected()) {
-            throw new UnexpectedException("not connected");
+          //  throw new UnexpectedException(bus.getSymbol() + " not connected");
         }
     }
 

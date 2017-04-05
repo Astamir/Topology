@@ -1,10 +1,10 @@
 package ru.etu.astamir.gui.painters;
 
-import com.google.common.base.Function;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.model.Entity;
 
 import java.awt.*;
+import java.util.function.Function;
 
 /**
  * @author Artem Mon'ko

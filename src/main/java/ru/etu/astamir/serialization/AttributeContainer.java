@@ -1,7 +1,5 @@
 package ru.etu.astamir.serialization;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import ru.etu.astamir.compression.grid.Grid;
@@ -16,6 +14,7 @@ import ru.etu.astamir.model.wires.Wire;
 import ru.etu.astamir.serialization.adapters.*;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * @author Artem Mon'ko
@@ -93,7 +92,7 @@ public class AttributeContainer {
         checkForAdapter(clazz);
 
         if (!cache.containsKey(clazz) && !substitutes.containsKey(clazz)) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         if (cache.containsKey(clazz)) {
@@ -104,7 +103,7 @@ public class AttributeContainer {
             return Optional.of(reference);
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public static AttributeAdapter<?> getAdapterFor(Class<?> clazz) {
@@ -154,7 +153,7 @@ public class AttributeContainer {
     public static Optional<Attribute> findAttribute(Attribute attribute, String name, boolean goDeep) {
         if (attribute.isSimple()) {
             NamePredicate namePredicate = new NamePredicate(name);
-            if (namePredicate.apply(attribute)) {
+            if (namePredicate.test(attribute)) {
                 return Optional.of(attribute);
             }
         } else {
@@ -167,7 +166,7 @@ public class AttributeContainer {
             return found;
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public static Optional<Attribute> findAttribute(Attribute attribute, String name) {
@@ -177,7 +176,7 @@ public class AttributeContainer {
     public static Optional<Attribute> findAttribute(Collection<Attribute> attributes, String name, boolean goDeep) {
         NamePredicate namePredicate = new NamePredicate(name);
         for (Attribute attribute : attributes) {
-            if (namePredicate.apply(attribute)) {
+            if (namePredicate.test(attribute)) {
                 return Optional.of(attribute);
             }
         }
@@ -192,7 +191,7 @@ public class AttributeContainer {
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public static Optional<Attribute> findAttribute(Collection<Attribute> attributes, String name) {
@@ -279,7 +278,7 @@ public class AttributeContainer {
             throw new UnexpectedException("Simple attribute is expected here, but complex one is found");
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public static Collection<Attribute> getComplexAttributeValue(Collection<Attribute> attributes, String name) {
@@ -342,7 +341,7 @@ public class AttributeContainer {
         }
 
         @Override
-        public boolean apply(Attribute attribute) {
+        public boolean test(Attribute attribute) {
             String attributeName = attribute.getName();
             return attribute != null && attributeName.equals(name);
         }

@@ -1,10 +1,9 @@
 package ru.etu.astamir.gui.painters;
 
-import com.google.common.base.Function;
 import ru.etu.astamir.geom.common.Point;
 
 import java.awt.Graphics;
-import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Created by Astamir on 10.03.14.

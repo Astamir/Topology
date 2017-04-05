@@ -23,11 +23,10 @@ import java.util.*;
 public class TopologyCompressor {
     Topology topology;
     public CommandManager commands = new CommandManager(); // public for debug
-    //VirtualGrid working_grid;
     int mode;
     public Map<TopologyLayer, Map<Direction, Border>> borders = new HashMap<>(); // public for debug
-    private Map<TopologyElement, Integer> processed_elements = new HashMap<>();
-    private Multimap<String, Direction> processed_contours = ArrayListMultimap.create();
+    private Map<TopologyElement, Integer> processedElements = new HashMap<>();
+    private Multimap<String, Direction> processedContours = ArrayListMultimap.create();
 
     private enum CompressionStage {
         UNCOMPRESSED, COMPRESSED, PARTIALLY_COMPRESSED;
@@ -37,7 +36,6 @@ public class TopologyCompressor {
 
     public TopologyCompressor(Topology topology) {
         this.topology = Preconditions.checkNotNull(topology);
-      //  this.working_grid = Preconditions.checkNotNull(topology.getGrid());
     }
 
     /**
@@ -61,10 +59,10 @@ public class TopologyCompressor {
     }
 
     public VirtualGrid step(int steps) {
-        int step_counter = 0;
-        while (step_counter < steps) {
+        int stepCounter = 0;
+        while (stepCounter < steps) {
             commands.executeNext();
-            step_counter++;
+            stepCounter++;
         }
         return topology.getGrid();
     }
@@ -79,19 +77,19 @@ public class TopologyCompressor {
         TopologicalCell topologicalCell = cell.get();
 
         for (TopologyLayer layer : availableLayers) {
-            Map<Direction, Border> border_map = new HashMap<>();
+            Map<Direction, Border> borderMap = new HashMap<>();
             for (Direction dir : Direction.all()) {
                 Border border = new Border(dir.toOrientation().getOppositeOrientation(), topology.getTechnology().getCharacteristics(), Lists.newArrayList(new BorderPart(topologicalCell.get(dir), topologicalCell, topologicalCell.getSymbol())));
                 border.setLayer(layer);
-                border_map.put(dir, border);
+                borderMap.put(dir, border);
             }
-            borders.put(layer, border_map);
+            borders.put(layer, borderMap);
         }
     }
 
     void compress(Direction direction) {
-        processed_elements.clear();
-        processed_contours.clear();
+        processedElements.clear();
+        processedContours.clear();
 
 
         for (List<TopologyElement> column : topology.getGrid().walk(direction)) {
@@ -109,7 +107,7 @@ public class TopologyCompressor {
     }
 
     void straightenWires(Direction direction) {
-        processed_elements.clear();
+        processedElements.clear();
         for (List<TopologyElement> column : topology.getGrid().walk(direction.opposite())) {
             clearProcessedContours();
             for (TopologyElement element : column) {
@@ -125,31 +123,31 @@ public class TopologyCompressor {
     }
 
     private boolean isElementProcessed(TopologyElement element, Direction direction) {
-        if (!processed_elements.containsKey(element)) {
-            processed_elements.put(element, 0);
+        if (!processedElements.containsKey(element)) {
+            processedElements.put(element, 0);
             return false;
         }
 
-        int processed = processed_elements.get(element);
-        int max_processed = 1;
+        int processed = processedElements.get(element);
+        int maxProcessed = 1;
         if (element instanceof Wire) {
             Wire wire = (Wire) element;
             if (!wire.getOrientation().isOrthogonal(direction.toOrientation())) {
                 long count = wire.getParts().stream().filter(part -> part.getAxis().getOrientation().isOrthogonal(wire.getOrientation())).count();
                 if (count > 0) {
-                    max_processed = (int) count;
+                    maxProcessed = (int) count;
                 }
             }
         }
-        return processed >= max_processed;
+        return processed >= maxProcessed;
     }
 
     private void clearProcessedContours() {
-        for (TopologyElement elem : processed_elements.keySet()) {
+        for (TopologyElement elem : processedElements.keySet()) {
             if (elem instanceof Contour) {
-                int processed = processed_elements.get(elem);
+                int processed = processedElements.get(elem);
                 processed = processed == 0 ? processed : --processed;
-                processed_elements.put(elem, processed);
+                processedElements.put(elem, processed);
             }
         }
     }
@@ -178,12 +176,12 @@ public class TopologyCompressor {
     }
 
     private void updateProcessedStatus(TopologyElement element, Direction direction) {
-        if (!processed_elements.containsKey(element)) {
-            processed_elements.put(element, 1);
+        if (!processedElements.containsKey(element)) {
+            processedElements.put(element, 1);
         }
 
-        int processed = processed_elements.get(element);
-        processed_elements.put(element, ++processed);
+        int processed = processedElements.get(element);
+        processedElements.put(element, ++processed);
     }
 
     private static double getMoveDistance(TopologyElement element, Collection<Border> borders, TopologyElement... additional) {
@@ -269,7 +267,7 @@ public class TopologyCompressor {
 
     void processContour(Contour contour, Collection<Border> affectedBorders, Direction direction) {
         Direction side = direction;
-        if (processed_contours.containsEntry(contour.getName(), direction)) {
+        if (processedContours.containsEntry(contour.getName(), direction)) {
             side = side.opposite();
         }
 
@@ -277,7 +275,7 @@ public class TopologyCompressor {
 //        commands.addCommand(new CompositeCommand(new MoveContourCommand(contour, move, direction, side)/*, new UpdateBorderCommand(borders, contour, direction)*/));
 //        new UpdateBorderCommand(borders, contour, direction).execute();
         commands.addCommand(new CompressContourCommand(topology.getGrid(), borders, contour.getName(), direction, side));
-        processed_contours.put(contour.getName(), side);
+        processedContours.put(contour.getName(), side);
     }
 
     void fitTopologicalCell(Direction direction) {

@@ -115,10 +115,7 @@ public class Converter {
                         Contact contact = (Contact) connectedElement;
                         if (contact.getCenter().isPoint()) { // todo implement for long contacts
                             Point center = contact.getCenter().getStart();
-                            Optional<SimpleWire> connected_part = wire.findPartWithPoint(center);
-                            if (connected_part.isPresent()) {
-                                wire.addEmptyLinkToPart(connected_part.get(), center);
-                            }
+                            wire.findPartWithPoint(center).ifPresent(simpleWire -> wire.addEmptyLinkToPart(simpleWire, center));
                         }
                     }
                 }

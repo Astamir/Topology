@@ -12,16 +12,16 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class IconFactory {
-    public static IconUIResource makeImageIconResource(Class base_class, String gif_file) {
-        return new IconUIResource(makeImageIcon(base_class, gif_file));
+    public static IconUIResource makeImageIconResource(Class baseClass, String gifFile) {
+        return new IconUIResource(makeImageIcon(baseClass, gifFile));
     }
 
-	public static ImageIcon makeImageIcon(Class base_class, String gif_file) {
+	public static ImageIcon makeImageIcon(Class baseClass, String gifFile) {
 		byte[] buffer = null;
         BufferedInputStream in = null;
         ByteArrayOutputStream out = null;
 		try {
-			InputStream resource = base_class.getResourceAsStream(gif_file);
+			InputStream resource = baseClass.getResourceAsStream(gifFile);
 			if (resource == null)
 				return null;
 			in = new BufferedInputStream(resource);
@@ -53,11 +53,11 @@ public class IconFactory {
         }
 
 		if (buffer == null) {
-			System.err.println(base_class.getName() + "/" + gif_file + " not found.");
+			System.err.println(baseClass.getName() + "/" + gifFile + " not found.");
 			return null;
 		}
 		if (buffer.length == 0) {
-			System.err.println("warning: " + gif_file + " is zero-length");
+			System.err.println("warning: " + gifFile + " is zero-length");
 			return null;
 		}
 

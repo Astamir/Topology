@@ -1,7 +1,5 @@
 package ru.etu.astamir.gui.painters;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.geom.common.Point;
@@ -10,6 +8,8 @@ import ru.etu.astamir.model.contacts.Contact;
 import ru.etu.astamir.model.regions.ContactWindow;
 
 import java.awt.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author Artem Mon'ko
@@ -28,7 +28,7 @@ public class ContactPainter implements Painter<Contact> {
         }
 
         for (ContactWindow window : entity.getContactWindows().values()) {
-            Polygon bounds = Polygon.of(Iterables.transform(window.getCoordinates(), coordinateTranslator));
+            Polygon bounds = Polygon.of(window.getCoordinates().stream().map(coordinateTranslator).collect(Collectors.toList()));
             DrawingUtils.drawPolygon(bounds, 0, false, graphics);
         }
     }

@@ -16,7 +16,7 @@ public class StraightenCommand extends ImitateCommand {
     }
 
     @Override
-    protected boolean imitate(boolean allow_deformation) {
+    protected boolean imitate(boolean allowDeformation) {
         return WireUtils.straighten(source, CompressionUtils.borderWithoutConnectedElements(source, border, grid), direction, grid);
     }
 }

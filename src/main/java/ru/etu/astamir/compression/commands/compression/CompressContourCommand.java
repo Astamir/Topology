@@ -31,10 +31,10 @@ public class CompressContourCommand extends CompressCommand {
     protected Direction side;
 
     protected MoveContourCommand move;
-    protected UpdateBorderCommand update_border;
+    protected UpdateBorderCommand updateBorder;
 
-    public CompressContourCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, String element_name, Direction direction, Direction side) {
-        super(grid, borders, element_name, direction);
+    public CompressContourCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, String elementName, Direction direction, Direction side) {
+        super(grid, borders, elementName, direction);
         this.side = side;
     }
 
@@ -50,7 +50,7 @@ public class CompressContourCommand extends CompressCommand {
         Collection<Border> affectedBorders = getAffectedBorders();
         Edge edge = new Rectangle(contour.getBounds()).getEdge(side);
         double length = getMoveDistanceForEdge(edge, contour, affectedBorders, direction);
-        Optional<Contour> container = grid.getElementsContainer(element_name);
+        Optional<Contour> container = grid.getElementsContainer(elementName);
         if (container.isPresent()) {
             Contour cnt = container.get();
             Border container_border = Border.of(direction.orthogonal().toOrientation(), affectedBorders.iterator().next().getTechnology(), cnt); // TODO technology
@@ -74,9 +74,7 @@ public class CompressContourCommand extends CompressCommand {
                 Optional<Point> connectionPoint = WireUtils.getConnectionPoint(collect.toArray(new Edge[collect.size()]), side);
                 if (connectionPoint.isPresent()) {
                     Optional<SimpleWire> partWithPoint = g.findPartWithPoint(connectionPoint.get());
-                    if (partWithPoint.isPresent()) {
-                        g.stretch(partWithPoint.get(), direction, length);
-                    }
+                    partWithPoint.ifPresent(simpleWire -> g.stretch(simpleWire, direction, length));
                 }
             }
         }
@@ -86,32 +84,32 @@ public class CompressContourCommand extends CompressCommand {
         move = new MoveContourCommand(contour, length, direction, side);
         move.execute();
 
-        update_border = new UpdateBorderCommand(affectedBorders, contour, side);
-        update_border.execute();
+        updateBorder = new UpdateBorderCommand(affectedBorders, contour, side);
+        updateBorder.execute();
     }
 
     protected double getMoveDistanceForEdge(Edge edge, Contour contour, Collection<Border> borders, Direction direction) {
         double length = 0.0;
         Technology.TechnologicalCharacteristics technology = borders.isEmpty() ? null : borders.iterator().next().getTechnology();
-        BorderPart closest_border = null;
+        BorderPart closestBorder = null;
         for (Border border : borders) {
             final Optional<BorderPart> closest = border.getClosestPartWithConstraints(edge, contour.getSymbol(), direction);
             if (closest.isPresent()) {
 
-                BorderPart closest_border_part = closest.get();
+                BorderPart closestBorderPart = closest.get();
                 for (Point coordinate : edge.getPoints()) {
-                    double l = border.getMoveDistance(closest_border_part, contour.getSymbol(), direction, coordinate);
+                    double l = border.getMoveDistance(closestBorderPart, contour.getSymbol(), direction, coordinate);
                     if (l < length || length == 0) {
                         length = l;
-                        closest_border = closest_border_part;
+                        closestBorder = closestBorderPart;
                     }
                 }
             }
         }
 
-        if (closest_border != null && technology != null) { // check for bulks and topological cell
-            if (closest_border.getSymbol().equals(TopologicalCell.DEFAULT_CELL_SYMBOL) && contour instanceof Well) {
-                if (Direction.RIGHT.getEdgeComparator().compare(closest_border.getAxis(), edge) < 0) {
+        if (closestBorder != null && technology != null) { // check for bulks and topological cell
+            if (closestBorder.getSymbol().equals(TopologicalCell.DEFAULT_CELL_SYMBOL) && contour instanceof Well) {
+                if (Direction.RIGHT.getEdgeComparator().compare(closestBorder.getAxis(), edge) < 0) {
                     double min = technology.getMinDistance(contour.getSymbol(), contour.getSymbol());
                     length += 2 * min;
                 }
@@ -123,8 +121,8 @@ public class CompressContourCommand extends CompressCommand {
 
     @Override
     public boolean unexecute() {
-        if (move != null && update_border != null) {
-            return update_border.unexecute() & move.unexecute();
+        if (move != null && updateBorder != null) {
+            return updateBorder.unexecute() & move.unexecute();
         }
         return false;
     }
@@ -132,7 +130,7 @@ public class CompressContourCommand extends CompressCommand {
     @Override
     public String toString() {
         if (move == null) {
-            return "Compress contour command with null move command for" + element_name;
+            return "Compress contour command with null move command for" + elementName;
         }
         return move.toString();
     }

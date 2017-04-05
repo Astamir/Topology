@@ -53,7 +53,7 @@ public final class Pair<L, R> implements Serializable, Cloneable {
         if (obj == this) {
             return true;
         }
-        if (obj instanceof Pair<?, ?> == false) {
+        if (!(obj instanceof Pair<?, ?>)) {
             return false;
         }
         Pair<?, ?> other = (Pair<?, ?>) obj;

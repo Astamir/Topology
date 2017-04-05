@@ -1,11 +1,11 @@
 package ru.etu.astamir.gui.editor;
 
-import com.google.common.base.Optional;
 import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.model.Entity;
 import ru.etu.astamir.model.TopologyElement;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * @author Artem Mon'ko

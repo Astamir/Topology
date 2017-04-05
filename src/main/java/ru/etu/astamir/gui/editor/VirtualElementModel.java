@@ -1,6 +1,5 @@
 package ru.etu.astamir.gui.editor;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.launcher.VirtualTopology;
@@ -9,6 +8,7 @@ import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * @author Astamir

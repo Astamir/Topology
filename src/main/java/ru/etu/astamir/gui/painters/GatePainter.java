@@ -1,6 +1,5 @@
 package ru.etu.astamir.gui.painters;
 
-import com.google.common.base.Function;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.geom.common.Point;
@@ -8,6 +7,7 @@ import ru.etu.astamir.model.wires.Gate;
 import ru.etu.astamir.model.wires.SimpleWire;
 
 import java.awt.*;
+import java.util.function.Function;
 
 /**
  * @author Artem Mon'ko

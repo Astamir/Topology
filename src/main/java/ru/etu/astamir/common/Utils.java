@@ -1,18 +1,18 @@
 package ru.etu.astamir.common;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import ru.etu.astamir.compression.BorderPart;
 import ru.etu.astamir.compression.commands.compression.ActiveBorder;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Orientation;
 import ru.etu.astamir.geom.common.Point;
+import ru.etu.astamir.model.Entity;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.wires.SimpleWire;
 
 import java.util.Collection;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,48 +24,18 @@ import java.util.Collection;
 public class Utils {
     public static final double LENGTH_NAN = -1D;
 
-    public static class Functions {
-        public static final Function<TopologyElement, String> NAME_FUNCTION = new Function<TopologyElement, String>() {
-            @Override
-            public String apply(TopologyElement input) {
-                return input.getName();
-            }
-        };
+    public static class Transformers {
+        public static final Function<TopologyElement, String> NAME_FUNCTION = Entity::getName;
 
-        public static final Function<TopologyElement, String> SYMBOL_FUNCTION = new Function<TopologyElement, String>() {
-            @Override
-            public String apply(TopologyElement input) {
-                return input.getSymbol();
-            }
-        };
+        public static final Function<TopologyElement, String> SYMBOL_FUNCTION = TopologyElement::getSymbol;
 
-        public static final Function<SimpleWire, Edge> WIRE_AXIS_FUNCTION = new Function<SimpleWire, Edge>() {
-            @Override
-            public Edge apply(SimpleWire input) {
-                return input.getAxis();
-            }
-        };
+        public static final Function<SimpleWire, Edge> WIRE_AXIS_FUNCTION = SimpleWire::getAxis;
 
-        public static final Function<BorderPart, Edge> BORDER_PART_AXIS_FUNCTION = new Function<BorderPart, Edge>() {
-            @Override
-            public Edge apply(BorderPart input) {
-                return input.getAxis();
-            }
-        };
+        public static final Function<BorderPart, Edge> BORDER_PART_AXIS_FUNCTION = BorderPart::getAxis;
 
-        public static final Function<SimpleWire, Collection<Point>> WIRE_TO_COORDINATES_FUNCTION = new Function<SimpleWire, Collection<Point>>() {
-            @Override
-            public Collection<Point> apply(SimpleWire input) {
-                return input.getCoordinates();
-            }
-        };
+        public static final Function<SimpleWire, Collection<Point>> WIRE_TO_COORDINATES_FUNCTION = SimpleWire::getCoordinates;
 
-        public static final Function<Point, Point> SELF_FUNCTION = new Function<Point, Point>() {
-            @Override
-            public Point apply(Point input) {
-                return input;
-            }
-        };
+        public static final Function<Point, Point> SELF_FUNCTION = Function.identity();
 
         public static final Function<TopologyElement, Collection<BorderPart>> TO_BORDER_PART_FUNCTION = new Function<TopologyElement, Collection<BorderPart>>() {
             Direction dir = Direction.UNDETERMINED;
@@ -83,8 +53,8 @@ public class Utils {
 
     public static class UtilPredicates {
         public static final class OrientationPredicate implements Predicate<SimpleWire> {
-            private static OrientationPredicate VERTICAL = new OrientationPredicate(Orientation.VERTICAL);
-            private static OrientationPredicate HORIZONTAL = new OrientationPredicate(Orientation.HORIZONTAL);
+            private static final OrientationPredicate VERTICAL = new OrientationPredicate(Orientation.VERTICAL);
+            private static final OrientationPredicate HORIZONTAL = new OrientationPredicate(Orientation.HORIZONTAL);
             private final Orientation orientation;
 
             public OrientationPredicate(Orientation orientation) {
@@ -92,14 +62,23 @@ public class Utils {
             }
 
             @Override
-            public boolean apply(SimpleWire input) {
+            public boolean test(SimpleWire input) {
                 return !input.getAxis().isPoint() && input.getAxis().getOrientation() == orientation;
             }
 
             public static Predicate<SimpleWire> forOrientation(Orientation orientation) {
-                return orientation == Orientation.HORIZONTAL ? HORIZONTAL : orientation == Orientation.VERTICAL ? VERTICAL : Predicates.<SimpleWire>alwaysFalse();
+                return orientation == Orientation.HORIZONTAL ? HORIZONTAL : orientation == Orientation.VERTICAL ? VERTICAL : i -> false;
             }
         }
+    }
+
+    public static int fact(int n) {
+        int fact = 1;
+        for (int i = 1; i <= n; i++) {
+            fact *= i;
+        }
+
+        return fact;
     }
 
     public static boolean isOdd(int number) {
@@ -110,19 +89,19 @@ public class Utils {
         return (number & 1) == 0;
     }
 
-    public static double assignIfSmaller(double current, double new_one, double nan) {
-        return current <= new_one && current != nan ? current : new_one;
+    public static double assignIfSmaller(double current, double newOne, double nan) {
+        return current <= newOne && current != nan ? current : newOne;
     }
 
-    public static double assignIfSmaller(double current, double new_one) {
-        return assignIfSmaller(current, new_one, LENGTH_NAN);
+    public static double assignIfSmaller(double current, double newOne) {
+        return assignIfSmaller(current, newOne, LENGTH_NAN);
     }
 
-    public static <V extends Comparable<V>> V assignIfSmaller(V current, V new_one, V nan) {
-        return current.compareTo(new_one) <= 0 && current.compareTo(nan) != 0 ? current : new_one;
+    public static <V extends Comparable<V>> V assignIfSmaller(V current, V newOne, V nan) {
+        return current.compareTo(newOne) <= 0 && current.compareTo(nan) != 0 ? current : newOne;
     }
 
-    public static ActiveBorder assignIfSmaller(ActiveBorder current, ActiveBorder new_one) {
-        return assignIfSmaller(current, new_one, ActiveBorder.NAN);
+    public static ActiveBorder assignIfSmaller(ActiveBorder current, ActiveBorder newOne) {
+        return assignIfSmaller(current, newOne, ActiveBorder.NAN);
     }
 }

@@ -35,10 +35,10 @@ public class DrawingUtils {
             g = graphics.create();
             g.drawLine(edge.startIntX(), edge.startIntY(), edge.endIntX(), edge.endIntY());
             if (drawPoints) {
-                g.drawString("s", edge.getStart().intX() - 5, edge.getStart().intY());
-                drawPoint(edge.getStart(), radius, true,  g);
-                g.drawString("e", edge.getEnd().intX() - 5, edge.getEnd().intY());
-                drawPoint(edge.getEnd(), radius, true, g);
+              //  g.drawString("s", edge.getStart().intX() - 5, edge.getStart().intY());
+                drawPoint(edge.getStart(), radius, false,  g);
+            //    g.drawString("e", edge.getEnd().intX() - 5, edge.getEnd().intY());
+                drawPoint(edge.getEnd(), radius, false, g);
             }
         } finally {
             if (g != null) {

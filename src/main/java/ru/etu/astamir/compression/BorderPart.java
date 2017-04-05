@@ -123,15 +123,12 @@ public class BorderPart {
     }
 
     public static Comparator<BorderPart> getAxisComparator(final Comparator<Edge> edgeComparator) {
-        return new Comparator<BorderPart>() {
-            @Override
-            public int compare(BorderPart o1, BorderPart o2) {
-                if (o1 != null && o2 != null) {
-                    return edgeComparator.compare(o1.getAxis(), o2.getAxis());
-                }
-
-                return 0;
+        return (o1, o2) -> {
+            if (o1 != null && o2 != null) {
+                return edgeComparator.compare(o1.getAxis(), o2.getAxis());
             }
+
+            return 0;
         };
     }
 

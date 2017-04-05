@@ -1,7 +1,5 @@
 package ru.etu.astamir.gui.painters;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import ru.etu.astamir.common.reflect.ReflectUtils;
 import ru.etu.astamir.dao.ProjectObjectManager;
@@ -15,6 +13,9 @@ import ru.etu.astamir.model.wires.Wire;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 /**
@@ -36,7 +37,7 @@ public class TopologyElementPainter implements Painter<TopologyElement> {
 
         List<Point> points = Lists.newArrayList(elem.getCoordinates());
         if (coordinateTranslator != null) {
-            points = Lists.newArrayList(Lists.transform(points, coordinateTranslator));
+            points = points.stream().map(coordinateTranslator).collect(Collectors.toList());
         }
         if (points.isEmpty()) { // we have no coordinates.
             return;

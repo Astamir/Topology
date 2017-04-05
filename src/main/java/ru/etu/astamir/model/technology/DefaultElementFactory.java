@@ -153,6 +153,26 @@ public class DefaultElementFactory implements ElementFactory {
             }
         });
 
+        cache.put("M3", new ElementCreator() {
+            @Override
+            public Entity create(Point... coordinates) {
+                List<Edge> edges = GeomUtils.fromPoints(Lists.newArrayList(coordinates));
+                List<SimpleWire> parts = Lists.newArrayList();
+                for (Edge edge : edges) {
+                    SimpleWire wire = new SimpleWire(edge);
+                    parts.add(wire);
+                }
+
+                Wire wire = new Wire(GeomUtils.getOrientation(edges));
+                wire.setSymbol("M3");
+                wire.setMaterial(Material.METAL);
+                wire.setLayer(ProjectObjectManager.getLayerFactory().forName("M3"));
+                wire.setParts(parts);
+
+                return wire;
+            }
+        });
+
         cache.put("M2", new ElementCreator() {
             @Override
             public Entity create(Point... coordinates) {
@@ -258,6 +278,7 @@ public class DefaultElementFactory implements ElementFactory {
                 return contact;
             }
         });
+
         cache.put("CNK", new ElementCreator() {//Контактное окно между М1C_  и NK_
             @Override
             public Entity create(Point... coordinates) {
