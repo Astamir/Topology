@@ -331,6 +331,16 @@ public class DefaultElementFactory implements ElementFactory {
                 return wire;
             }
         });
+        cache.put("TC", new ElementCreator() {//ячейка
+            @Override
+            public Entity create(Point... coordinates) {
+                TopologicalCell topologicalCell = new TopologicalCell("cell", TopologicalCell.DEFAULT_CELL_SYMBOL, Polygon.of(coordinates));
+                //region.setConductionType(ConductionType.NNN);
+                topologicalCell.setLayer(ProjectObjectManager.getLayerFactory().forName(TopologicalCell.DEFAULT_CELL_SYMBOL));
+
+                return topologicalCell;
+            }
+        });
     }
 
     public ElementCreator getElementCreator(String symbol) {
