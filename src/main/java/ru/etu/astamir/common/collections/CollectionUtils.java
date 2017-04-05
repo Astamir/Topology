@@ -1,25 +1,19 @@
 package ru.etu.astamir.common.collections;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicates;
 import com.google.common.collect.*;
 import com.google.common.primitives.Doubles;
+import ru.etu.astamir.common.Pair;
+import ru.etu.astamir.common.Pairs;
 import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Edge;
-import ru.etu.astamir.geom.common.Point;
-import ru.etu.astamir.geom.common.Polygon;
-import ru.etu.astamir.model.Entity;
 import ru.etu.astamir.model.TopologyElement;
-import ru.etu.astamir.common.Pair;
-import ru.etu.astamir.common.Pairs;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
-import ru.etu.astamir.model.regions.ActiveRegion;
-import ru.etu.astamir.model.wires.SimpleWire;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -58,7 +52,9 @@ public class CollectionUtils {
     }
 
     public static <V extends TopologyElement> Collection<String> toNames(Collection<V> elements) {
-        return Collections2.transform(elements, Utils.Functions.NAME_FUNCTION);
+        return elements.stream()
+                .map(Utils.Transformers.NAME_FUNCTION)
+                .collect(Collectors.toList());
     }
 
     public static <V extends Comparable<V>> List<Pair<V, V>> getAllUniquePairs(List<V> items) {
@@ -77,7 +73,7 @@ public class CollectionUtils {
 
     public static <V> List<? extends V> removeIdenticalSequences(List<? extends V> list) {
         List<V> result = Lists.newArrayList(list);
-        for (ListIterator<V> i = result.listIterator(); i.hasNext();) {
+        for (ListIterator<V> i = result.listIterator(); i.hasNext(); ) {
             V part = i.next();
 
             while (i.hasNext()) {
@@ -98,7 +94,7 @@ public class CollectionUtils {
     public static <V> List<List<V>> getPermutations(List<V> objects) {
         List<List<V>> result = Lists.newArrayList();
         List<Integer> curPermutation = firstPermutation(objects.size());
-        for (int i = 0; i < fact(objects.size()); i++) {
+        for (int i = 0; i < Utils.fact(objects.size()); i++) {
             result.add(listByIndices(objects, curPermutation));
             curPermutation = nextPermutation(curPermutation);
         }
@@ -116,23 +112,10 @@ public class CollectionUtils {
     }
 
     private static <V> List<V> listByIndices(List<V> objects, List<Integer> indices) {
-        List<V> result = Lists.newArrayList();
-        for (int index : indices) {
-            result.add(objects.get(index));
-        }
-
-        return result;
+        return indices.stream()
+                .map(objects::get)
+                .collect(Collectors.toList());
     }
-
-    public static int fact(int n) {
-        int fact = 1;
-        for (int i = 1; i <= n; i++) {
-            fact *= i;
-        }
-
-        return fact;
-    }
-
 
     private static List<Integer> nextPermutation(List<Integer> currentPermutation) {
         List<Integer> nextPermutation = Lists.newArrayList(currentPermutation);
@@ -172,50 +155,37 @@ public class CollectionUtils {
             return table.get(columnKey, rowKey);
         }
 
-        Table<C, R, V> transpose_table = Tables.transpose(table);
-        if (transpose_table.contains(rowKey, columnKey)) {
-            return transpose_table.get(rowKey, columnKey);
+        Table<C, R, V> transposeTable = Tables.transpose(table);
+        if (transposeTable.contains(rowKey, columnKey)) {
+            return transposeTable.get(rowKey, columnKey);
         }
 
-        return transpose_table.get(columnKey, rowKey);
+        return transposeTable.get(columnKey, rowKey);
     }
 
     public static <V> Collection<V> filterNullElements(Iterable<V> iterable) {
-        return StreamSupport.stream(iterable.spliterator(), false).filter(e -> e != null).collect(Collectors.toList());
+        return StreamSupport.stream(iterable.spliterator(), false)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
-    public static <V> List<List<V>> divideEdgedElements(List<V> list, final Function<V, Edge> to_edges, final Direction dir) {
-        Collections.sort(list, new Comparator<V>() {
-            @Override
-            public int compare(V o1, V o2) {
-                return dir.getEdgeComparator().compare(to_edges.apply(o1), to_edges.apply(o2));
-            }
-        });
+    public static <V> List<List<V>> divideEdgedElements(List<V> list, final Function<V, Edge> toEdges, final Direction dir) {
+        list.sort((o1, o2) -> dir.getEdgeComparator().compare(toEdges.apply(o1), toEdges.apply(o2)));
 
-        Multimap<Double, V> map = TreeMultimap.create(new Comparator<Double>() {
-            @Override
-            public int compare(Double o1, Double o2) {
-                return dir.getDirectionSign() * Doubles.compare(o1, o2);
-            }
-        }, new Comparator<V>() {
-            @Override
-            public int compare(V o1, V o2) {
-                return 1;
-            }
-        });
+        Multimap<Double, V> map = TreeMultimap.create((o1, o2) -> dir.getDirectionSign() * Doubles.compare(o1, o2), (o1, o2) -> 1);
         for (V element : list) {
-            Edge edge = to_edges.apply(element);
+            Edge edge = toEdges.apply(element);
             double key = dir.isLeftOrRight() ? edge.getStart().x() : edge.getStart().y();
             map.put(key, element);
         }
 
-        List<List<V>> result = Lists.newArrayList();
-        for (Double i : map.keySet()) {
-            List<V> column = Lists.newArrayList();
-            column.addAll(map.get(i));
-            result.add(column);
-        }
 
-        return result;
+        return map.keySet().stream()
+                .map(i -> {
+                    List<V> column = Lists.newArrayList();
+                    column.addAll(map.get(i));
+                    return column;
+                })
+                .collect(Collectors.toList());
     }
 }

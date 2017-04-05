@@ -1,17 +1,13 @@
 package ru.etu.astamir.gui.painters;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import ru.etu.astamir.dao.ProjectObjectManager;
-import ru.etu.astamir.geom.common.*;
+import ru.etu.astamir.geom.common.Edge;
 import ru.etu.astamir.geom.common.Point;
-import ru.etu.astamir.geom.common.Polygon;
 import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
-import ru.etu.astamir.model.wires.WireUtils;
 
 import java.awt.*;
-import java.util.List;
+import java.util.function.Function;
 
 
 /**

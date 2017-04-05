@@ -119,8 +119,8 @@ public class Polygon implements Cloneable, Serializable, Movable, Roundable {
 
     public boolean intersects(Edge edge) {
         for (Iterator<Edge> i = edgeIterator(); i.hasNext();) {
-            Edge polygon_edge = i.next();
-            if (polygon_edge.intersect(edge) == Edge.EdgeRelation.SKEW_CROSS) {
+            Edge polygonEdge = i.next();
+            if (polygonEdge.intersect(edge) == Edge.EdgeRelation.SKEW_CROSS) {
                 return true;
             }
         }

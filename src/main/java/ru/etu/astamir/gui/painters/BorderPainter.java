@@ -1,8 +1,5 @@
 package ru.etu.astamir.gui.painters;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.BorderPart;
 import ru.etu.astamir.dao.ProjectObjectManager;
@@ -10,6 +7,7 @@ import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.geom.common.Point;
 
 import java.awt.*;
+import java.util.function.Function;
 
 /**
  * @author Artem Mon'ko

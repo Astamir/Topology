@@ -1,8 +1,5 @@
 package ru.etu.astamir.common.reflect;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import ru.etu.astamir.common.io.StringUtils;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
@@ -15,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Artem Mon'ko
@@ -32,7 +30,6 @@ public class ReflectUtils {
     public static Optional<Class> forSimpleName(String name) {
         for (Package p : Package.getPackages()) {
             try {
-
                 Class cl = Class.forName(p.getName() + "." + StringUtils.capitalize(name));
                 return Optional.of(cl);
             } catch (ClassNotFoundException e) {
@@ -40,7 +37,7 @@ public class ReflectUtils {
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public static List<Field> getFieldsUpTo(Class<?> base, Class<?> parent) {
@@ -69,12 +66,7 @@ public class ReflectUtils {
     }
 
     public static Optional<Field> findField(Class<?> type, final String name) {
-        return Iterables.tryFind(getAllFields(type), new Predicate<Field>() {
-            @Override
-            public boolean apply(Field input) {
-                return input.getName().equals(name);
-            }
-        });
+        return getAllFields(type).stream().filter(i -> i.getName().equals(name)).findFirst();
     }
 
     public static Number parse(String value, Class<?> type) {

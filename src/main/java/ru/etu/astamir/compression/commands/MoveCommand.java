@@ -1,6 +1,5 @@
 package ru.etu.astamir.compression.commands;
 
-import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.GeomUtils;
 import ru.etu.astamir.geom.common.Point;
@@ -8,7 +7,6 @@ import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.Movable;
 import ru.etu.astamir.common.Pair;
 
-import javax.rmi.CORBA.Util;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -28,7 +26,7 @@ public class MoveCommand implements DescribableCommand {
     protected double dx = 0.0;
     protected double dy = 0.0;
 
-    protected Collection<Point> old_coordinates = Collections.emptyList();
+    protected Collection<Point> oldCoordinates = Collections.emptyList();
     
     private MoveCommand(TopologyElement element, double dx, double dy) {
         this.source = element;
@@ -63,8 +61,8 @@ public class MoveCommand implements DescribableCommand {
             return ((Movable) source).move(dx, dy);
         }
 
-        old_coordinates = source.getCoordinates();
-        source.setCoordinates(GeomUtils.prepareToMove(old_coordinates, dx, dy));
+        oldCoordinates = source.getCoordinates();
+        source.setCoordinates(GeomUtils.prepareToMove(oldCoordinates, dx, dy));
         return true;
     }
 
@@ -73,7 +71,7 @@ public class MoveCommand implements DescribableCommand {
         if (source instanceof Movable) {
             return ((Movable) source).move(-dx, -dy);
         }
-        source.setCoordinates(old_coordinates);
+        source.setCoordinates(oldCoordinates);
         return true;
     }
 

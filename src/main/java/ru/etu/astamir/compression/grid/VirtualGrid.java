@@ -9,6 +9,7 @@ import ru.etu.astamir.common.collections.EntitySet;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.geom.common.Polygon;
+import ru.etu.astamir.model.Entity;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.regions.Contour;
 
@@ -36,17 +37,13 @@ public class VirtualGrid implements Grid, Serializable {
 
     public static VirtualGrid deepCopyOf(VirtualGrid grid) {
         VirtualGrid vg = new VirtualGrid();
-        for (TopologyElement element : grid.elements) {
-            vg.addElement(element.clone());
-        }
+        grid.getAllElements().stream().map(TopologyElement::clone).forEach(vg::addElement);
 
         return vg;
     }
 
     private void fillTable(Collection<TopologyElement> elements) {
-        for (TopologyElement element : elements) {
-            addElement(element);
-        }
+        elements.forEach(this::addElement);
     }
 
     public void putElement(Point coordinate, TopologyElement element) {
@@ -72,9 +69,7 @@ public class VirtualGrid implements Grid, Serializable {
      */
     @Override
     public void addElement(TopologyElement element) {
-        for (Point coordinate : element.getCoordinates()) {
-            putElement(coordinate, element);
-        }
+        element.getCoordinates().forEach(coordinate -> putElement(coordinate, element));
     }
 
     public boolean removeElement(TopologyElement element) {
@@ -83,13 +78,13 @@ public class VirtualGrid implements Grid, Serializable {
 
     private boolean removeFromTable(String name) {
         final Collection<Pair<Double, Double>> keys = findInTable(name);
-        boolean all_removed = true;
+        boolean allRemoved = true;
         for (Pair<Double, Double> key : keys) {
             Collection<String> elements = table.get(key.left, key.right);
-            all_removed &= elements.remove(name);
+            allRemoved &= elements.remove(name);
         }
 
-        return all_removed;
+        return allRemoved;
     }
 
     private Collection<Pair<Double, Double>> findInTable(final String name) {
@@ -98,10 +93,11 @@ public class VirtualGrid implements Grid, Serializable {
         for (double x : rowMap.keySet()) {
             Map<Double, Collection<String>> row = rowMap.get(x);
             for (double y : row.keySet()) {
-                final Optional<String> element = row.get(y).stream().filter(input -> input.equals(name)).findFirst();
-                if (element.isPresent()) {
-                    keys.add(Pair.of(x, y));
-                }
+                row.get(y).stream()
+                        .filter(input -> input.equals(name))
+                        .findFirst()
+                        .ifPresent(s -> keys.add(Pair.of(x, y)));;
+
             }
         }
 
@@ -132,9 +128,9 @@ public class VirtualGrid implements Grid, Serializable {
     public Map<Double, Collection<TopologyElement>> getColumn(double columnIndex) {
         Map<Double, Collection<TopologyElement>> column = new TreeMap<>();
         if (table.containsRow(columnIndex)) {// here, we're getting row cause column is x and we have rows as x
-            Map<Double, Collection<String>> column_names = table.row(columnIndex);
-            for (double index : column_names.keySet()) {
-                Collection<String> names = column_names.get(index);
+            Map<Double, Collection<String>> columnNames = table.row(columnIndex);
+            for (double index : columnNames.keySet()) {
+                Collection<String> names = columnNames.get(index);
                 column.put(index, toElements(names));
             }
         }
@@ -146,9 +142,9 @@ public class VirtualGrid implements Grid, Serializable {
     public Map<Double, Collection<TopologyElement>> getRow(double rowIndex) {
         Map<Double, Collection<TopologyElement>> row = new TreeMap<>();
         if (table.containsColumn(rowIndex)) {// here, we're getting column cause row is y and we have columns as y
-            Map<Double, Collection<String>> row_names = table.column(rowIndex);
-            for (double index : row_names.keySet()) {
-                Collection<String> names = row_names.get(index);
+            Map<Double, Collection<String>> rowNames = table.column(rowIndex);
+            for (double index : rowNames.keySet()) {
+                Collection<String> names = rowNames.get(index);
                 row.put(index, toElements(names));
             }
         }

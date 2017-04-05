@@ -28,16 +28,16 @@ import java.util.stream.Collectors;
 public class CompressionUtils {
     public static Collection<Border> getAffectedBorders(TopologyElement element, Map<TopologyLayer, Map<Direction, Border>> borders, Direction direction) {
         List<Border> result = Lists.newArrayList();
-        Set<TopologyLayer> element_layers = Sets.newHashSet(element.getLayer());
+        Set<TopologyLayer> elementLayers = Sets.newHashSet(element.getLayer());
         if (element instanceof ComplexElement) {
-            element_layers.addAll(Collections2.transform(((ComplexElement) element).getElements(), new Function<TopologyElement, TopologyLayer>() {
+            elementLayers.addAll(Collections2.transform(((ComplexElement) element).getElements(), new Function<TopologyElement, TopologyLayer>() {
                 @Override
                 public TopologyLayer apply(TopologyElement element) {
                     TopologyLayer layer = element.getLayer();
                     if (layer == null) {
-                        Collection<TopologyLayer> material_layers = ProjectObjectManager.getLayerFactory().forMaterial(element.getMaterial());
-                        if (!material_layers.isEmpty()) {
-                            layer = material_layers.iterator().next();
+                        Collection<TopologyLayer> materialLayers = ProjectObjectManager.getLayerFactory().forMaterial(element.getMaterial());
+                        if (!materialLayers.isEmpty()) {
+                            layer = materialLayers.iterator().next();
                         }
                     }
                     return layer;
@@ -46,17 +46,17 @@ public class CompressionUtils {
         }
 
         if (element instanceof Contour && !(element instanceof ActiveRegion)) {
-            for (TopologyElement containing_element : ((Contour) element).getElements()) {
-                TopologyLayer layer = containing_element.getLayer();
+            for (TopologyElement containingElement : ((Contour) element).getElements()) {
+                TopologyLayer layer = containingElement.getLayer();
                 if (layer != null)
-                    element_layers.add(layer);
+                    elementLayers.add(layer);
             }
         }
 
-        for (Map.Entry<TopologyLayer, Map<Direction, Border>> border_map : borders.entrySet()) {
-            TopologyLayer border_layer = border_map.getKey();
-            if (element_layers.contains(border_layer)) {
-                result.add(border_map.getValue().get(direction));
+        for (Map.Entry<TopologyLayer, Map<Direction, Border>> borderMap : borders.entrySet()) {
+            TopologyLayer borderLayer = borderMap.getKey();
+            if (elementLayers.contains(borderLayer)) {
+                result.add(borderMap.getValue().get(direction));
             }
         }
         return result;

@@ -573,8 +573,8 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
 
     static boolean stretchParts(Collection<SimpleWire> partsToStretch, Collection<Point> connectedPartsPoints, Direction direction, double length) {
         for (final SimpleWire part : partsToStretch) {
-            final Collection<Point> part_coordinates = part.getCoordinates();
-            Optional<Point> base = connectedPartsPoints.stream().filter(part_coordinates::contains).findFirst();
+            final Collection<Point> partCoordinates = part.getCoordinates();
+            Optional<Point> base = connectedPartsPoints.stream().filter(partCoordinates::contains).findFirst();
 
             if (base.isPresent() && part.isStretchable()) {
                 part.stretchDirectly(base.get(), direction, length, true);
@@ -689,9 +689,9 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
         rebuildBounds();
     }
 
-    public void stretchOnly(SimpleWire part, Point working_point, Direction direction, double length) {
+    public void stretchOnly(SimpleWire part, Point workingPoint, Direction direction, double length) {
         Edge axis = part.getAxis();
-        axis.stretch(working_point, direction, length, true);
+        axis.stretch(workingPoint, direction, length, true);
         rebuildBounds();
     }
 
@@ -775,25 +775,25 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
     }
 
     public Optional<SimpleWire> findPartWithPoint(Point point) {
-        Collection<SimpleWire> found_parts = new ArrayList<>();
+        Collection<SimpleWire> foundParts = new ArrayList<>();
         for (SimpleWire part : parts) {
             Edge axis = part.getAxis();
             if (axis.isOnEdges(point)) {
-                found_parts.add(part);
+                foundParts.add(part);
             }
         }
 
-        if (found_parts.isEmpty()) {
+        if (foundParts.isEmpty()) {
             return Optional.empty();
         }
 
-        for (SimpleWire found_part : found_parts) {
-            if (found_part.getAxis().isPoint()) {
-                return Optional.of(found_part);
+        for (SimpleWire foundPart : foundParts) {
+            if (foundPart.getAxis().isPoint()) {
+                return Optional.of(foundPart);
             }
         }
 
-        return Optional.of(found_parts.iterator().next());
+        return Optional.of(foundParts.iterator().next());
     }
 
     public Optional<SimpleWire> findLink(Point point) {
@@ -957,20 +957,20 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
             Point start = partAxis.getStart();
             Point end = partAxis.getEnd();
 
-            SimpleWire.Builder link_builder = new SimpleWire.Builder(closestPart);
-            link_builder.setAxis(Edge.of(p.clone(), p.clone()));
-            link_builder.setMaxLength(maxBendLength);
-            link_builder.setStretchable(closestPart.isMovable()); // link is always stretchable
-            link_builder.setMovable(true);
-            SimpleWire link = link_builder.build();
+            SimpleWire.Builder linkBuilder = new SimpleWire.Builder(closestPart);
+            linkBuilder.setAxis(Edge.of(p.clone(), p.clone()));
+            linkBuilder.setMaxLength(maxBendLength);
+            linkBuilder.setStretchable(closestPart.isMovable()); // link is always stretchable
+            linkBuilder.setMovable(true);
+            SimpleWire link = linkBuilder.build();
 
-            SimpleWire.Builder left_builder = new SimpleWire.Builder(closestPart);
-            left_builder.setAxis(Edge.of(start.clone(), link.getAxis().getStart().clone()));
-            SimpleWire left = left_builder.build();
+            SimpleWire.Builder leftBuilder = new SimpleWire.Builder(closestPart);
+            leftBuilder.setAxis(Edge.of(start.clone(), link.getAxis().getStart().clone()));
+            SimpleWire left = leftBuilder.build();
 
-            SimpleWire.Builder right_builder = new SimpleWire.Builder(closestPart);
-            right_builder.setAxis(Edge.of(link.getAxis().getEnd().clone(), end.clone()));
-            SimpleWire right = right_builder.build();
+            SimpleWire.Builder rightBuilder = new SimpleWire.Builder(closestPart);
+            rightBuilder.setAxis(Edge.of(link.getAxis().getEnd().clone(), end.clone()));
+            SimpleWire right = rightBuilder.build();
 
             ListIterator<SimpleWire> i = parts.listIterator(parts.indexOf(closestPart));
             i.next();
@@ -991,13 +991,17 @@ public class Wire extends TopologyElement implements ComplexElement, Movable, Se
     }
 
     public SimpleWire addEmptyLinkToPart(SimpleWire part, Point p) {
-        SimpleWire.Builder link_builder = new SimpleWire.Builder(this);
-        link_builder.setAxis(Edge.of(p.clone(), p.clone()));
-        link_builder.setMaxLength(maxBendLength);
-        link_builder.setStretchable(true); // link is always stretchable
-        SimpleWire link = link_builder.build();
+        SimpleWire.Builder linkBuilder = new SimpleWire.Builder(this);
+        linkBuilder.setAxis(Edge.of(p.clone(), p.clone()));
+        linkBuilder.setMaxLength(maxBendLength);
+        linkBuilder.setStretchable(true); // link is always stretchable
+        SimpleWire link = linkBuilder.build();
         int index = indexOf(part);
-        parts.add(index > 0 ? index + 1 : index, link);
+        if (part.getAxis().getStart().eq(p)){
+            parts.add(index, link);
+        } else {
+            parts.add(index + 1, link);
+        }
 
         return link;
     }

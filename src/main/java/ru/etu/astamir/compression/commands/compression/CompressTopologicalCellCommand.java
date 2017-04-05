@@ -17,8 +17,8 @@ import java.util.*;
  */
 public class CompressTopologicalCellCommand extends CompressContourCommand {
 
-    public CompressTopologicalCellCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, String element_name, Direction direction) {
-        super(grid, borders, element_name, direction, direction.opposite());
+    public CompressTopologicalCellCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, String elementName, Direction direction) {
+        super(grid, borders, elementName, direction, direction.opposite());
     }
 
 
@@ -35,16 +35,16 @@ public class CompressTopologicalCellCommand extends CompressContourCommand {
         Edge edge = rect.getEdge(side);
 
         double length = 0;
-        BorderPart closest_border = null;
+        BorderPart closestBorder = null;
         for (Border border : borders) {
             Optional<BorderPart> closest = border.without(grid.getSymbolsOfClass(Well.class)).getClosestPartWithConstraints(edge, cell.getSymbol(), direction);
             if (closest.isPresent()) {
-                BorderPart closest_border_part = closest.get();
+                BorderPart closestBorderPart = closest.get();
                 for (Point coordinate : edge.getPoints()) {
-                    double l = border.getMoveDistance(closest_border_part, cell.getSymbol(), direction, coordinate);
+                    double l = border.getMoveDistance(closestBorderPart, cell.getSymbol(), direction, coordinate);
                     if (l < length || length == 0) {
                         length = l;
-                        closest_border = closest_border_part;
+                        closestBorder = closestBorderPart;
                     }
                 }
             }

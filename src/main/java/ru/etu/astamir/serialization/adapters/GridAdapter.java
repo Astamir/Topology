@@ -1,8 +1,5 @@
 package ru.etu.astamir.serialization.adapters;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import org.reflections.Reflections;
 import ru.etu.astamir.common.reflect.ReflectUtils;
 import ru.etu.astamir.compression.grid.Grid;
@@ -10,12 +7,22 @@ import ru.etu.astamir.compression.grid.VirtualGrid;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
-import ru.etu.astamir.serialization.*;
+import ru.etu.astamir.serialization.Attribute;
+import ru.etu.astamir.serialization.AttributeAdapter;
+import ru.etu.astamir.serialization.AttributeContainer;
+import ru.etu.astamir.serialization.AttributeFactory;
+import ru.etu.astamir.serialization.ComplexAttribute;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author Artem Mon'ko
@@ -115,20 +122,12 @@ public class GridAdapter implements AttributeAdapter<Grid> {
         for (final Attribute attribute : complexAttribute.getValue()) {
             if (attribute.isSimple()) {
                 if (attribute.isReference()) {
-                    Optional<TopologyElement> referenceParent = Iterables.tryFind(parsed, new Predicate<TopologyElement>() {
-                        @Override
-                        public boolean apply(TopologyElement input) {
+                    Optional<TopologyElement> referenceParent = parsed.stream().filter(e -> {
                             Optional<Attribute> name = AttributeContainer.findAttribute(complexAttribute, "id");
-                            return name.isPresent() && input.getName().equals(name.get().getValue());
-                        }
-                    });
+                            return name.isPresent() && e.getName().equals(name.get().getValue());
+                    }).findFirst();
 
-                    Optional<TopologyElement> referenceTarget = Iterables.tryFind(parsed, new Predicate<TopologyElement>() {
-                        @Override
-                        public boolean apply(TopologyElement input) {
-                            return input.getName().equals(attribute.getValue());
-                        }
-                    });
+                    Optional<TopologyElement> referenceTarget = parsed.stream().filter(e -> e.getName().equals(attribute.getValue())).findFirst();
 
                     if (referenceTarget.isPresent() && referenceParent.isPresent()) {
                         try {

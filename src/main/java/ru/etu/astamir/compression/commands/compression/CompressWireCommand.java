@@ -28,18 +28,18 @@ import java.util.*;
  */
 public class CompressWireCommand extends CompressCommand {
     Command imitate;
-    UpdateBorderCommand update_border;
+    UpdateBorderCommand updateBorder;
     Wire wire;
-    List<Pair<SimpleWire, Point>> connected_wires_to_stretch = Lists.newArrayList();
-    Map<SimpleWire, Flap> connected_to_flaps = new HashMap<>();
-    boolean gate_deformation_allowed = true;
+    List<Pair<SimpleWire, Point>> connectedWiresToStretch = Lists.newArrayList();
+    Map<SimpleWire, Flap> connectedToFlaps = new HashMap<>();
+    boolean gateDeformationAllowed = true;
 
-    public CompressWireCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, String element_name, Direction direction) {
-        super(grid, borders, element_name, direction);
+    public CompressWireCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, String elementName, Direction direction) {
+        super(grid, borders, elementName, direction);
     }
 
-    public void setGateDeformationAllowed(boolean gate_deformation_allowed) {
-        this.gate_deformation_allowed = gate_deformation_allowed;
+    public void setGateDeformationAllowed(boolean gateDeformationAllowed) {
+        this.gateDeformationAllowed = gateDeformationAllowed;
     }
 
     @Override
@@ -57,24 +57,24 @@ public class CompressWireCommand extends CompressCommand {
         imitate = createImitateCommand(wire, affectedBorders.iterator().next());
         imitate.execute();
         moveConnected();
-        update_border = new UpdateBorderCommand(affectedBorders, wire, direction);
-        update_border.execute();
+        updateBorder = new UpdateBorderCommand(affectedBorders, wire, direction);
+        updateBorder.execute();
 
         return false;
     }
 
     protected Command createImitateCommand(Wire wire, Border overlay) {
-        return wire instanceof Gate ? new ImitateGateCommand((Gate) wire, overlay, direction, gate_deformation_allowed, grid) : new ImitateCommand(wire, overlay, direction, grid);
+        return wire instanceof Gate ? new ImitateGateCommand((Gate) wire, overlay, direction, gateDeformationAllowed, grid) : new ImitateCommand(wire, overlay, direction, grid);
     }
 
     protected void moveConnected() {
-        for (Pair<SimpleWire, Point> wire_pair : connected_wires_to_stretch) {
-            if (connected_to_flaps.containsKey(wire_pair.left)) {
-                Flap flap = connected_to_flaps.get(wire_pair.left);
-                Point working_point = flap.getCenter().getStart();
-                double distance = Point.distance(working_point, wire_pair.right);
+        for (Pair<SimpleWire, Point> wirePair : connectedWiresToStretch) {
+            if (connectedToFlaps.containsKey(wirePair.left)) {
+                Flap flap = connectedToFlaps.get(wirePair.left);
+                Point workingPoint = flap.getCenter().getStart();
+                double distance = Point.distance(workingPoint, wirePair.right);
 
-                wire_pair.left.getWire().stretchOnly(wire_pair.left, wire_pair.right, direction, distance);
+                wirePair.left.getWire().stretchOnly(wirePair.left, wirePair.right, direction, distance);
             }
         }
     }
@@ -93,8 +93,8 @@ public class CompressWireCommand extends CompressCommand {
         }
     }
 
-    void handleConnectedContact(Contact connected_contact) {
-        if (connected_contact.getType() == ContactType.FLAP) {
+    void handleConnectedContact(Contact connectedContact) {
+        if (connectedContact.getType() == ContactType.FLAP) {
             if (wire instanceof Gate) {
                 // move flap
             } else {
@@ -105,35 +105,35 @@ public class CompressWireCommand extends CompressCommand {
         }
     }
 
-    void handleConnectedWire(Wire connected_wire) {
+    void handleConnectedWire(Wire connectedWire) {
         if (wire instanceof Gate) {
-            handleConnectedWireAndGate((Gate) wire, connected_wire);
-        } else if (connected_wire instanceof Gate) {
-            handleConnectedWireAndGate((Gate) connected_wire, wire);
+            handleConnectedWireAndGate((Gate) wire, connectedWire);
+        } else if (connectedWire instanceof Gate) {
+            handleConnectedWireAndGate((Gate) connectedWire, wire);
         }
     }
 
     void handleConnectedWireAndGate(Gate gate, Wire wire) {
-        Optional<Point> on_flap = gate.findConnectionPointOnFlaps(wire);
-        if (on_flap.isPresent()) {
+        Optional<Point> onFlaps = gate.findConnectionPointOnFlaps(wire);
+        if (onFlaps.isPresent()) {
             // So our wire connected to gate's flap. We have to figure out length to to stretch by the change of the correspondent flap's position
-            Optional<SimpleWire> found_part = wire.findPartWithPoint(on_flap.get());
-            if (!found_part.isPresent()) {
+            Optional<SimpleWire> foundPart = wire.findPartWithPoint(onFlaps.get());
+            if (!foundPart.isPresent()) {
                 throw new UnexpectedException("we found connection point but not the part ??");
             }
 
-            SimpleWire part = found_part.get();
+            SimpleWire part = foundPart.get();
 
-            Flap flap = gate.getFlap(on_flap.get());
+            Flap flap = gate.getFlap(onFlaps.get());
             if (!part.isLink() && part.getAxis().getOrientation().isOrthogonal(direction.toOrientation())) {
                 // we have to connect them
                 part = WireUtils.connect(wire, flap).iterator().next();
             }
-            connected_to_flaps.put(part, flap);
-            connected_wires_to_stretch.add(Pair.of(part, on_flap.get()));
+            connectedToFlaps.put(part, flap);
+            connectedWiresToStretch.add(Pair.of(part, onFlaps.get()));
         }
         // wire could also be connected to the gate directly
-        final Optional<Point> connection_point = WireUtils.getConnectionPoint(gate, wire);
+        final Optional<Point> connectionPoint = WireUtils.getConnectionPoint(gate, wire);
         // todo figure out how to track connection point
     }
 
@@ -145,8 +145,8 @@ public class CompressWireCommand extends CompressCommand {
     @Override
     public String toString() {
         if (wire == null) {
-            return "CompressWireCommand with null element" + element_name;
+            return "CompressWireCommand with null element" + elementName;
         }
-        return "Moving " + wire.getClass().getSimpleName() +"[" + wire.getSymbol()+"], deformation = " + gate_deformation_allowed;
+        return "Moving " + wire.getClass().getSimpleName() +"[" + wire.getSymbol()+"], deformation = " + gateDeformationAllowed;
     }
 }

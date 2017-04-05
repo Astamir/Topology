@@ -1,12 +1,16 @@
 package ru.etu.astamir.geom.common;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import ru.etu.astamir.common.Pair;
 import ru.etu.astamir.model.Movable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Различные вспомогательные геометрические функции.
@@ -16,17 +20,14 @@ public class GeomUtils {
 
     }
 
-    public static final Function<Pair<Direction, Double>, Pair<Double, Double>> TO_DXDY = new Function<Pair<Direction, Double>, Pair<Double, Double>>() {
-        @Override
-        public Pair<Double, Double> apply(Pair<Direction, Double> input) {
-            double d = input.right;
-            Direction direction = input.left;
-            double signedD = d * direction.getDirectionSign();
-            if (direction.isLeftOrRight()) {
-                return Pair.of(signedD, 0.0);
-            } else {
-                return Pair.of(0.0, signedD);
-            }
+    public static final Function<Pair<Direction, Double>, Pair<Double, Double>> TO_DXDY = input -> {
+        double d = input.right;
+        Direction direction = input.left;
+        double signedD = d * direction.getDirectionSign();
+        if (direction.isLeftOrRight()) {
+            return Pair.of(signedD, 0.0);
+        } else {
+            return Pair.of(0.0, signedD);
         }
     };
 
@@ -71,8 +72,8 @@ public class GeomUtils {
         return one > another ? one - another : another - one;
     }
 
-    public static Optional<Point> getClosestPoint(Collection<Point> points, Point target_point) {
-        if (target_point == null || points.isEmpty()) {
+    public static Optional<Point> getClosestPoint(Collection<Point> points, Point targetPoint) {
+        if (targetPoint == null || points.isEmpty()) {
             return Optional.empty();
         }
 
@@ -81,12 +82,12 @@ public class GeomUtils {
         }
 
         Point closest = null;
-        double min_dist = 0;
+        double minDist = 0;
         for (Point point : points) {
-            double dist = Point.distance(point, target_point);
-            if (dist < min_dist || closest == null) {
+            double dist = Point.distance(point, targetPoint);
+            if (dist < minDist || closest == null) {
                 closest = point;
-                min_dist = dist;
+                minDist = dist;
             }
         }
 

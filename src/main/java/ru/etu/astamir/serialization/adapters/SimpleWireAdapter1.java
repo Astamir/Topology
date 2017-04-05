@@ -1,16 +1,11 @@
 package ru.etu.astamir.serialization.adapters;
 
-import ru.etu.astamir.geom.common.Edge;
-import ru.etu.astamir.geom.common.Polygon;
-import ru.etu.astamir.model.exceptions.UnexpectedException;
 import ru.etu.astamir.model.wires.SimpleWire;
-import ru.etu.astamir.model.wires.Wire;
-import ru.etu.astamir.serialization.*;
+import ru.etu.astamir.serialization.Attribute;
+import ru.etu.astamir.serialization.AttributeAdapter;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Artem Mon'ko

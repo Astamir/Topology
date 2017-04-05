@@ -12,12 +12,12 @@ public class CommandManager<T extends Command> {
 
     Deque<T> commands = new LinkedList<>();
     Deque<T> history = new LinkedList<>();
-    Deque<T> failed_commands = new LinkedList<>();
-    Deque<T> executed_commands = new LinkedList<>();
+    Deque<T> failedCommands = new LinkedList<>();
+    Deque<T> executedCommands = new LinkedList<>();
 
     List<Listener> listeners = new ArrayList<>();
 
-    private int fail_policy = CONTINUE_ON_FAIL;
+    private int failPolicy = CONTINUE_ON_FAIL;
 
     public CommandManager(List<T> commands) {
         this.commands.addAll(commands);
@@ -34,17 +34,17 @@ public class CommandManager<T extends Command> {
 
     public boolean executeNext() {
         boolean success = false;
-        T next_command = commands.poll();
-        if (next_command != null) {
-            success = next_command.execute();
-            log(next_command); // todo
+        T nextCommand = commands.poll();
+        if (nextCommand != null) {
+            success = nextCommand.execute();
+            log(nextCommand); // todo
             if (!success) {
-                next_command.unexecute();
-                failed_commands.add(next_command);
+                nextCommand.unexecute();
+                failedCommands.add(nextCommand);
             }
 
-            executed_commands.add(next_command);
-            fireCommandExecuted(next_command);
+            executedCommands.add(nextCommand);
+            fireCommandExecuted(nextCommand);
         }
 
         return success;
@@ -62,7 +62,7 @@ public class CommandManager<T extends Command> {
     public void clear() {
         commands.clear();
         history.clear();
-        failed_commands.clear();
+        failedCommands.clear();
     }
 
     public ImmutableList<T> getCommands() {
@@ -88,9 +88,9 @@ public class CommandManager<T extends Command> {
     }
 
     public void rollback() {
-        while (!executed_commands.isEmpty()) {
-            T command_to_unexecute = executed_commands.pop();
-            command_to_unexecute.unexecute();
+        while (!executedCommands.isEmpty()) {
+            T commandToUnexecute = executedCommands.pop();
+            commandToUnexecute.unexecute();
         }
     }
 

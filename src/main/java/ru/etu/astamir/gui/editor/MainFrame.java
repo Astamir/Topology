@@ -1,6 +1,5 @@
 package ru.etu.astamir.gui.editor;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import net.miginfocom.swing.MigLayout;
 import org.jdom2.JDOMException;
@@ -20,7 +19,6 @@ import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.gui.editor.creation.ContactCreationDialog;
 import ru.etu.astamir.gui.editor.creation.ElementCreationDialog;
-import ru.etu.astamir.gui.widgets.CommandTrackerPanel;
 import ru.etu.astamir.launcher.Project;
 import ru.etu.astamir.launcher.Topology;
 import ru.etu.astamir.launcher.VirtualTopology;
@@ -39,6 +37,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
 /**
  * Created by Astamir on 10.03.14.
@@ -51,7 +50,7 @@ public class MainFrame extends JFrame {
     VirtualGridPanel paintPanel;
     String currentTopology = "default_topology";
     VirtualTopology defaultTopology;
-    boolean border_painted = false;
+    boolean borderPainted = false;
 
     public MainFrame() {
         this.defaultTopology = (VirtualTopology) Preconditions.checkNotNull(ProjectObjectManager.getCurrentProject().getTopologies().get(currentTopology));
@@ -173,12 +172,12 @@ public class MainFrame extends JFrame {
                 } else {
                     paintPanel.setBorders(affectedBorders);
                 }
-                if (!border_painted) {
+                if (!borderPainted) {
                     paintPanel.repaint();
-                    border_painted = true;
+                    borderPainted = true;
                     return;
                 }
-                border_painted = false;
+                borderPainted = false;
             }
             compressor.step(1);
 

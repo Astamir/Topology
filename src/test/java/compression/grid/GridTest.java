@@ -24,10 +24,10 @@ public class GridTest {
 
     @Before
     public void setUp() throws IllegalAccessException, InstantiationException {
-        List<Class<? extends AbstractEntitySet>> set_classes = new ArrayList<>();
-        set_classes.add(EntitySet.class);
+        List<Class<? extends AbstractEntitySet>> setClasses = new ArrayList<>();
+        setClasses.add(EntitySet.class);
 
-        for (Class<? extends AbstractEntitySet> aClass : set_classes) {
+        for (Class<? extends AbstractEntitySet> aClass : setClasses) {
             sets.add(aClass.newInstance());
         }
     }

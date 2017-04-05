@@ -62,10 +62,10 @@ public class Gate extends Wire {
     }
 
     public Flap getFlap(Point point) {
-        Flap start_flap = getFlap(Flap.Position.START);
-        Flap end_flap = getFlap(Flap.Position.END);
+        Flap startFlap = getFlap(Flap.Position.START);
+        Flap endFlap = getFlap(Flap.Position.END);
 
-        return Point.distanceSq(start_flap.getCenter().getStart(), point) <= Point.distanceSq(end_flap.getCenter().getStart(), point) ? start_flap : end_flap;
+        return Point.distanceSq(startFlap.getCenter().getStart(), point) <= Point.distanceSq(endFlap.getCenter().getStart(), point) ? startFlap : endFlap;
     }
 
     public Map<Flap.Position, Flap> getFlaps() {
@@ -94,17 +94,17 @@ public class Gate extends Wire {
             throw new UnexpectedException("wire " + wire.getName() + " is not connect to gate " + name);
         }
 
-        Flap start_flap = getFlap(Flap.Position.START);
-        Point working_point = start_flap.getCenter().getStart();
-        Optional<SimpleWire> for_start = wire.findPartWithPoint(working_point);
-        if (for_start.isPresent()) {
-            return Optional.of(working_point);
+        Flap startFlap = getFlap(Flap.Position.START);
+        Point workingPoint = startFlap.getCenter().getStart();
+        Optional<SimpleWire> forStart = wire.findPartWithPoint(workingPoint);
+        if (forStart.isPresent()) {
+            return Optional.of(workingPoint);
         }
 
-        Flap end_flap = getFlap(Flap.Position.END);
-        working_point = end_flap.getCenter().getStart();
-        Optional<SimpleWire> for_end = wire.findPartWithPoint(working_point);
-        return for_end.isPresent() ? Optional.of(working_point) : Optional.<Point>empty();
+        Flap endFlap = getFlap(Flap.Position.END);
+        workingPoint = endFlap.getCenter().getStart();
+        Optional<SimpleWire> forEnd = wire.findPartWithPoint(workingPoint);
+        return forEnd.isPresent() ? Optional.of(workingPoint) : Optional.<Point>empty();
     }
 
     @Override

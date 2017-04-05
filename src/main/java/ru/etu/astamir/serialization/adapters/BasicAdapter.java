@@ -1,6 +1,5 @@
 package ru.etu.astamir.serialization.adapters;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Primitives;
 import org.jdom2.Document;
@@ -8,7 +7,14 @@ import org.w3c.dom.Node;
 import ru.etu.astamir.common.reflect.ReflectUtils;
 import ru.etu.astamir.model.Entity;
 import ru.etu.astamir.model.exceptions.UnexpectedException;
-import ru.etu.astamir.serialization.*;
+import ru.etu.astamir.serialization.Attribute;
+import ru.etu.astamir.serialization.AttributeAdapter;
+import ru.etu.astamir.serialization.AttributeContainer;
+import ru.etu.astamir.serialization.AttributeFactory;
+import ru.etu.astamir.serialization.ComplexAttribute;
+import ru.etu.astamir.serialization.IgnoreAttribute;
+import ru.etu.astamir.serialization.JAXBUtils;
+import ru.etu.astamir.serialization.LookIntoAttribute;
 import ru.etu.astamir.serialization.xml.XMLAttributeParser;
 
 import javax.xml.bind.JAXBContext;
@@ -23,6 +29,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Рефлексивный получатель аттрибутов. Работает сомнительно, и мб где-нить сломается.

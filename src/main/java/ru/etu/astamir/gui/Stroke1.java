@@ -28,9 +28,9 @@ public class Stroke1 extends JFrame {
     Rectangle horizontalRectangle = Rectangle.of(Point.of(50, 50), Direction.RIGHT, 150, 8, 8);
 
     Wire wire = new Wire(Orientation.VERTICAL);
-    SimpleWire selected_part;
+    SimpleWire selectedPart;
     Direction direction = Direction.DOWN;
-    Point selected_point;
+    Point selectedPoint;
 
     public Stroke1() {
         super();
@@ -58,75 +58,75 @@ public class Stroke1 extends JFrame {
                 }
 
                 if (e.getKeyChar() == 'e') {
-                    wire.createAnEmptyLink(selected_point, direction);
+                    wire.createAnEmptyLink(selectedPoint, direction);
                     repaint();
                     return;
                 }
 
 
                 if (e.getKeyChar() == KeyEvent.VK_SPACE) {
-                    wire.movePart(selected_part, direction, 5);
+                    wire.movePart(selectedPart, direction, 5);
                     repaint();
                     return;
                 }
 
                 if (e.getKeyChar() == '0') {
-                    selected_part = wire.getPart(0);
+                    selectedPart = wire.getPart(0);
                     repaint();
                     return;
                 }
 
                  if (e.getKeyChar() == '1') {
-                    selected_part = wire.getPart(1);
+                    selectedPart = wire.getPart(1);
                     repaint();
                     return;
                 }
 
                 if (e.getKeyChar() == '2') {
-                    selected_part = wire.getPart(2);
+                    selectedPart = wire.getPart(2);
                     repaint();
                     return;
                 }
 
                 if (e.getKeyChar() == '3') {
-                    selected_part = wire.getPart(3);
+                    selectedPart = wire.getPart(3);
                     repaint();
                     return;
                 }
 
                 if (e.getKeyChar() == '4') {
-                    selected_part = wire.getPart(4);
+                    selectedPart = wire.getPart(4);
                     repaint();
                     return;
                 }
 
                 if (e.getKeyChar() == '5') {
-                    selected_part = wire.getPart(5);
+                    selectedPart = wire.getPart(5);
                     repaint();
                     return;
                 }
 
                 if (e.getKeyChar() == '6') {
-                    selected_part = wire.getPart(6);
+                    selectedPart = wire.getPart(6);
                     repaint();
                     return;
                 }
 
                 if (e.getKeyChar() == '7') {
-                    selected_part = wire.getPart(7);
+                    selectedPart = wire.getPart(7);
 
                     repaint();
                     return;
                 }
 
                 if (e.getKeyChar() == '8') {
-                    selected_part = wire.getPart(8);
+                    selectedPart = wire.getPart(8);
                     repaint();
                     return;
                 }
 
                 if (e.getKeyChar() == '9') {
-                    selected_part = wire.getPart(9);
+                    selectedPart = wire.getPart(9);
                     repaint();
                     return;
                 }
@@ -137,7 +137,7 @@ public class Stroke1 extends JFrame {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                selected_point = Point.fromPoint2D(e.getPoint());
+                selectedPoint = Point.fromPoint2D(e.getPoint());
                 repaint();
             }
         });
@@ -153,19 +153,19 @@ public class Stroke1 extends JFrame {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
         WirePainter painter = new WirePainter();
-        painter.paint(wire, g, Utils.Functions.SELF_FUNCTION);
-        if (selected_part != null) {
+        painter.paint(wire, g, Utils.Transformers.SELF_FUNCTION);
+        if (selectedPart != null) {
             Color color = g2d.getColor();
             g2d.setColor(Color.RED);
-            g2d.draw(selected_part.getAxis().toLine2D());
+            g2d.draw(selectedPart.getAxis().toLine2D());
             g2d.setColor(color);
         }
 
         g.drawString(direction.toString(), 100, 150);
         ((Graphics2D) g).drawString(wire.isChained() ? "chained" : "not chained", 150, 150);
         g.setColor(Color.red);
-        if (selected_point != null) {
-            DrawingUtils.drawPoint(selected_point, 5, false, g);
+        if (selectedPoint != null) {
+            DrawingUtils.drawPoint(selectedPoint, 5, false, g);
         }
 
         //g2d.setStroke(drawingStroke);

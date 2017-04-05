@@ -11,36 +11,36 @@ import java.util.HashSet;
  * Некоторая виртуальная точка к которой подключены различные элементы.
  */
 public class SimpleConnectionPoint extends Entity implements ConnectionPoint, Serializable, Cloneable {
-    private Collection<String> connected_elements = new HashSet<>();
+    private Collection<String> connectedElements = new HashSet<>();
 
     public SimpleConnectionPoint() {
     }
 
-    public SimpleConnectionPoint(Collection<String> connected_elements) {
-        this.connected_elements = connected_elements;
+    public SimpleConnectionPoint(Collection<String> connectedElements) {
+        this.connectedElements = connectedElements;
     }
 
-    public void setConnectedElements(Collection<String> connected_elements) {
-        this.connected_elements = connected_elements;
+    public void setConnectedElements(Collection<String> connectedElements) {
+        this.connectedElements = connectedElements;
     }
 
     public void addConnectedElement(String name) {
-        this.connected_elements.add(Preconditions.checkNotNull(name));
+        this.connectedElements.add(Preconditions.checkNotNull(name));
     }
 
     public void removeConnectedElement(String name) {
-        this.connected_elements.remove(Preconditions.checkNotNull(name));
+        this.connectedElements.remove(Preconditions.checkNotNull(name));
     }
 
     @Override
     public Collection<String> getConnectedNames() {
-        return connected_elements;
+        return connectedElements;
     }
 
     @Override
     public SimpleConnectionPoint clone() {
         SimpleConnectionPoint clone = (SimpleConnectionPoint) super.clone();
-        clone.connected_elements = new HashSet<>(connected_elements);
+        clone.connectedElements = new HashSet<>(connectedElements);
 
         return clone;
     }

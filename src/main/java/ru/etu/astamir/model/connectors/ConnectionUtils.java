@@ -35,12 +35,12 @@ public class ConnectionUtils {
     }
 
     public static <V extends TopologyElement> EntitySet<V> getConnectedElementsForWire(Wire wire, Grid grid) {
-        EntitySet<V> connected_elements = new EntitySet<>();
-        for (ConnectionPoint connection_point : wire.getConnections()) {
-            connected_elements.addAll(ConnectionUtils.<V>resolveConnectedElements(connection_point, grid));
+        EntitySet<V> connectedElements = new EntitySet<>();
+        for (ConnectionPoint connectionPoint : wire.getConnections()) {
+            connectedElements.addAll(ConnectionUtils.<V>resolveConnectedElements(connectionPoint, grid));
         }
 
-        return connected_elements;
+        return connectedElements;
     }
 
     public static <V extends TopologyElement> EntitySet<V> getConnectedElements(TopologyElement element, Grid grid) {

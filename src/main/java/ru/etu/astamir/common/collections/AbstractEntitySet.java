@@ -10,9 +10,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Created by astamir on 9/12/14.
- */
 public abstract class AbstractEntitySet<V extends Entity> implements Set<V>, Serializable, Cloneable {
 
     public AbstractEntitySet() {
@@ -99,32 +96,26 @@ public abstract class AbstractEntitySet<V extends Entity> implements Set<V>, Ser
 
     @Override
     public boolean addAll(Collection<? extends V> c) {
-        boolean all_added = true;
+        boolean allAdded = true;
         for (V v : c) {
-            all_added &= add(v);
+            allAdded &= add(v);
         }
 
-        return all_added;
+        return allAdded;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        for (Iterator<V> i = iterator(); i.hasNext(); ) {
-            if (!c.contains(i.next())) {
-                i.remove();
-            }
-        }
-
-        return true;
+        return removeIf(v -> !c.contains(v));
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        boolean something_was_removed = false;
+        boolean somethingWasRemoved = false;
         for (Object o : c) {
-            something_was_removed |= remove(o);
+            somethingWasRemoved |= remove(o);
         }
-        return something_was_removed;
+        return somethingWasRemoved;
     }
 
 

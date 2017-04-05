@@ -1,6 +1,5 @@
 package ru.etu.astamir.serialization.adapters;
 
-import com.google.common.base.Optional;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.serialization.Attribute;
 import ru.etu.astamir.serialization.AttributeAdapter;

@@ -1,7 +1,7 @@
 package ru.etu.astamir.dao;
 
-import ru.etu.astamir.compression.CompressorsPool;
-import ru.etu.astamir.compression.DefaultCompressorsPool;
+import ru.etu.astamir.compression.CompressorsCache;
+import ru.etu.astamir.compression.DefaultCompressorsCache;
 import ru.etu.astamir.gui.painters.*;
 import ru.etu.astamir.launcher.Project;
 import ru.etu.astamir.launcher.SimpleProject;
@@ -23,7 +23,7 @@ public class ProjectObjectManager {
      * Only used in tests. <br><b>For correct synchronization the list must not be changed (just read) after class
      * (static) initialization.</b>
      */
-    private static final List<ObjectManager> manager_list = new ArrayList<ObjectManager>();
+    private static final List<ObjectManager> MANAGER_LIST = new ArrayList<ObjectManager>();
 
 
     private static final ObjectManager<TechnologyFactory> TECHNOLOGY_FACTORY = new ObjectManager<TechnologyFactory>(TechnologyFactory.class);
@@ -38,7 +38,7 @@ public class ProjectObjectManager {
 
     private static final ObjectManager<PainterCentral> PAINTER_CENTRAL = new ObjectManager<PainterCentral>(DefaultPainterCentral.class);
 
-    private static final ObjectManager<CompressorsPool> COMPRESSORS_POOL = new ObjectManager<CompressorsPool>(DefaultCompressorsPool.class);
+    private static final ObjectManager<CompressorsCache> COMPRESSORS_POOL = new ObjectManager<CompressorsCache>(DefaultCompressorsCache.class);
 
 
     public static TechnologyFactory getTechnologyFactory() {
@@ -65,7 +65,7 @@ public class ProjectObjectManager {
         return PAINTER_CENTRAL.getInstance();
     }
 
-    public static CompressorsPool getCompressorsPool() {
+    public static CompressorsCache getCompressorsPool() {
         return COMPRESSORS_POOL.getInstance();
     }
 
@@ -73,7 +73,7 @@ public class ProjectObjectManager {
      * This method is for test purposes only.
      */
     public static void reset() {
-        for (ObjectManager manager : manager_list)
+        for (ObjectManager manager : MANAGER_LIST)
             manager.reset();
     }
 
@@ -92,7 +92,7 @@ public class ProjectObjectManager {
          */
         public ObjectManager(final Class<? extends T> clazz) {
             this.clazz = clazz;
-            manager_list.add(this);
+            MANAGER_LIST.add(this);
         }
 
         /**
@@ -156,7 +156,7 @@ public class ProjectObjectManager {
         return CURRENT_PROJECT;
     }
 
-    public synchronized static void setCurrentProject(Project currentProject) {
+    public static synchronized void setCurrentProject(Project currentProject) {
         ProjectObjectManager.CURRENT_PROJECT = currentProject;
     }
 }

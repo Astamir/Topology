@@ -24,6 +24,8 @@ import ru.etu.astamir.model.contacts.ContactType;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Утилитный класс для различных действий над шинами и контурами.
@@ -41,19 +43,19 @@ public class WireUtils {
         }
 
         if (contact.getType() == ContactType.USUAL || contact.getType() == ContactType.FLAP) {
-            List<SimpleWire> connecting_wires = Lists.newArrayList();
-            Point working_point = contact.getCenter().getStart();
-            final Optional<SimpleWire> part_with_point = wire.findPartWithPoint(working_point);
-            if (part_with_point.isPresent()) {
-                if (!part_with_point.get().isLink()) {
-                    connecting_wires.add(wire.addEmptyLinkToPart(part_with_point.get(), working_point));
+            List<SimpleWire> connectingWires = Lists.newArrayList();
+            Point workingPoint = contact.getCenter().getStart();
+            final Optional<SimpleWire> partWithPoint = wire.findPartWithPoint(workingPoint);
+            if (partWithPoint.isPresent()) {
+                if (!partWithPoint.get().isLink()) {
+                    connectingWires.add(wire.addEmptyLinkToPart(partWithPoint.get(), workingPoint));
                 }
             } else {
                 // we have our contact far away
-                Optional<Point> closest_point = GeomUtils.getClosestPoint(wire.getCoordinates(), working_point);
-                if (closest_point.isPresent()) {
-                    if (GeomUtils.isOnOneLine(closest_point.get(), working_point)) { // we have to connect with one part
-                        Optional<SimpleWire> part = wire.findPartWithPoint(closest_point.get());
+                Optional<Point> closestPoint = GeomUtils.getClosestPoint(wire.getCoordinates(), workingPoint);
+                if (closestPoint.isPresent()) {
+                    if (GeomUtils.isOnOneLine(closestPoint.get(), workingPoint)) { // we have to connect with one part
+                        Optional<SimpleWire> part = wire.findPartWithPoint(closestPoint.get());
                         if (part.isPresent()) {
                             SimpleWire.Builder builder = new SimpleWire.Builder(wire);
                             builder.setDeformable(true);
@@ -62,23 +64,23 @@ public class WireUtils {
 
                             SimpleWire connection;
                             if (wire.isFirstPart(part.get())) {
-                                builder.setAxis(Edge.of(working_point.clone(), closest_point.get().clone()));
+                                builder.setAxis(Edge.of(workingPoint.clone(), closestPoint.get().clone()));
                                 connection = builder.build();
                                 wire.getParts().add(0, connection);
 
                             } else {
-                                builder.setAxis(Edge.of(closest_point.get().clone(), working_point.clone()));
+                                builder.setAxis(Edge.of(closestPoint.get().clone(), workingPoint.clone()));
                                 connection = builder.build();
                                 wire.getParts().add(connection);
                             }
 
-                            connecting_wires.add(connection);
+                            connectingWires.add(connection);
                         }
                     }
                     // todo
                 }
             }
-            return connecting_wires; // connected
+            return connectingWires; // connected
         } else {
             // some logic for complex contacts
         }
@@ -91,11 +93,11 @@ public class WireUtils {
     }
 
     public static Optional<Point> getConnectionPoint(Wire one, Wire another) {
-        for (SimpleWire ones_part : one.getParts()) {
-            for (SimpleWire anothers_part : another.getParts()) {
-                final Point common_point = ones_part.getAxis().crossing(anothers_part.getAxis());
-                if (common_point != null) {
-                    return Optional.of(common_point);
+        for (SimpleWire onesPart : one.getParts()) {
+            for (SimpleWire anothersPart : another.getParts()) {
+                final Point commonPoint = onesPart.getAxis().crossing(anothersPart.getAxis());
+                if (commonPoint != null) {
+                    return Optional.of(commonPoint);
                 }
             }
         }
@@ -123,13 +125,16 @@ public class WireUtils {
         if (element == null) {
             return false;
         }
-        Collection<String> element_names = element instanceof ComplexElement ? Collections2.transform(Lists.<TopologyElement>newArrayList(Iterables.concat(Collections.singletonList(element), ((ComplexElement) element).getElements())), Utils.Functions.NAME_FUNCTION) : Collections.singletonList(element.getName());
-        Collection<String> connected_names = ConnectionUtils.getConnectedNames(wire.getConnections());
-        if (element_names.isEmpty()) {
+
+        Collection<String> elementNames = element instanceof ComplexElement ?
+                Stream.concat(Stream.of(element), ((ComplexElement) element).getElements().stream()).map(Utils.Transformers.NAME_FUNCTION).collect(Collectors.toList()) :
+                Collections.singletonList(element.getName());
+        Collection<String> connectedNames = ConnectionUtils.getConnectedNames(wire.getConnections());
+        if (elementNames.isEmpty()) {
             return false;
         }
-        for (String name : connected_names) {
-            if (element_names.contains(name)) {
+        for (String name : connectedNames) {
+            if (elementNames.contains(name)) {
                 return true;
             }
         }
@@ -158,10 +163,10 @@ public class WireUtils {
 
     private static Optional<Double> getConnectionPoints(Wire wire, Direction direction, Grid grid) {
         List<Double> points = new ArrayList<>();
-        for (TopologyElement connected_element : ConnectionUtils.getConnectedElementsForWire(wire, grid)) {
-            if (connected_element instanceof Contact) {
-                final Point connection_point = ((Contact) connected_element).getCenter().getStart();
-                points.add(direction.getDirectionalComponent(connection_point));
+        for (TopologyElement connectedElement : ConnectionUtils.getConnectedElementsForWire(wire, grid)) {
+            if (connectedElement instanceof Contact) {
+                final Point connectionPoint = ((Contact) connectedElement).getCenter().getStart();
+                points.add(direction.getDirectionalComponent(connectionPoint));
             }
         }
 
@@ -185,34 +190,34 @@ public class WireUtils {
 
     public static boolean straighten(Wire wire, SimpleWire part, Border border, Direction direction, Optional<Double> preferable) {
         List<SimpleWire> connected = wire.getConnectedParts(part);
-        EntitySet<SimpleWire> connected_set = new EntitySet<>(connected);
-        for (SimpleWire connected_part : connected) {
-            List<SimpleWire> farther_connections = wire.getConnectedParts(connected_part);
-            connected_set.addAll(farther_connections);
+        EntitySet<SimpleWire> connectedSet = new EntitySet<>(connected);
+        for (SimpleWire connectedPart : connected) {
+            List<SimpleWire> fartherConnections = wire.getConnectedParts(connectedPart);
+            connectedSet.addAll(fartherConnections);
         }
 
         // we only need connected parts with same orientation that given part.
         // we need this connected parts to find some maximum boundary for given part, it cant move farther than that
-        connected_set = new EntitySet<>(Iterables.filter(connected_set,
-                Utils.UtilPredicates.OrientationPredicate.forOrientation(part.axis.getOrientation())));
 
-        if (connected_set.isEmpty()) { // means we only have one part in this wire, no need to straighten it
+        connectedSet = new EntitySet<>(connectedSet.stream().filter(Utils.UtilPredicates.OrientationPredicate.forOrientation(part.axis.getOrientation())).collect(Collectors.toList()));
+
+        if (connectedSet.isEmpty()) { // means we only have one part in this wire, no need to straighten it
             return false;
         }
 
-        Optional<SimpleWire> closest_part = wire.closestWithSameOrientation(part);
-        double to_closest_part = isMin(wire, part, direction) ? 0.0 : closest_part.isPresent() ? part.axis.distanceToEdge(closest_part.get().axis) : 0.0;
+        Optional<SimpleWire> closestPart = wire.closestWithSameOrientation(part);
+        double toClosestPart = isMin(wire, part, direction) ? 0.0 : closestPart.isPresent() ? part.axis.distanceToEdge(closestPart.get().axis) : 0.0;
 
         if (preferable.isPresent()) {
-            to_closest_part = GeomUtils.distance(part.axis.constant(), preferable.get());
+            toClosestPart = GeomUtils.distance(part.axis.constant(), preferable.get());
         }
-        double to_closest_border = getBorderMoveDistance(wire, part, border, direction);
+        double toClosestBorder = getBorderMoveDistance(wire, part, border, direction);
 
-        if (to_closest_border >=0) {
-            to_closest_part = to_closest_part < to_closest_border ? to_closest_part : to_closest_border;
+        if (toClosestBorder >=0) {
+            toClosestPart = toClosestPart < toClosestBorder ? toClosestPart : toClosestBorder;
         }
 
-        return wire.movePart(part, direction, to_closest_part);
+        return wire.movePart(part, direction, toClosestPart);
     }
 
     private static double getBorderMoveDistance(final Wire wire, final SimpleWire part, Border border, Direction direction) {
@@ -220,7 +225,7 @@ public class WireUtils {
         if (parts.isEmpty()) {
             return -1;
         }
-        List<BorderPart> parts_in_order = Lists.newArrayList(parts.keySet());
+        List<BorderPart> partsInOrder = Lists.newArrayList(parts.keySet());
 
         final Collection<BorderPart> connected = Collections2.filter(parts.keySet(), new Predicate<BorderPart>() {
             @Override
@@ -233,10 +238,10 @@ public class WireUtils {
             }
         });
 
-        parts_in_order.removeAll(connected);
+        partsInOrder.removeAll(connected);
 
-        if (!parts_in_order.isEmpty()) {
-            final BorderPart min = Collections.min(parts_in_order, new Comparator<BorderPart>() {
+        if (!partsInOrder.isEmpty()) {
+            final BorderPart min = Collections.min(partsInOrder, new Comparator<BorderPart>() {
                 @Override
                 public int compare(BorderPart o1, BorderPart o2) {
                     return Doubles.compare(parts.get(o1), parts.get(o2));
@@ -258,13 +263,13 @@ public class WireUtils {
         return commands;
     }
 
-    public static List<Command> imitate(Wire wire, Border overlay, boolean deformation_allowed, Direction direction) {
+    public static List<Command> imitate(Wire wire, Border overlay, boolean deformationAllowed, Direction direction) {
         //bus.correctBus();
         List<Command> commands = new LinkedList<>();
 //        if (!wire.isChained()) {
 //            wire.ensureChained();
 //        }
-        if (deformation_allowed)
+        if (deformationAllowed)
             createEmptyLinks(wire, overlay, direction);
 
         for (SimpleWire part : wire.getParts()) {

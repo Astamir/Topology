@@ -1,12 +1,9 @@
 package ru.etu.astamir.gui.editor;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import ru.etu.astamir.common.Utils;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.Edge;
-import ru.etu.astamir.geom.common.MarshallTest;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.geom.common.Polygon;
 import ru.etu.astamir.gui.common.ElementContainer;
@@ -47,7 +44,7 @@ public class VirtualGridPanel extends JPanel {
 
     private TopologyMode mode = TopologyMode.VIRTUAL;
 
-    private Collection<Border> borders_to_paint = Lists.newArrayList();
+    private Collection<Border> bordersToPaint = Lists.newArrayList();
 
     public VirtualGridPanel(VirtualTopology topology, int step) {
         this.step = step;
@@ -123,8 +120,8 @@ public class VirtualGridPanel extends JPanel {
         return mode == TopologyMode.VIRTUAL ? clone.multiply(step) : clone;
     }
 
-    public void setBorders(Collection<Border> borders_to_paint) {
-        this.borders_to_paint = borders_to_paint;
+    public void setBorders(Collection<Border> bordersToPaint) {
+        this.bordersToPaint = bordersToPaint;
     }
 
     private List<Point> convert(Collection<Point> coordinates) {
@@ -145,12 +142,7 @@ public class VirtualGridPanel extends JPanel {
             PainterCentral painters = ProjectObjectManager.getPainterCentral();
             for (TopologyElement elem : model.getAllElements()) {
                 Painter<TopologyElement> painter = painters.getEntityPainter(elem);
-                painter.paint(elem, graphics2D, new Function<Point, Point>() {
-                    @Override
-                    public Point apply(Point input) {
-                        return toGridCoordinates(input);
-                    }
-                });
+                painter.paint(elem, graphics2D, (this::toGridCoordinates));
             }
         } finally {
             if (graphics2D != null)
@@ -216,14 +208,9 @@ public class VirtualGridPanel extends JPanel {
             DrawingUtils.drawEdge(Edge.of(toGridCoordinates(one), toGridCoordinates(another)), 4, true, graphics2D);
         }
 
-        for (Border border : borders_to_paint) {
+        for (Border border : bordersToPaint) {
             BorderPainter painter = new BorderPainter();
-            painter.paint(border, graphics2D, new Function<Point, Point>() {
-                @Override
-                public Point apply(Point input) {
-                    return Point.of(input.x() * step, -input.y() * step);
-                }
-            });
+            painter.paint(border, graphics2D, input -> Point.of(input.x() * step, -input.y() * step));
         }
     }
 
@@ -261,10 +248,10 @@ public class VirtualGridPanel extends JPanel {
             this.constraints = constraints;
         }
 
-        public void install(JPanel panel, JLabel coordinate_label, boolean allowZooming) {
+        public void install(JPanel panel, JLabel coordinateLabel, boolean allowZooming) {
             this.panel = panel;
             this.allowZooming = allowZooming;
-            this.label = coordinate_label;
+            this.label = coordinateLabel;
             panel.addMouseListener(this);
             panel.addMouseMotionListener(this);
             if (allowZooming) {

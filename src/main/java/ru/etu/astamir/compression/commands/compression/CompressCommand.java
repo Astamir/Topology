@@ -27,23 +27,23 @@ public abstract class CompressCommand implements Command {
      * All borders. Only actual before executing this command.
      */
     protected Map<TopologyLayer, Map<Direction, Border>> borders = new HashMap<>();
-    protected String element_name;
+    protected String elementName;
     protected Direction direction;
 
-    public CompressCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, String element_name, Direction direction) {
+    public CompressCommand(VirtualGrid grid, Map<TopologyLayer, Map<Direction, Border>> borders, String elementName, Direction direction) {
         this.grid = grid;
         this.borders = borders;
-        this.element_name = element_name;
+        this.elementName = elementName;
         this.direction = direction;
     }
 
     public TopologyElement getElement() {
-        Optional<TopologyElement> found_element = grid.findElementByName(element_name);
-        if (!found_element.isPresent()) {
-            throw new UnexpectedException("There is no found_element with the name=" + element_name + " in the grid");
+        Optional<TopologyElement> foundElement = grid.findElementByName(elementName);
+        if (!foundElement.isPresent()) {
+            throw new UnexpectedException("There is no foundElement with the name=" + elementName + " in the grid");
         }
 
-        return found_element.get();
+        return foundElement.get();
     }
 
     public Collection<Border> getAffectedBorders() {
