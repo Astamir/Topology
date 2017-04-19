@@ -39,17 +39,16 @@ public class TopologyCompressor {
     }
 
     /**
-     *
      * @return топология после сжатия
      */
     public void compress() {
         commands.clear();
 
         prepareBorders();
-       // compress(Direction.LEFT);
+        // compress(Direction.LEFT);
         //compress(Direction.RIGHT);
-      //  straightenWires(Direction.LEFT);
-      compress(Direction.UP);
+        //  straightenWires(Direction.LEFT);
+        compress(Direction.UP);
 //        compress(Direction.DOWN);
 //        straightenWires(Direction.UP);
         // todo compressing wires for another direction
@@ -93,17 +92,17 @@ public class TopologyCompressor {
 
 
         for (List<TopologyElement> column : topology.getGrid().walk(direction)) {
-                clearProcessedContours();
-                for (TopologyElement element : column) {
-                    if (element instanceof TopologicalCell) {
-                        continue; // do not change topological cell
-                    }
-
-                    processElement(element, CompressionUtils.getAffectedBorders(element, borders, direction), direction);
+            clearProcessedContours();
+            for (TopologyElement element : column) {
+                if (element instanceof TopologicalCell) {
+                    continue; // do not change topological cell
                 }
-            }
 
-            fitTopologicalCell(direction);
+                processElement(element, CompressionUtils.getAffectedBorders(element, borders, direction), direction);
+            }
+        }
+
+        fitTopologicalCell(direction);
     }
 
     void straightenWires(Direction direction) {
@@ -232,6 +231,7 @@ public class TopologyCompressor {
 //        move(contact, direction, length, affectedBorders);
         commands.addCommand(new CompressContactCommand(topology.getGrid(), borders, direction, contact.getName()));
     }
+
     /**
      * Обработка контакта. Тут просто передвигаем в направлении сжатия на сколько может.
      * Может мешать частокол и другие контакты(диагональные расстояния)
@@ -303,7 +303,7 @@ public class TopologyCompressor {
         new UpdateBorderCommand(borders, element, direction).execute();
     }
 
-    public Map<TopologyElement, Integer> getProcessed_elements() {
-        return processed_elements;
+    public Map<TopologyElement, Integer> getProcessedElements() {
+        return processedElements;
     }
 }

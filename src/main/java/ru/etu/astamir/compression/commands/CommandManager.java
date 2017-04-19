@@ -92,8 +92,8 @@ public class CommandManager<T extends Command> {
             T commandToUnexecute = executedCommands.pop();
             commandToUnexecute.unexecute();
         }
-        while (!failed_commands.isEmpty()) {
-            T command_to_unexecute = failed_commands.pop();
+        while (!failedCommands.isEmpty()) {
+            T command_to_unexecute = failedCommands.pop();
             command_to_unexecute.unexecute();
         }
     }

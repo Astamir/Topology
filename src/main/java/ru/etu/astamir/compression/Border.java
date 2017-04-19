@@ -11,6 +11,7 @@ import ru.etu.astamir.geom.common.*;
 import ru.etu.astamir.model.TopologicalCell;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.TopologyLayer;
+import ru.etu.astamir.model.exceptions.UnexpectedException;
 import ru.etu.astamir.model.technology.Technology;
 import ru.etu.astamir.model.wires.SimpleWire;
 import ru.etu.astamir.model.wires.Wire;
@@ -73,7 +74,7 @@ public class Border {
 
         return new Border(orientation, technology, parts);
     }
-    
+
     public static Border of(Orientation orientation, Technology.TechnologicalCharacteristics technology, List<Edge> edges, String symbol) {
         Border border = new Border(orientation, technology);
         List<BorderPart> parts = Lists.newArrayList();
@@ -183,10 +184,10 @@ public class Border {
         // preparing our parts
         was.correct();
         added.correct();
-        
+
         Edge addedAxis = added.getAxis();
         Edge wasAxis = was.getAxis();
-        
+
         Edge ourTopRay = Edge.ray(wasAxis.getEnd(), dir);
         Edge ourBotRay = Edge.ray(wasAxis.getStart(), dir);
 
@@ -198,8 +199,8 @@ public class Border {
         boolean botCross = addedAxis.cross(ourBotRay) == Edge.EdgeRelation.SKEW_CROSS;
         if (botCross) {
             result.add(new BorderPart(Edge.of(addedAxis.getStart(), addedAxis.crossing(ourBotRay)), added.getElement(), added.getSymbol()));
-        }        
-        
+        }
+
         if (!topCross && !botCross) {
             Edge reverseRay = Edge.ray(addedAxis.getStart(), dir.opposite());
             if (reverseRay.cross(wasAxis) == Edge.EdgeRelation.SKEW_CROSS) {
@@ -213,7 +214,6 @@ public class Border {
     }
 
     /**
-     *
      * @param newParts
      * @param dir
      */
@@ -231,13 +231,13 @@ public class Border {
             // now we have to cut added parts out of all remaining ones.
             for (BorderPart part : column) {
                 for (int j = i + 1; j < columnSize; j++) {
-                    for (ListIterator<BorderPart> k = columns.get(j).listIterator(); k.hasNext();) {
+                    for (ListIterator<BorderPart> k = columns.get(j).listIterator(); k.hasNext(); ) {
                         BorderPart burningPart = k.next();
                         k.remove();
                         List<BorderPart> overlay = singleOverlay(part, burningPart, orientation, dir);
                         for (BorderPart o : overlay) {
                             k.add(o);
-                        }                        
+                        }
                     }
                 }
             }
@@ -249,7 +249,7 @@ public class Border {
 
     public Border without(Collection<String> symbols) {
         Border copy = new Border(orientation, technology, parts);
-        for (Iterator<BorderPart> i = copy.parts.iterator(); i.hasNext();) {
+        for (Iterator<BorderPart> i = copy.parts.iterator(); i.hasNext(); ) {
             BorderPart next = i.next();
             if (symbols.contains(next.getSymbol()) || (next.getElement() != null && symbols.contains(next.getElement().getSymbol()))) {
                 i.remove();
@@ -271,6 +271,7 @@ public class Border {
 
     /**
      * Получить огибающую линию
+     *
      * @param direction
      * @return
      */
@@ -285,7 +286,7 @@ public class Border {
     /**
      * Соединяет элементы частокола. Предполагается, что
      * все элементы скорректированы.
-     *
+     * <p>
      * (Пока останется так, но можно запихивать соединительные
      * части в конец списка, тем самым не возвращаясь на шаг назад.)
      */
@@ -295,7 +296,7 @@ public class Border {
                 Direction.UP.getEdgeComparator(false) : Direction.RIGHT.getEdgeComparator(false)));
         Class<? extends TopologyElement> lastClass;
         String lastSymbol = null;
-        for (ListIterator<BorderPart> i = parts.listIterator(); i.hasNext();) {
+        for (ListIterator<BorderPart> i = parts.listIterator(); i.hasNext(); ) {
             BorderPart cur = i.next();
             TopologyElement element = cur.getElement();
             lastClass = element != null ? element.getClass() : null;
@@ -361,13 +362,13 @@ public class Border {
 
     /**
      * Получает соритрованые пачки кусков частокола.
-     * 
-     * @param unsortedParts 
+     *
+     * @param unsortedParts
      * @param dir
      * @return
      */
     private List<List<BorderPart>> divideParts(List<BorderPart> unsortedParts, Direction dir) {
-        List<List<BorderPart>> result = Lists.newArrayList();        
+        List<List<BorderPart>> result = Lists.newArrayList();
         Collections.sort(unsortedParts, BorderPart.getAxisComparator(dir.getEdgeComparator()));
         int size = unsortedParts.size();
         for (int i = 0; i < size; i++) {
@@ -382,11 +383,11 @@ public class Border {
                     break;
                 }
             }
-            
+
             result.add(parts);
         }
-        
-        return result;        
+
+        return result;
     }
 
     public Optional<BorderPart> getClosestPartWithConstraints(Point point, String symbol, Direction direction) {
@@ -405,7 +406,7 @@ public class Border {
         if (distances.isEmpty()) {
             return Optional.empty();
         }
-        
+
         return Optional.of(Collections.min(distances, new Comparator<Pair<BorderPart, Double>>() {
             @Override
             public int compare(Pair<BorderPart, Double> o1, Pair<BorderPart, Double> o2) {
@@ -536,7 +537,7 @@ public class Border {
 
         return Optional.of(Collections.max(orientationParts, cmp));
     }
-    
+
     public List<BorderPart> orientationParts() {
         return parts.stream().filter(orientation()).collect(Collectors.toList());
     }
@@ -571,7 +572,7 @@ public class Border {
         }
 
         bus.removeEmptyParts(false);
-       // bus.correct(direction.opposite());
+        // bus.correct(direction.opposite());
     }
 
     public void imitate(Wire bus, Direction direction, Grid grid) {
@@ -582,7 +583,7 @@ public class Border {
         Border copy = CompressionUtils.borderWithoutConnectedElements(bus, this, grid);
         imitate(bus, copy.getOverlay(direction), direction, deformationAllowed);
         if (!bus.isConnected()) {
-          //  throw new UnexpectedException(bus.getSymbol() + " not connected");
+            throw new UnexpectedException(bus.getSymbol() + " not connected");
         }
     }
 
@@ -596,7 +597,7 @@ public class Border {
             GeomUtils.move(one, direction.clockwise(), min);
             Point another = part.getAxis().getStart().clone();
             GeomUtils.move(another, direction.counterClockwise(), min);
-            
+
             bus.createAnEmptyLink(one, direction.opposite());
             bus.createAnEmptyLink(another, direction.opposite());
         }

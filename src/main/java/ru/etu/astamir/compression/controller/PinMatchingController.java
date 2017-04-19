@@ -83,7 +83,7 @@ public class PinMatchingController {
     private List<Collection<Point>> getPinsFromTopologyCompressor(MainFrame topologyFrame) {
         List<Collection<Point>> outPins = new ArrayList<>();
         TopologyCompressor compressor = ProjectObjectManager.getCompressorsPool().getCompressor(topologyFrame.getDefaultTopology());
-        for (Map.Entry<TopologyElement, Integer> processedElements : compressor.getProcessed_elements().entrySet()) {
+        for (Map.Entry<TopologyElement, Integer> processedElements : compressor.getProcessedElements().entrySet()) {
             if (processedElements.getKey() instanceof Contact) {
                 outPins.add(processedElements.getKey().getCoordinates());
             }

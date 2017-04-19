@@ -404,12 +404,12 @@ public class MainFrame extends JFrame {
                     } else {
                         paintPanel.setBorders(affectedBorders);
                     }
-                    if (!border_painted) {
+                    if (!borderPainted) {
                         paintPanel.repaint();
-                        border_painted = true;
+                        borderPainted = true;
                         continue;
                     }
-                    border_painted = false;
+                    borderPainted = false;
                 }
                 compressor.step(1);
 
