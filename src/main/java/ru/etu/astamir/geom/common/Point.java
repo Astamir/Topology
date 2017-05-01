@@ -13,10 +13,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *  Класс двухмерной точки.
+ * Класс двухмерной точки.
  *
- *  @version 1.0
- *  @author astamir
+ * @author astamir
+ * @version 1.0
  */
 @XmlRootElement
 public class Point implements Serializable, Cloneable, Movable, Roundable, Comparable<Point> {
@@ -31,7 +31,9 @@ public class Point implements Serializable, Cloneable, Movable, Roundable, Compa
     /**
      * Возможные положение точки относительно прямой.
      */
-    public enum Position {LEFT,  RIGHT,  BEYOND,  BEHIND, BETWEEN, ORIGIN, DESTINATION;
+    public enum Position {
+        LEFT, RIGHT, BEYOND, BEHIND, BETWEEN, ORIGIN, DESTINATION;
+
         public boolean isOnEdge() {
             return this == ORIGIN || this == BETWEEN || this == DESTINATION;
         }
@@ -118,7 +120,7 @@ public class Point implements Serializable, Cloneable, Movable, Roundable, Compa
     public static Point plus(final Point p1, final Point p2) {
         return new Point(p1.x + p2.x, p1.y + p2.y);
     }
-    
+
     public Point plus(final Point p) {
         x += p.x;
         y += p.y;
@@ -133,7 +135,7 @@ public class Point implements Serializable, Cloneable, Movable, Roundable, Compa
     public static Point multiply(final Point p, double s) {
         return new Point(p.x * s, p.y * s);
     }
-    
+
     public Point multiply(double s) {
         x *= s;
         y *= s;
@@ -158,24 +160,33 @@ public class Point implements Serializable, Cloneable, Movable, Roundable, Compa
         return xCmp != 0 ? xCmp : yCmp;
     }
 
+    /**
+     * Сравнение двух точек по вертикали
+     */
+    public int compareToY(final @Nonnull Point p) {
+        int xCmp = MathUtils.compare(x, p.x);
+        int yCmp = MathUtils.compare(y, p.y);
+        return yCmp != 0 ? yCmp : xCmp;
+    }
+
     public double length() {
-        return Math.sqrt(x*x + y*y);
+        return Math.sqrt(x * x + y * y);
     }
 
     public double distance(Edge e) {
         Edge ab = e.clone();
         ab.flip().rotate();          // поворот ab на 90 градусов
-                                     // против часовой стрелки
+        // против часовой стрелки
         Point n = Point.minus(ab.getEnd(), ab.getStart());
-                                    // n = вектор, перпендикулярный ребру е
+        // n = вектор, перпендикулярный ребру е
         n = Point.multiply(n, 1.0 / n.length());
-                                    // нормализация вектора n
+        // нормализация вектора n
         Edge f = new Edge(this, Point.plus(this, n));
-                                    // ребро f = n позиционируется
-                                    // на текущей точке
-                                    // t = расстоянию со знаком
+        // ребро f = n позиционируется
+        // на текущей точке
+        // t = расстоянию со знаком
         return f.intersectionCoefficient(e);// вдоль вектора f до точки,
-                                    // в которой ребро f пересекает ребро е
+        // в которой ребро f пересекает ребро е
     }
 
     /**
@@ -188,6 +199,7 @@ public class Point implements Serializable, Cloneable, Movable, Roundable, Compa
 
     /**
      * Скалярное произведение точек(как векторов из двух координат).
+     *
      * @return
      */
     public static double dotProduct(final Point p, final Point q) {
@@ -207,13 +219,13 @@ public class Point implements Serializable, Cloneable, Movable, Roundable, Compa
     public Position classify(final Point p1, final Point p2) {
         Point a = Point.minus(p2, p1);
         Point b = Point.minus(this, p1);
-        double sa = a. x * b.y - b.x * a.y;
+        double sa = a.x * b.y - b.x * a.y;
         int saToZero = MathUtils.compare(sa, 0.0);
         if (saToZero == 1)
             return Position.LEFT;
         if (saToZero == -1)
             return Position.RIGHT;
-        if ( MathUtils.compare(a.x * b.x, 0.0) == -1 || MathUtils.compare(a.y * b.y, 0.0) == -1)
+        if (MathUtils.compare(a.x * b.x, 0.0) == -1 || MathUtils.compare(a.y * b.y, 0.0) == -1)
             return Position.BEHIND;
         if (MathUtils.compare(a.length(), b.length()) == -1)
             return Position.BEYOND;
@@ -223,7 +235,7 @@ public class Point implements Serializable, Cloneable, Movable, Roundable, Compa
             return Position.DESTINATION;
         return Position.BETWEEN;
     }
-    
+
     public Position classify(final Edge e) {
         return classify(e.getStart(), e.getEnd());
     }
@@ -282,7 +294,7 @@ public class Point implements Serializable, Cloneable, Movable, Roundable, Compa
 
     /**
      * Format should be (x, y)
-     * 
+     *
      * @return Point from string representation
      */
     public static Point fromString(String string) {

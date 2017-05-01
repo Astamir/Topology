@@ -28,7 +28,7 @@ public class ApplicationLauncher {
         mw.setSize(600, 600);
         mw.setVisible(true);
 
-        loadProject2();
+        /*loadProject2();
 
         MainFrame mw2 = new MainFrame("default_topology_2");
         mw2.setTitle("default_topology_2");
@@ -37,7 +37,9 @@ public class ApplicationLauncher {
         mw2.setVisible(true);
 
         PinMatchingController pinMatchingController = new PinMatchingController(mw, mw2);
-        pinMatchingController.matchCells();
+        pinMatchingController.matchCells();*/
+        PinMatchingController pinMatchingController = new PinMatchingController();
+        pinMatchingController.multipleTopologiesCompression();
     }
 
     private static void loadProject() throws IOException {

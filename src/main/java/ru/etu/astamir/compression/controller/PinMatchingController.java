@@ -2,9 +2,10 @@ package ru.etu.astamir.compression.controller;
 
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.TopologyCompressor;
-import ru.etu.astamir.compression.commands.Command;
+import ru.etu.astamir.compression.TopologyParser;
 import ru.etu.astamir.compression.commands.compression.ActiveBorder;
 import ru.etu.astamir.compression.commands.compression.CompressContactCommand;
+import ru.etu.astamir.compression.grid.VirtualGrid;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Point;
@@ -13,8 +14,11 @@ import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.contacts.Contact;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -31,6 +35,10 @@ public class PinMatchingController {
         private Point coordinates;
         private Double constraint;
 
+        public PinSimpleBean() {
+            this.name = "-1";
+        }
+
         public PinSimpleBean(String name, Point coordinates, Double constraint) {
             this.name = name;
             this.coordinates = coordinates;
@@ -39,6 +47,10 @@ public class PinMatchingController {
 
         public int compareTo(final @Nonnull PinSimpleBean p) {
             return this.coordinates.compareTo(p.coordinates);
+        }
+
+        public int compareToY(final @Nonnull PinSimpleBean p) {
+            return this.coordinates.compareToY(p.coordinates);
         }
 
         @Override
@@ -80,6 +92,9 @@ public class PinMatchingController {
     public PinMatchingController(MainFrame leftTopologyFrame, MainFrame rightTopologyFrame) {
         this.setLeftTopologyFrame(leftTopologyFrame);
         this.setRightTopologyFrame(rightTopologyFrame);
+    }
+
+    public PinMatchingController() {
     }
 
     public void matchCells() {
@@ -212,6 +227,36 @@ public class PinMatchingController {
         //System.out.println(outPins.toString());
         outPins.sort(PinSimpleBean::compareTo);
         return outPins;
+    }
+
+    public void multipleTopologiesCompression() throws IOException {
+        //System.out.format("toString: ", Paths.get("").toAbsolutePath().toString());
+        List<List<PinSimpleBean>> pinTable = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            List<PinSimpleBean> pinList = new ArrayList<>();
+            String fileName = Paths.get("").toAbsolutePath().toString() + File.separator + "topologies" + File.separator + "default_topology_" + (i + 1) + ".txt";
+            File topologyFile = new File(fileName);
+            if (topologyFile.exists()) {
+                TopologyParser parser = new TopologyParser(topologyFile);
+                parser.parse();
+                VirtualGrid elements = parser.getElements();
+                /*VirtualTopology default_topology = (VirtualTopology) project.getTopologies().get("default_topology");
+                default_topology.setMode(VirtualTopology.VIRTUAL_MODE);
+                default_topology.setVirtual(elements);*/
+
+                for (TopologyElement element : elements.getAllElements()) {
+                    if (element instanceof Contact) {
+                        pinList.add(new PinSimpleBean(element.getName(), element.getCoordinates().iterator().next(), 0.0));
+                    }
+                }
+                if (pinList.isEmpty()) {
+                    pinList.add(new PinSimpleBean());
+                }
+                pinList.sort(PinSimpleBean::compareToY);
+                pinTable.add(i, pinList);
+            }
+        }
+        System.out.format("toString: ", Paths.get("").toAbsolutePath().toString());
     }
 
     public MainFrame getRightTopologyFrame() {
