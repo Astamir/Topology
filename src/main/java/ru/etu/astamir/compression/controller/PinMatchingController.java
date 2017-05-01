@@ -1,12 +1,20 @@
 package ru.etu.astamir.compression.controller;
 
+import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.TopologyCompressor;
+import ru.etu.astamir.compression.commands.Command;
+import ru.etu.astamir.compression.commands.compression.ActiveBorder;
+import ru.etu.astamir.compression.commands.compression.CompressContactCommand;
 import ru.etu.astamir.dao.ProjectObjectManager;
+import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.gui.editor.MainFrame;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.contacts.Contact;
 
+import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -15,7 +23,57 @@ import java.util.*;
 public class PinMatchingController {
     private MainFrame rightTopologyFrame;
     private MainFrame leftTopologyFrame;
-    private static List<Map<Point, Double>> currentProcessingPins;
+    private static List<PinSimpleBean> currentProcessingPins = new ArrayList<>();
+    private static List<PinSimpleBean> allProcessedPins = new ArrayList<>();
+
+    public class PinSimpleBean {
+        private String name;
+        private Point coordinates;
+        private Double constraint;
+
+        public PinSimpleBean(String name, Point coordinates, Double constraint) {
+            this.name = name;
+            this.coordinates = coordinates;
+            this.constraint = constraint;
+        }
+
+        public int compareTo(final @Nonnull PinSimpleBean p) {
+            return this.coordinates.compareTo(p.coordinates);
+        }
+
+        @Override
+        public String toString() {
+            return "PinSimpleBean{" +
+                    "name='" + name + '\'' +
+                    ", coordinates=" + coordinates +
+                    ", constraint=" + constraint +
+                    '}';
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Point getCoordinates() {
+            return coordinates;
+        }
+
+        public void setCoordinates(Point coordinates) {
+            this.coordinates = coordinates;
+        }
+
+        public Double getConstraint() {
+            return constraint;
+        }
+
+        public void setConstraint(Double constraint) {
+            this.constraint = constraint;
+        }
+    }
 
     public static boolean pinProcessed = false;
 
@@ -25,67 +83,96 @@ public class PinMatchingController {
     }
 
     public void matchCells() {
-        List<Point> leftPins = new ArrayList<>();
-        List<Point> rightPins = new ArrayList<>();
-        List<Map<Point, Double>> leftOutPins = new ArrayList<>();
-        List<Map<Point, Double>> rightOutPins = new ArrayList<>();
+        TopologyCompressor compressorLeft, compressorRight;
+        CompressContactCommand peekLeft, peekRight;
+        Contact contactLeft, contactRight;
+        Collection<Border> affectedBordersLeft, affectedBordersRight;
+        Double distanceLeft = 0.0, distanceRight = 0.0;
+
+        List<PinSimpleBean> leftPins, rightPins;
+        //List<Map<Point, Double>> leftOutPins = new ArrayList<>();
+        //List<Map<Point, Double>> rightOutPins = new ArrayList<>();
+
         //full compressing first
         this.leftTopologyFrame.convertAction();
         this.rightTopologyFrame.convertAction();
-        this.leftTopologyFrame.fullCompress();
-        this.rightTopologyFrame.fullCompress();
+        /*this.leftTopologyFrame.fullCompress();
+        this.rightTopologyFrame.fullCompress();*/
+
         //get pin coordinates
         //System.out.println(getPinsFromTopologyCompressor(this.leftTopologyFrame).toString());
         //System.out.println(getPinsFromTopologyCompressor(this.rightTopologyFrame).toString());
         leftPins = getPinsForMatching(getPinsFromTopologyCompressor(this.leftTopologyFrame), 0);
         rightPins = getPinsForMatching(getPinsFromTopologyCompressor(this.rightTopologyFrame), 1);
-
-        //create matching query
         pinProcessed = true;
+
+        Method m = null;
+        try {
+            m = CompressContactCommand.class.getDeclaredMethod("getContactMoveDistance", Contact.class, Collection.class, Direction.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        m.setAccessible(true);
+
         for (int i = 0; i < leftPins.size(); i++) {
-            Map<Point, Double> currPointLeft = new HashMap<>();
-            Map<Point, Double> currPointRight = new HashMap<>();
-            if (leftPins.get(i).y()-rightPins.get(i).y() < 0) {
-                currPointLeft.put(leftPins.get(i), (double) 0);
-                leftOutPins.add(currPointLeft);
-                currPointRight.put(rightPins.get(i), leftPins.get(i).y()-rightPins.get(i).y());
-                rightOutPins.add(currPointRight);
-            } else if (leftPins.get(i).y()-rightPins.get(i).y() > 0) {
-                currPointLeft.put(leftPins.get(i), (double) 0);
-                leftOutPins.add(currPointLeft);
-                currPointRight.put(rightPins.get(i), leftPins.get(i).y()-rightPins.get(i).y());
-                rightOutPins.add(currPointRight);
+            //добавляем текущие пины одного уровня
+            currentProcessingPins.add(leftPins.get(i));
+            currentProcessingPins.add(rightPins.get(i));
+
+            //начинаем сжатие, которое прервется на команде перемещения пина
+            this.leftTopologyFrame.fullCompress();
+            this.rightTopologyFrame.fullCompress();
+
+            //получаем компрессоры и текущие команды
+            compressorLeft = ProjectObjectManager.getCompressorsPool().getCompressor(this.leftTopologyFrame.getDefaultTopology());
+            compressorRight = ProjectObjectManager.getCompressorsPool().getCompressor(this.rightTopologyFrame.getDefaultTopology());
+            peekLeft = (CompressContactCommand) compressorLeft.commands.peek();
+            peekRight = (CompressContactCommand) compressorRight.commands.peek();
+
+            //получаем расстояние, на которое будет перемещаться пин (как в CompressContactCommand)
+            contactLeft = (Contact) peekLeft.getElement();
+            contactRight = (Contact) peekRight.getElement();
+            affectedBordersLeft = peekLeft.getAffectedBorders();
+            affectedBordersRight = peekRight.getAffectedBorders();
+            try {
+                distanceLeft = ((ActiveBorder) m.invoke(peekLeft, contactLeft, affectedBordersLeft, peekLeft.getDirection())).getLength();
+                distanceRight = ((ActiveBorder) m.invoke(peekRight, contactRight, affectedBordersRight, peekRight.getDirection())).getLength();
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
             }
-            else {
-                currPointLeft.put(leftPins.get(i), (double) 0);
-                leftOutPins.add(currPointLeft);
-                currPointRight.put(rightPins.get(i), (double) 0);
-                rightOutPins.add(currPointRight);
+
+            if (distanceLeft - distanceRight < 0) {
+                allProcessedPins.add(new PinSimpleBean(currentProcessingPins.get(0).getName(), currentProcessingPins.get(0).getCoordinates(), 0.0));
+                allProcessedPins.add(new PinSimpleBean(currentProcessingPins.get(1).getName(), currentProcessingPins.get(1).getCoordinates(), distanceLeft - distanceRight));
+            } else if (distanceLeft - distanceRight > 0) {
+                allProcessedPins.add(new PinSimpleBean(currentProcessingPins.get(0).getName(), currentProcessingPins.get(0).getCoordinates(), distanceLeft - distanceRight));
+                allProcessedPins.add(new PinSimpleBean(currentProcessingPins.get(1).getName(), currentProcessingPins.get(1).getCoordinates(), 0.0));
+            } else {
+                allProcessedPins.add(new PinSimpleBean(currentProcessingPins.get(0).getName(), currentProcessingPins.get(0).getCoordinates(), 0.0));
+                allProcessedPins.add(new PinSimpleBean(currentProcessingPins.get(1).getName(), currentProcessingPins.get(1).getCoordinates(), 0.0));
             }
-            //if ()
-//            System.out.println("//////"+leftPins.get(i).compareTo(rightPins.get(i)));
-//            System.out.println("//////"+Point.distance(leftPins.get(i), rightPins.get(i)));
-            //System.out.println("//////"+(leftPins.get(i).y()-rightPins.get(i).y()));
+
+            //очищяем текущие пины
+            currentProcessingPins.clear();
+
+            //конвертируем топологию чтобы начать сжатие сначала
+            this.leftTopologyFrame.convertAction();
+            this.rightTopologyFrame.convertAction();
+            this.leftTopologyFrame.convertAction();
+            this.rightTopologyFrame.convertAction();
         }
 
-        //compress again
-        this.leftTopologyFrame.convertAction();
-        this.rightTopologyFrame.convertAction();
-        this.leftTopologyFrame.convertAction();
-        this.rightTopologyFrame.convertAction();
-
-        currentProcessingPins = leftOutPins;
         this.leftTopologyFrame.fullCompress();
-        currentProcessingPins = rightOutPins;
         this.rightTopologyFrame.fullCompress();
+
     }
 
-    private List<Collection<Point>> getPinsFromTopologyCompressor(MainFrame topologyFrame) {
-        List<Collection<Point>> outPins = new ArrayList<>();
+    private List<PinSimpleBean> getPinsFromTopologyCompressor(MainFrame topologyFrame) {
+        List<PinSimpleBean> outPins = new ArrayList<>();
         TopologyCompressor compressor = ProjectObjectManager.getCompressorsPool().getCompressor(topologyFrame.getDefaultTopology());
         for (Map.Entry<TopologyElement, Integer> processedElements : compressor.getProcessedElements().entrySet()) {
             if (processedElements.getKey() instanceof Contact) {
-                outPins.add(processedElements.getKey().getCoordinates());
+                outPins.add(new PinSimpleBean(processedElements.getKey().getName(), processedElements.getKey().getCoordinates().iterator().next(), 0.0));
             }
         }
         return outPins;
@@ -98,36 +185,32 @@ public class PinMatchingController {
      * @param mode 0 - обработка для  левой ячейки, 1 - для правой
      * @return
      */
-    private List<Point> getPinsForMatching(List<Collection<Point>> pins, int mode) {
+    private List<PinSimpleBean> getPinsForMatching(List<PinSimpleBean> pins, int mode) {
         double[] xArray = new double[20];
         int i = 0;
-        List<Point> outPins = new ArrayList<>();
+        List<PinSimpleBean> outPins = new ArrayList<>();
         //собираем все координаты по x
-        for (Collection<Point> pointCollection : pins) {
-            for (Point point : pointCollection) {
-                xArray[i] = point.x();
-                i++;
-            }
+        for (PinSimpleBean pointCollection : pins) {
+            xArray[i] = pointCollection.coordinates.x();
+            i++;
         }
         //отрезаем лишнее и сортируем
         xArray = Arrays.copyOfRange(xArray, 0, i);
         Arrays.sort(xArray);
         //проходим по всем, заполняем выходной массив в завистимости от мода (правее/левее середины)
-        for (Collection<Point> pointCollection : pins) {
-            for (Point point : pointCollection) {
-                if (mode == 0) {
-                    if (point.x() > (xArray[0] + xArray[xArray.length - 1]) / 2) {
-                        outPins.add(point);
-                    }
-                } else {
-                    if (point.x() < (xArray[0] + xArray[xArray.length - 1]) / 2) {
-                        outPins.add(point);
-                    }
+        for (PinSimpleBean pointCollection : pins) {
+            if (mode == 0) {
+                if (pointCollection.coordinates.x() > (xArray[0] + xArray[xArray.length - 1]) / 2) {
+                    outPins.add(new PinSimpleBean(pointCollection.name, pointCollection.coordinates, 0.0));
+                }
+            } else {
+                if (pointCollection.coordinates.x() < (xArray[0] + xArray[xArray.length - 1]) / 2) {
+                    outPins.add(new PinSimpleBean(pointCollection.name, pointCollection.coordinates, 0.0));
                 }
             }
         }
         //System.out.println(outPins.toString());
-        outPins.sort(Point::compareTo);
+        outPins.sort(PinSimpleBean::compareTo);
         return outPins;
     }
 
@@ -147,7 +230,7 @@ public class PinMatchingController {
         this.leftTopologyFrame = leftTopologyFrame;
     }
 
-    public static List<Map<Point, Double>> getCurrentProcessingPins() {
+    public static List<PinSimpleBean> getCurrentProcessingPins() {
         return currentProcessingPins;
     }
 
@@ -162,4 +245,8 @@ public class PinMatchingController {
     /*public void setPinProcessed(boolean pinProcessed) {
         this.pinProcessed = pinProcessed;
     }*/
+
+    public static List<PinSimpleBean> getAllProcessedPins() {
+        return allProcessedPins;
+    }
 }

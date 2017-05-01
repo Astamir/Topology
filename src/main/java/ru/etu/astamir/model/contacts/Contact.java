@@ -124,36 +124,27 @@ public class Contact extends TopologyElement implements ConnectionPoint, Seriali
 
     @Override
     public boolean move(double dx, double dy) {
-
-        //System.out.println("1"+this.getCoordinates().toString());
         boolean success = center.move(dx, dy);
         for (ContactWindow contactWindow : contactWindows.values()) {
             success &= contactWindow.move(dx, dy);
         }
         //System.out.println("2"+this.getCoordinates().toString());
         if (PinMatchingController.pinProcessed) {
-            for (Point point : this.getCoordinates()) {
-                for (Map<Point, Double> pointMapListEl : PinMatchingController.getCurrentProcessingPins()) {
-                    for (Map.Entry<Point, Double> pointMap : pointMapListEl.entrySet()) {
-                        if (MathUtils.round(point.x()) == pointMap.getKey().x() && MathUtils.round(point.y()) == pointMap.getKey().y()) {
-                            //System.out.println("kokokokombo");
-                            success = center.move(0, pointMap.getValue());
-                            for (ContactWindow contactWindow : contactWindows.values()) {
-                                success &= contactWindow.move(0, pointMap.getValue());
-                            }
-                        }
+            for (PinMatchingController.PinSimpleBean pin : PinMatchingController.getAllProcessedPins()) {
+                if (pin.getName() == this.getName()) {
+                    success = center.move(0, pin.getConstraint());
+                    for (ContactWindow contactWindow : contactWindows.values()) {
+                        success &= contactWindow.move(0, pin.getConstraint());
                     }
                 }
             }
-            //this.getCoordinates().contains(new Point(8.0, 25.7));
-            //System.out.println("kokokokombo");
-        } /*else {
-            success = center.move(dx, dy);
-            for (ContactWindow contactWindow : contactWindows.values()) {
-                success &= contactWindow.move(dx, dy);
-            }
-        }*/
+        }
         return success;
+        /*boolean success = center.move(dx, dy);
+        for (ContactWindow contactWindow : contactWindows.values()) {
+            success &= contactWindow.move(dx, dy);
+        }
+        return success;*/
     }
 
     @Override

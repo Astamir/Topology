@@ -10,7 +10,9 @@ import ru.etu.astamir.compression.TopologyCompressor;
 import ru.etu.astamir.compression.TopologyParser;
 import ru.etu.astamir.compression.commands.Command;
 import ru.etu.astamir.compression.commands.compression.CompressCommand;
+import ru.etu.astamir.compression.commands.compression.CompressContactCommand;
 import ru.etu.astamir.compression.commands.compression.CompressWireCommand;
+import ru.etu.astamir.compression.controller.PinMatchingController;
 import ru.etu.astamir.compression.grid.Grid;
 import ru.etu.astamir.compression.grid.VirtualGrid;
 import ru.etu.astamir.compression.virtual.ConvertException;
@@ -411,6 +413,15 @@ public class MainFrame extends JFrame {
                     }
                     borderPainted = false;
                 }
+                if (peek instanceof CompressContactCommand) {
+                    if (PinMatchingController.pinProcessed && !PinMatchingController.getCurrentProcessingPins().isEmpty()) {
+                        if (((CompressContactCommand) peek).getElement().getName() == PinMatchingController.getCurrentProcessingPins().get(0).getName()
+                                || ((CompressContactCommand) peek).getElement().getName() == PinMatchingController.getCurrentProcessingPins().get(1).getName()
+                                ) {
+                            break;
+                        }
+                    }
+                }
                 compressor.step(1);
 
 
@@ -419,10 +430,7 @@ public class MainFrame extends JFrame {
                 continue;
             }
         }
-        //full compress done
-        //compressor.commands.rollback();
         System.out.println("full compressed");
-        //compress again
     }
 
     public void convertAction() {

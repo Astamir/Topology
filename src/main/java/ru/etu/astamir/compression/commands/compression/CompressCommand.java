@@ -49,4 +49,8 @@ public abstract class CompressCommand implements Command {
     public Collection<Border> getAffectedBorders() {
         return CompressionUtils.getAffectedBorders(getElement(), borders, direction);
     }
+
+    public Direction getDirection() {
+        return direction;
+    }
 }
