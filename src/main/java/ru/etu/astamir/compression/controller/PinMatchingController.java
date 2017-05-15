@@ -1,17 +1,26 @@
 package ru.etu.astamir.compression.controller;
 
+import com.google.common.primitives.Ints;
 import ru.etu.astamir.compression.Border;
 import ru.etu.astamir.compression.TopologyCompressor;
 import ru.etu.astamir.compression.TopologyParser;
 import ru.etu.astamir.compression.commands.compression.ActiveBorder;
 import ru.etu.astamir.compression.commands.compression.CompressContactCommand;
 import ru.etu.astamir.compression.grid.VirtualGrid;
+import ru.etu.astamir.compression.virtual.ConvertException;
+import ru.etu.astamir.compression.virtual.Converter;
 import ru.etu.astamir.dao.ProjectObjectManager;
 import ru.etu.astamir.geom.common.Direction;
 import ru.etu.astamir.geom.common.Point;
 import ru.etu.astamir.gui.editor.MainFrame;
+import ru.etu.astamir.launcher.VirtualTopology;
+import ru.etu.astamir.math.MathUtils;
 import ru.etu.astamir.model.TopologyElement;
 import ru.etu.astamir.model.contacts.Contact;
+import ru.etu.astamir.model.technology.CMOSTechnology;
+import ru.etu.astamir.model.technology.CharacteristicParser;
+import ru.etu.astamir.model.technology.DefaultTechnologicalCharacteristics;
+import ru.etu.astamir.model.technology.Technology;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -231,8 +240,34 @@ public class PinMatchingController {
 
     public void multipleTopologiesCompression() throws IOException {
         //System.out.format("toString: ", Paths.get("").toAbsolutePath().toString());
+
+        class PriorityBean {
+            //массив приоритетов
+            public int[] priority;// = new int[3];
+            //массив ярусов для стыкуемых ячеек
+            public int[] levels;// = new int[3];
+
+            public PriorityBean(int num) {
+                this.priority = new int[num - 1];
+                this.levels = new int[num];
+            }
+        }
+
+        int topologyListSize = 3; //temporary
+        //кол-во ярусов в левой и правой обрабатываемых ячейках
+        int leftLevelsCount = 0, rightLevelsCount = 0;
+
+        //финальная таблица приоритетов
+        int[][] outPriotityTable;
+
+        PinSimpleBean leftPin, rightPin;
+        PriorityBean priorityBean = new PriorityBean(topologyListSize);
         List<List<PinSimpleBean>> pinTable = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
+        TopologyCompressor compressor;
+        // текущий приоритет обработки
+        int currentPriority = 0;
+
+        for (int i = 0; i < topologyListSize; i++) {
             List<PinSimpleBean> pinList = new ArrayList<>();
             String fileName = Paths.get("").toAbsolutePath().toString() + File.separator + "topologies" + File.separator + "default_topology_" + (i + 1) + ".txt";
             File topologyFile = new File(fileName);
@@ -240,23 +275,99 @@ public class PinMatchingController {
                 TopologyParser parser = new TopologyParser(topologyFile);
                 parser.parse();
                 VirtualGrid elements = parser.getElements();
+                VirtualTopology topology = VirtualTopology.of(elements);
+                Technology.TechnologicalCharacteristics.Base base = new DefaultTechnologicalCharacteristics();
+                CharacteristicParser characteristicParser = new CharacteristicParser(new File("tehnol.txt"), base);
+                characteristicParser.parse();
+                topology.setTechnology(new CMOSTechnology("def", base));
+                topology.setMode(VirtualTopology.VIRTUAL_MODE);
+                topology.setVirtual(elements);
+                Converter converter = new Converter(topology);
+                try {
+                    converter.convert();
+                    topology.setMode(VirtualTopology.REAL_MODE);
+                } catch (ConvertException e1) {
+                    e1.printStackTrace();
+                }
+                compressor = ProjectObjectManager.getCompressorsPool().getCompressor(topology);
+                compressor.compress();
                 /*VirtualTopology default_topology = (VirtualTopology) project.getTopologies().get("default_topology");
                 default_topology.setMode(VirtualTopology.VIRTUAL_MODE);
                 default_topology.setVirtual(elements);*/
-
-                for (TopologyElement element : elements.getAllElements()) {
+                for (Map.Entry<TopologyElement, Integer> processedElements : compressor.getProcessedElements().entrySet()) {
+                    if (processedElements.getKey() instanceof Contact) {
+                        pinList.add(new PinSimpleBean(processedElements.getKey().getName(), processedElements.getKey().getCoordinates().iterator().next(), 0.0));
+                    }
+                }
+                /*for (TopologyElement element : *//*elements.getAllElements()*//*) {
                     if (element instanceof Contact) {
                         pinList.add(new PinSimpleBean(element.getName(), element.getCoordinates().iterator().next(), 0.0));
                     }
-                }
+                }*/
+                //заполняем кол-во ярусов
                 if (pinList.isEmpty()) {
                     pinList.add(new PinSimpleBean());
+                    priorityBean.levels[i] = 0;
+                } else {
+                    //рассмотрим 3 варианта - начало последовательности ячеек, середина и конец
+                    if ((i == 0) || (i == (topologyListSize - 1))) {
+                        //leftLevelsCount = getPinsForMatching(pinList, 0).size();
+                        //continue;
+                        priorityBean.levels[i] = 0;
+                    } else if (i < (topologyListSize - 1)) {
+                        leftLevelsCount = getPinsForMatching(pinList, 0).size();
+                        rightLevelsCount = getPinsForMatching(pinList, 1).size();
+                        priorityBean.levels[i] = Math.max(leftLevelsCount, rightLevelsCount);
+                        //leftLevelsCount = getPinsForMatching(pinList, 0).size();
+                    }/* else {
+                        //continue;
+                        *//*rightLevelsCount = getPinsForMatching(pinList, 1).size();
+                        priorityBean.levels[i] = Math.max(leftLevelsCount, rightLevelsCount);*//*
+                    }*/
                 }
                 pinList.sort(PinSimpleBean::compareToY);
                 pinTable.add(i, pinList);
             }
         }
-        System.out.format("toString: ", Paths.get("").toAbsolutePath().toString());
+        //priority = new int[pinTable.size()];
+        outPriotityTable = new int[Ints.max(priorityBean.levels)][priorityBean.priority.length];
+        //проходим по всем ярусам
+        for (int currentLevelCount = 0; currentLevelCount < Ints.max(priorityBean.levels); currentLevelCount++) {
+            currentPriority = 0;
+            //проходим по всей строке ячеек и расставляем приоритеты
+            for (int currentCellCount = 0; currentCellCount < pinTable.size() - 1; currentCellCount++) {
+                //обработаем ячейки, в которых нет контактов, а также первую ячейку
+                if ((priorityBean.levels[currentCellCount] == 0) || (currentCellCount == 0)) {
+                    priorityBean.priority[currentCellCount] = currentPriority;
+                    continue;
+                } else {
+                    //проверим, что не превышаем счетчик ярусов для данной пары ячеек
+                    if ((getPinsForMatching(pinTable.get(currentCellCount), 1).size() <= currentLevelCount) ||
+                            (getPinsForMatching(pinTable.get(currentCellCount), 0).size() <= currentLevelCount)) {
+                        priorityBean.priority[currentCellCount] = currentPriority;
+                        continue;
+                    }
+                    //расставим приоритеты
+                    leftPin = getPinsForMatching(pinTable.get(currentCellCount), 1).get(currentLevelCount);
+                    rightPin = getPinsForMatching(pinTable.get(currentCellCount), 0).get(currentLevelCount);
+                    if (leftPin.getCoordinates().y() > rightPin.getCoordinates().y()) {
+                        priorityBean.priority[currentCellCount] = --currentPriority;
+                    } else if (leftPin.getCoordinates().y() < rightPin.getCoordinates().y()) {
+                        priorityBean.priority[currentCellCount] = ++currentPriority;
+                    } else {
+                        priorityBean.priority[currentCellCount] = currentPriority;
+                    }
+                }
+                //нормализуем приоритеты
+                int norm = Math.abs(Ints.min(priorityBean.priority));
+                for (int i = 0; i < priorityBean.priority.length; i++) {
+                    outPriotityTable[currentLevelCount][i] = priorityBean.priority[i] += norm;
+                }
+
+            }
+
+            System.out.format("toString: ", Paths.get("").toAbsolutePath().toString());
+        }
     }
 
     public MainFrame getRightTopologyFrame() {
